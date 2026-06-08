@@ -1,4 +1,4 @@
-import { BadgePercent, MapPin, WalletCards } from "lucide-react";
+import { BadgePercent, ChevronRight, MapPin, WalletCards } from "lucide-react";
 import StatusBadge from "./StatusBadge.jsx";
 import { formatCurrency, getStartingPrice } from "../utils/format.js";
 
@@ -40,6 +40,11 @@ export default function BarCard({ bar, onSelect }) {
               {bar.promotion}
             </p>
           )}
+
+          <span className="card-open-link">
+            Ver detalhes
+            <ChevronRight size={16} aria-hidden="true" />
+          </span>
         </div>
       </button>
     </article>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import AppHeader from "./components/AppHeader.jsx";
 import BarDetails from "./components/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
+import BottomNav from "./components/BottomNav.jsx";
 import FilterBar from "./components/FilterBar.jsx";
 import { mockBars } from "./data/mockBars.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
@@ -69,19 +70,40 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function focusSearch() {
+    document.querySelector('[aria-label="Buscar por cidade ou bairro"]')?.focus();
+  }
+
+  function scrollToMenu() {
+    document.querySelector(".menu-section")?.scrollIntoView({ behavior: "smooth" });
+  }
+
   if (selectedBar) {
-    return <BarDetails bar={selectedBar} onBack={goBack} />;
+    return (
+      <>
+        <BarDetails bar={selectedBar} onBack={goBack} />
+        <BottomNav
+          mode="menu"
+          onHome={goBack}
+          onSearch={goBack}
+          onMenu={scrollToMenu}
+        />
+      </>
+    );
   }
 
   return (
-    <main className="home-page">
-      <AppHeader
-        resultCount={visibleBars.length}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
-      <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
-      <BarList bars={visibleBars} onSelectBar={selectBar} />
-    </main>
+    <>
+      <main className="home-page">
+        <AppHeader
+          resultCount={visibleBars.length}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+        <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
+        <BarList bars={visibleBars} onSelectBar={selectBar} />
+      </main>
+      <BottomNav mode="home" onHome={() => window.scrollTo(0, 0)} onSearch={focusSearch} />
+    </>
   );
 }

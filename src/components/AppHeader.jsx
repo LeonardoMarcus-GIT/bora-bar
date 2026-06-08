@@ -1,14 +1,19 @@
-import { MapPin, Search } from "lucide-react";
+import { Bell, MapPin, Search } from "lucide-react";
 
 export default function AppHeader({ searchTerm, onSearchChange, resultCount }) {
   return (
     <header className="app-header">
-      <div className="brand-lockup">
-        <span className="brand-mark">BB</span>
-        <div>
-          <p className="brand-kicker">Bora Bar</p>
-          <h1>Escolha o bar antes de sair</h1>
+      <div className="app-topbar">
+        <div className="brand-lockup">
+          <span className="brand-mark">BB</span>
+          <div>
+            <p className="brand-kicker">Bora Bar</p>
+            <h1>Escolha o bar antes de sair</h1>
+          </div>
         </div>
+        <button className="icon-action" type="button" aria-label="Notificações" title="Notificações">
+          <Bell size={19} aria-hidden="true" />
+        </button>
       </div>
 
       <label className="search-box">
