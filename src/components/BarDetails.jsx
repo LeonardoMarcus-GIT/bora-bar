@@ -1,0 +1,101 @@
+import {
+  ArrowLeft,
+  BadgePercent,
+  Clock3,
+  MapPin,
+  MessageCircle,
+  Phone
+} from "lucide-react";
+import MenuCategory from "./MenuCategory.jsx";
+import Reviews from "./Reviews.jsx";
+import StatusBadge from "./StatusBadge.jsx";
+
+export default function BarDetails({ bar, onBack }) {
+  return (
+    <main className="details-page">
+      <button className="back-button" type="button" onClick={onBack}>
+        <ArrowLeft size={18} aria-hidden="true" />
+        Voltar
+      </button>
+
+      <section className="details-hero">
+        <img src={bar.image} alt={bar.name} />
+        <div className="details-hero-overlay">
+          <StatusBadge isOpen={bar.isOpen} />
+          <h1>{bar.name}</h1>
+          <p>
+            {bar.neighborhood}, {bar.city}
+          </p>
+        </div>
+      </section>
+
+      <section className="details-content">
+        <div className="details-main">
+          <div className="section-heading">
+            <h2>Informações</h2>
+            <span>{bar.priceLevel}</span>
+          </div>
+          <p className="description">{bar.description}</p>
+
+          <div className="info-list">
+            <p>
+              <MapPin size={18} aria-hidden="true" />
+              {bar.address}
+            </p>
+            <p>
+              <Clock3 size={18} aria-hidden="true" />
+              {bar.hours}
+            </p>
+            <p>
+              <Phone size={18} aria-hidden="true" />
+              {bar.phone}
+            </p>
+            <a href={`https://wa.me/55${bar.phone.replace(/\D/g, "")}`}>
+              <MessageCircle size={18} aria-hidden="true" />
+              WhatsApp
+            </a>
+          </div>
+
+          {bar.promotion && (
+            <div className="promo-box">
+              <BadgePercent size={20} aria-hidden="true" />
+              <span>{bar.promotion}</span>
+            </div>
+          )}
+        </div>
+
+        <aside className="details-side">
+          <h2>Resumo</h2>
+          <dl>
+            <div>
+              <dt>Distância</dt>
+              <dd>{bar.distanceKm.toFixed(1).replace(".", ",")} km</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{bar.isOpen ? "Aberto agora" : "Fechado no momento"}</dd>
+            </div>
+            <div>
+              <dt>Preço</dt>
+              <dd>{bar.priceLevel}</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section className="menu-section">
+        <div className="section-heading">
+          <h2>Cardápio</h2>
+          <span>{Object.values(bar.menu).flat().length} itens</span>
+        </div>
+        <div className="menu-grid">
+          {Object.entries(bar.menu).map(([category, items]) => (
+            <MenuCategory key={category} name={category} items={items} />
+          ))}
+        </div>
+      </section>
+
+      <Reviews barId={bar.id} />
+    </main>
+  );
+}
