@@ -18,7 +18,7 @@ export async function signUp(email, password, profileData) {
     password,
     options: {
       data: profileData,
-      emailRedirectTo: getRedirectUrl("#profile")
+      emailRedirectTo: getRedirectUrl("#")
     }
   });
 }

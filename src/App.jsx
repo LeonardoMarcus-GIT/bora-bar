@@ -186,7 +186,7 @@ export default function App() {
   if (route.name === "login") {
     return (
       <>
-        <AuthPage onAuthenticated={() => (window.location.hash = "profile")} />
+        <AuthPage onAuthenticated={goBack} />
         <BottomNav
           mode="profile"
           onFavorites={showFavorites}
