@@ -773,6 +773,18 @@ p {
   cursor: pointer;
 }
 
+.submit-review:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.form-feedback {
+  color: #ffb7aa;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: -4px 0 0;
+}
+
 .review-list {
   display: grid;
   align-content: start;

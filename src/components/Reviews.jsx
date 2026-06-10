@@ -1,17 +1,11 @@
 import { MessageSquare, Send, Star, Trash2, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-
-function readStoredReviews(barId) {
-  try {
-    return JSON.parse(localStorage.getItem(`bora-bar-reviews:${barId}`)) ?? [];
-  } catch {
-    return [];
-  }
-}
-
-function saveStoredReviews(barId, reviews) {
-  localStorage.setItem(`bora-bar-reviews:${barId}`, JSON.stringify(reviews));
-}
+import {
+  canDeleteReviews,
+  createReview,
+  deleteStoredReview,
+  fetchReviews
+} from "../services/reviewsService.js";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -22,16 +16,31 @@ function formatDate(value) {
 }
 
 export default function Reviews({ barId }) {
-  const [reviews, setReviews] = useState(() => readStoredReviews(barId));
+  const [reviews, setReviews] = useState([]);
   const [author, setAuthor] = useState("");
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const allowDelete = canDeleteReviews();
 
   useEffect(() => {
-    setReviews(readStoredReviews(barId));
+    let isMounted = true;
+
+    fetchReviews(barId).then((nextReviews) => {
+      if (isMounted) {
+        setReviews(nextReviews);
+      }
+    });
+
     setAuthor("");
     setComment("");
     setRating(5);
+    setFeedback("");
+
+    return () => {
+      isMounted = false;
+    };
   }, [barId]);
 
   const averageRating = useMemo(() => {
@@ -43,7 +52,7 @@ export default function Reviews({ barId }) {
     return (total / reviews.length).toFixed(1).replace(".", ",");
   }, [reviews]);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const trimmedAuthor = author.trim();
@@ -53,35 +62,38 @@ export default function Reviews({ barId }) {
       return;
     }
 
-    const nextReview = {
-      id: crypto.randomUUID(),
-      author: trimmedAuthor,
-      comment: trimmedComment,
-      createdAt: new Date().toISOString(),
-      rating
-    };
-    const nextReviews = [nextReview, ...reviews];
+    setIsSubmitting(true);
+    setFeedback("");
 
-    setReviews(nextReviews);
-    saveStoredReviews(barId, nextReviews);
-    setAuthor("");
-    setComment("");
-    setRating(5);
+    try {
+      const nextReview = await createReview(barId, {
+        author: trimmedAuthor,
+        comment: trimmedComment,
+        rating
+      });
+
+      setReviews((currentReviews) => [nextReview, ...currentReviews]);
+      setAuthor("");
+      setComment("");
+      setRating(5);
+    } catch {
+      setFeedback("Nao foi possivel enviar agora. Tente novamente em instantes.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function handleDelete(reviewId) {
-    const nextReviews = reviews.filter((review) => review.id !== reviewId);
-
+  async function handleDelete(reviewId) {
+    const nextReviews = await deleteStoredReview(barId, reviewId);
     setReviews(nextReviews);
-    saveStoredReviews(barId, nextReviews);
   }
 
   return (
     <section className="reviews-section">
       <div className="section-heading reviews-heading">
         <div>
-          <p className="section-kicker">Opinião da galera</p>
-          <h2>Avaliações</h2>
+          <p className="section-kicker">Opiniao da galera</p>
+          <h2>Avaliacoes</h2>
         </div>
         <span>{averageRating ? `${averageRating} / 5` : "Sem notas"}</span>
       </div>
@@ -122,23 +134,28 @@ export default function Reviews({ barId }) {
           </fieldset>
 
           <label>
-            <span>Comentário</span>
+            <span>Comentario</span>
             <div className="field-with-icon textarea-field">
               <MessageSquare size={18} aria-hidden="true" />
               <textarea
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
-                placeholder="O que você achou do bar?"
+                placeholder="O que voce achou do bar?"
                 required
                 rows={4}
               />
             </div>
           </label>
 
-          <button className="submit-review" type="submit">
+          <button
+            className="submit-review"
+            type="submit"
+            disabled={isSubmitting}
+          >
             <Send size={18} aria-hidden="true" />
-            Enviar avaliação
+            {isSubmitting ? "Enviando..." : "Enviar avaliacao"}
           </button>
+          {feedback && <p className="form-feedback">{feedback}</p>}
         </form>
 
         <div className="review-list" aria-live="polite">
@@ -150,15 +167,17 @@ export default function Reviews({ barId }) {
                     <strong>{review.author}</strong>
                     <span>{formatDate(review.createdAt)}</span>
                   </div>
-                  <button
-                    className="delete-review"
-                    type="button"
-                    onClick={() => handleDelete(review.id)}
-                    aria-label={`Remover avaliação de ${review.author}`}
-                    title="Remover avaliação"
-                  >
-                    <Trash2 size={16} aria-hidden="true" />
-                  </button>
+                  {allowDelete && (
+                    <button
+                      className="delete-review"
+                      type="button"
+                      onClick={() => handleDelete(review.id)}
+                      aria-label={`Remover avaliacao de ${review.author}`}
+                      title="Remover avaliacao"
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
                 <div className="review-stars" aria-label={`${review.rating} de 5`}>
                   {[1, 2, 3, 4, 5].map((value) => (
@@ -176,7 +195,7 @@ export default function Reviews({ barId }) {
           ) : (
             <div className="review-empty">
               <MessageSquare size={22} aria-hidden="true" />
-              <p>Ainda não há avaliações para este bar.</p>
+              <p>Ainda nao ha avaliacoes para este bar.</p>
             </div>
           )}
         </div>

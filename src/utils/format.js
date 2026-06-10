@@ -6,11 +6,12 @@ export function formatCurrency(value) {
 }
 
 export function getStartingPrice(bar) {
-  return Math.min(
-    ...Object.values(bar.menu)
-      .flat()
-      .map((item) => item.price)
-  );
+  const prices = Object.values(bar.menu ?? {})
+    .flat()
+    .map((item) => item.price)
+    .filter((price) => Number.isFinite(price));
+
+  return prices.length ? Math.min(...prices) : 0;
 }
 
 export function normalizeText(value) {

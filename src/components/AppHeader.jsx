@@ -1,6 +1,11 @@
 import { Bell, MapPin, Search } from "lucide-react";
 
-export default function AppHeader({ searchTerm, onSearchChange, resultCount }) {
+export default function AppHeader({
+  isLoading,
+  searchTerm,
+  onSearchChange,
+  resultCount
+}) {
   return (
     <header className="app-header">
       <div className="app-topbar">
@@ -29,7 +34,9 @@ export default function AppHeader({ searchTerm, onSearchChange, resultCount }) {
 
       <div className="location-summary" aria-live="polite">
         <MapPin size={18} aria-hidden="true" />
-        <span>{resultCount} bares encontrados</span>
+        <span>
+          {isLoading ? "Carregando bares" : `${resultCount} bares encontrados`}
+        </span>
       </div>
     </header>
   );

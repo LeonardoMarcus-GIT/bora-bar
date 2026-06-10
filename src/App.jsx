@@ -4,14 +4,14 @@ import BarDetails from "./components/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import FilterBar from "./components/FilterBar.jsx";
-import { mockBars } from "./data/mockBars.js";
+import { fetchBars } from "./services/barsService.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
 
-function getInitialBar() {
-  const hashId = window.location.hash.replace("#bar/", "");
-  return mockBars.find((bar) => bar.id === hashId) ?? null;
+function getHashBarId() {
+  const hash = window.location.hash.replace("#", "");
+  return hash.startsWith("bar/") ? hash.replace("bar/", "") : "";
 }
 
 function readFavoriteIds() {
@@ -23,14 +23,31 @@ function readFavoriteIds() {
 }
 
 export default function App() {
+  const [bars, setBars] = useState([]);
+  const [isLoadingBars, setIsLoadingBars] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
-  const [selectedBar, setSelectedBar] = useState(getInitialBar);
+  const [selectedBarId, setSelectedBarId] = useState(getHashBarId);
   const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   useEffect(() => {
-    const onHashChange = () => setSelectedBar(getInitialBar());
+    let isMounted = true;
+
+    fetchBars().then((nextBars) => {
+      if (isMounted) {
+        setBars(nextBars);
+        setIsLoadingBars(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => setSelectedBarId(getHashBarId());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
@@ -43,10 +60,15 @@ export default function App() {
     }
   }, [favoriteIds]);
 
+  const selectedBar = useMemo(
+    () => bars.find((bar) => bar.id === selectedBarId) ?? null,
+    [bars, selectedBarId]
+  );
+
   const visibleBars = useMemo(() => {
     const normalizedSearch = normalizeText(searchTerm.trim());
 
-    let bars = mockBars.filter((bar) => {
+    let nextBars = bars.filter((bar) => {
       const searchableText = normalizeText(
         `${bar.name} ${bar.neighborhood} ${bar.city}`
       );
@@ -62,15 +84,17 @@ export default function App() {
     });
 
     if (activeFilters.includes("cheap")) {
-      bars = [...bars].sort((a, b) => getStartingPrice(a) - getStartingPrice(b));
+      nextBars = [...nextBars].sort(
+        (a, b) => getStartingPrice(a) - getStartingPrice(b)
+      );
     }
 
     if (activeFilters.includes("near")) {
-      bars = [...bars].sort((a, b) => a.distanceKm - b.distanceKm);
+      nextBars = [...nextBars].sort((a, b) => a.distanceKm - b.distanceKm);
     }
 
-    return bars;
-  }, [activeFilters, favoriteIds, searchTerm, showFavoritesOnly]);
+    return nextBars;
+  }, [activeFilters, bars, favoriteIds, searchTerm, showFavoritesOnly]);
 
   function toggleFavorite(barId) {
     setFavoriteIds((currentIds) =>
@@ -90,13 +114,13 @@ export default function App() {
 
   function selectBar(bar) {
     window.location.hash = `bar/${bar.id}`;
-    setSelectedBar(bar);
+    setSelectedBarId(bar.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function goBack() {
     window.location.hash = "";
-    setSelectedBar(null);
+    setSelectedBarId("");
     setShowFavoritesOnly(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -112,9 +136,23 @@ export default function App() {
 
   function showFavorites() {
     window.location.hash = "";
-    setSelectedBar(null);
+    setSelectedBarId("");
     setShowFavoritesOnly(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (selectedBarId && !selectedBar && isLoadingBars) {
+    return (
+      <>
+        <main className="details-page">
+          <section className="empty-state">
+            <h2>Carregando bar</h2>
+            <p>Estamos buscando as informacoes desse lugar.</p>
+          </section>
+        </main>
+        <BottomNav mode="menu" onHome={goBack} onSearch={goBack} />
+      </>
+    );
   }
 
   if (selectedBar) {
@@ -141,6 +179,7 @@ export default function App() {
     <>
       <main className="home-page">
         <AppHeader
+          isLoading={isLoadingBars}
           resultCount={visibleBars.length}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
