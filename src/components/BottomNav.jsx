@@ -1,6 +1,12 @@
 import { Heart, Home, Search, Utensils, UserRound } from "lucide-react";
 
-export default function BottomNav({ onHome, onSearch, onMenu, mode = "home" }) {
+export default function BottomNav({
+  mode = "home",
+  onFavorites,
+  onHome,
+  onMenu,
+  onSearch
+}) {
   return (
     <nav className="bottom-nav" aria-label="Navegação principal">
       <button
@@ -29,7 +35,13 @@ export default function BottomNav({ onHome, onSearch, onMenu, mode = "home" }) {
       >
         <Utensils size={20} aria-hidden="true" />
       </button>
-      <button type="button" aria-label="Favoritos" title="Favoritos">
+      <button
+        className={mode === "favorites" ? "is-active" : ""}
+        type="button"
+        onClick={onFavorites}
+        aria-label="Favoritos"
+        title="Favoritos"
+      >
         <Heart size={20} aria-hidden="true" />
       </button>
       <button type="button" aria-label="Perfil" title="Perfil">

@@ -1,10 +1,20 @@
-import { BadgePercent, ChevronRight, MapPin, WalletCards } from "lucide-react";
+import { BadgePercent, ChevronRight, Heart, MapPin, WalletCards } from "lucide-react";
 import StatusBadge from "./StatusBadge.jsx";
 import { formatCurrency, getStartingPrice } from "../utils/format.js";
 
-export default function BarCard({ bar, onSelect }) {
+export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite }) {
   return (
     <article className="bar-card">
+      <button
+        className={`favorite-toggle ${isFavorite ? "is-favorite" : ""}`}
+        type="button"
+        onClick={() => onToggleFavorite(bar.id)}
+        aria-label={`${isFavorite ? "Remover" : "Favoritar"} ${bar.name}`}
+        aria-pressed={isFavorite}
+        title={isFavorite ? "Remover dos favoritos" : "Favoritar"}
+      >
+        <Heart size={19} aria-hidden="true" />
+      </button>
       <button
         className="bar-card-button"
         type="button"

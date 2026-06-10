@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   BadgePercent,
   Clock3,
+  Heart,
   MapPin,
   MessageCircle,
   Phone
@@ -10,13 +11,31 @@ import MenuCategory from "./MenuCategory.jsx";
 import Reviews from "./Reviews.jsx";
 import StatusBadge from "./StatusBadge.jsx";
 
-export default function BarDetails({ bar, onBack }) {
+export default function BarDetails({
+  bar,
+  isFavorite,
+  onBack,
+  onToggleFavorite
+}) {
   return (
     <main className="details-page">
-      <button className="back-button" type="button" onClick={onBack}>
-        <ArrowLeft size={18} aria-hidden="true" />
-        Voltar
-      </button>
+      <div className="details-actions">
+        <button className="back-button" type="button" onClick={onBack}>
+          <ArrowLeft size={18} aria-hidden="true" />
+          Voltar
+        </button>
+        <button
+          className={`detail-favorite ${isFavorite ? "is-favorite" : ""}`}
+          type="button"
+          onClick={() => onToggleFavorite(bar.id)}
+          aria-label={`${isFavorite ? "Remover" : "Favoritar"} ${bar.name}`}
+          aria-pressed={isFavorite}
+          title={isFavorite ? "Remover dos favoritos" : "Favoritar"}
+        >
+          <Heart size={19} aria-hidden="true" />
+          {isFavorite ? "Favorito" : "Favoritar"}
+        </button>
+      </div>
 
       <section className="details-hero">
         <img src={bar.image} alt={bar.name} />
