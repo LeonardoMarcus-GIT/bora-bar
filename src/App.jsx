@@ -1,17 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
 import AppHeader from "./components/AppHeader.jsx";
+import AuthPage from "./components/AuthPage.jsx";
 import BarDetails from "./components/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import FilterBar from "./components/FilterBar.jsx";
+import PasswordResetPage from "./components/PasswordResetPage.jsx";
+import ProfilePage from "./components/ProfilePage.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 import { fetchBars } from "./services/barsService.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
 
-function getHashBarId() {
+function getRoute() {
   const hash = window.location.hash.replace("#", "");
-  return hash.startsWith("bar/") ? hash.replace("bar/", "") : "";
+
+  if (hash.startsWith("bar/")) {
+    return { name: "bar", barId: hash.replace("bar/", "") };
+  }
+
+  if (hash.startsWith("profile")) {
+    return { name: "profile" };
+  }
+
+  if (hash.startsWith("login")) {
+    return { name: "login" };
+  }
+
+  if (hash.startsWith("reset-password") || hash.includes("type=recovery")) {
+    return { name: "reset-password" };
+  }
+
+  return { name: "home" };
 }
 
 function readFavoriteIds() {
@@ -23,11 +44,12 @@ function readFavoriteIds() {
 }
 
 export default function App() {
+  const { user } = useAuth();
+  const [route, setRoute] = useState(getRoute);
   const [bars, setBars] = useState([]);
   const [isLoadingBars, setIsLoadingBars] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
-  const [selectedBarId, setSelectedBarId] = useState(getHashBarId);
   const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
@@ -47,7 +69,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onHashChange = () => setSelectedBarId(getHashBarId());
+    const onHashChange = () => setRoute(getRoute());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
@@ -59,6 +81,8 @@ export default function App() {
       // O app continua funcionando mesmo se o navegador bloquear o armazenamento local.
     }
   }, [favoriteIds]);
+
+  const selectedBarId = route.name === "bar" ? route.barId : "";
 
   const selectedBar = useMemo(
     () => bars.find((bar) => bar.id === selectedBarId) ?? null,
@@ -114,13 +138,11 @@ export default function App() {
 
   function selectBar(bar) {
     window.location.hash = `bar/${bar.id}`;
-    setSelectedBarId(bar.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function goBack() {
     window.location.hash = "";
-    setSelectedBarId("");
     setShowFavoritesOnly(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -136,9 +158,62 @@ export default function App() {
 
   function showFavorites() {
     window.location.hash = "";
-    setSelectedBarId("");
     setShowFavoritesOnly(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openProfile() {
+    window.location.hash = user ? "profile" : "login";
+    setShowFavoritesOnly(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (route.name === "reset-password") {
+    return (
+      <>
+        <PasswordResetPage onDone={() => (window.location.hash = "profile")} />
+        <BottomNav
+          mode="profile"
+          onFavorites={showFavorites}
+          onHome={goBack}
+          onProfile={openProfile}
+          onSearch={goBack}
+        />
+      </>
+    );
+  }
+
+  if (route.name === "login") {
+    return (
+      <>
+        <AuthPage onAuthenticated={() => (window.location.hash = "profile")} />
+        <BottomNav
+          mode="profile"
+          onFavorites={showFavorites}
+          onHome={goBack}
+          onProfile={openProfile}
+          onSearch={goBack}
+        />
+      </>
+    );
+  }
+
+  if (route.name === "profile") {
+    return (
+      <>
+        <ProfilePage
+          onLoginRequired={() => (window.location.hash = "login")}
+          onSignedOut={() => (window.location.hash = "login")}
+        />
+        <BottomNav
+          mode="profile"
+          onFavorites={showFavorites}
+          onHome={goBack}
+          onProfile={openProfile}
+          onSearch={goBack}
+        />
+      </>
+    );
   }
 
   if (selectedBarId && !selectedBar && isLoadingBars) {
@@ -150,7 +225,12 @@ export default function App() {
             <p>Estamos buscando as informacoes desse lugar.</p>
           </section>
         </main>
-        <BottomNav mode="menu" onHome={goBack} onSearch={goBack} />
+        <BottomNav
+          mode="menu"
+          onHome={goBack}
+          onProfile={openProfile}
+          onSearch={goBack}
+        />
       </>
     );
   }
@@ -170,6 +250,7 @@ export default function App() {
           onSearch={goBack}
           onFavorites={showFavorites}
           onMenu={scrollToMenu}
+          onProfile={openProfile}
         />
       </>
     );
@@ -197,6 +278,7 @@ export default function App() {
         mode={showFavoritesOnly ? "favorites" : "home"}
         onFavorites={showFavorites}
         onHome={goBack}
+        onProfile={openProfile}
         onSearch={focusSearch}
       />
     </>

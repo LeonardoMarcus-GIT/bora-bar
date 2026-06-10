@@ -32,6 +32,18 @@ Site configuration > Environment variables
 
 Depois disso, faça um novo deploy.
 
+## 5. Configurar Auth
+
+No painel do Supabase, abra Authentication > URL Configuration:
+
+- Site URL: `https://bora-bar.netlify.app`
+- Redirect URLs:
+  - `https://bora-bar.netlify.app/*`
+  - `http://localhost:5173/*`
+
+Em Authentication > Providers > Email, deixe email/senha habilitado. Para o fluxo
+mais seguro, mantenha a confirmacao de email ativada.
+
 ## Observacao
 
 Enquanto a tabela `bars` estiver vazia ou as variaveis nao estiverem configuradas,

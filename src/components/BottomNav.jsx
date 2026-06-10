@@ -5,6 +5,7 @@ export default function BottomNav({
   onFavorites,
   onHome,
   onMenu,
+  onProfile,
   onSearch
 }) {
   return (
@@ -44,7 +45,13 @@ export default function BottomNav({
       >
         <Heart size={20} aria-hidden="true" />
       </button>
-      <button type="button" aria-label="Perfil" title="Perfil">
+      <button
+        className={mode === "profile" ? "is-active" : ""}
+        type="button"
+        onClick={onProfile}
+        aria-label="Perfil"
+        title="Perfil"
+      >
         <UserRound size={20} aria-hidden="true" />
       </button>
     </nav>
