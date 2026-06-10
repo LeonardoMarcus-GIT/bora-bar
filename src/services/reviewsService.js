@@ -54,16 +54,16 @@ export async function fetchReviews(barId) {
 }
 
 export async function createReview(barId, review) {
-  if (!isSupabaseConfigured) {
-    const nextReview = {
-      ...review,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString()
-    };
+  const localReview = {
+    ...review,
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString()
+  };
 
-    const nextReviews = [nextReview, ...readStoredReviews(barId)];
+  if (!isSupabaseConfigured) {
+    const nextReviews = [localReview, ...readStoredReviews(barId)];
     saveStoredReviews(barId, nextReviews);
-    return nextReview;
+    return localReview;
   }
 
   const { data, error } = await supabase
@@ -78,7 +78,10 @@ export async function createReview(barId, review) {
     .single();
 
   if (error) {
-    throw error;
+    console.warn("Nao foi possivel salvar avaliacao no Supabase.", error);
+    const nextReviews = [localReview, ...readStoredReviews(barId)];
+    saveStoredReviews(barId, nextReviews);
+    return localReview;
   }
 
   return mapReviewFromDatabase(data);
