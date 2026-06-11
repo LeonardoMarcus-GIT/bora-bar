@@ -5,7 +5,8 @@ export default function AppHeader({
   isLoading,
   searchTerm,
   onSearchChange,
-  resultCount
+  resultCount,
+  summaryLabel
 }) {
   return (
     <header className="app-header">
@@ -43,7 +44,7 @@ export default function AppHeader({
       <div className="location-summary" aria-live="polite">
         <MapPin size={18} aria-hidden="true" />
         <span>
-          {isLoading ? "Carregando bares" : `${resultCount} bares encontrados`}
+          {isLoading ? "Carregando bares" : summaryLabel ?? `${resultCount} bares encontrados`}
         </span>
       </div>
     </header>

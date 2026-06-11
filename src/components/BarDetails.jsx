@@ -10,6 +10,7 @@ import {
 import MenuCategory from "./MenuCategory.jsx";
 import Reviews from "./Reviews.jsx";
 import StatusBadge from "./StatusBadge.jsx";
+import { formatDistanceKm } from "../utils/geo.js";
 
 export default function BarDetails({
   bar,
@@ -88,7 +89,11 @@ export default function BarDetails({
           <dl>
             <div>
               <dt>Distância</dt>
-              <dd>{bar.distanceKm.toFixed(1).replace(".", ",")} km</dd>
+              <dd>
+                {bar.hasCoordinates
+                  ? formatDistanceKm(bar.distanceKm)
+                  : "Indisponivel"}
+              </dd>
             </div>
             <div>
               <dt>Status</dt>

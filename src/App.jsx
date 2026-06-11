@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import AppHeader from "./components/AppHeader.jsx";
 import AuthPage from "./components/AuthPage.jsx";
+import BarMap from "./components/BarMap.jsx";
 import BarDetails from "./components/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import FilterBar from "./components/FilterBar.jsx";
+import GeoControls from "./components/GeoControls.jsx";
 import PasswordResetPage from "./components/PasswordResetPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
+import { useGeolocation } from "./hooks/useGeolocation.js";
 import { fetchBars } from "./services/barsService.js";
+import { calculateDistanceKm } from "./utils/geo.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
@@ -51,7 +55,15 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
+  const [radiusKm, setRadiusKm] = useState(5);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const {
+    coordinates: userLocation,
+    errorMessage: locationError,
+    hasLocation,
+    requestLocation,
+    status: locationStatus
+  } = useGeolocation();
 
   useEffect(() => {
     let isMounted = true;
@@ -84,15 +96,33 @@ export default function App() {
 
   const selectedBarId = route.name === "bar" ? route.barId : "";
 
+  const barsWithDistance = useMemo(
+    () =>
+      bars.map((bar) => {
+        const calculatedDistanceKm = hasLocation
+          ? calculateDistanceKm(userLocation, bar)
+          : null;
+
+        return {
+          ...bar,
+          distanceKm: calculatedDistanceKm ?? bar.distanceKm,
+          hasCoordinates:
+            Number.isFinite(bar.latitude) && Number.isFinite(bar.longitude),
+          hasRealDistance: Number.isFinite(calculatedDistanceKm)
+        };
+      }),
+    [bars, hasLocation, userLocation]
+  );
+
   const selectedBar = useMemo(
-    () => bars.find((bar) => bar.id === selectedBarId) ?? null,
-    [bars, selectedBarId]
+    () => barsWithDistance.find((bar) => bar.id === selectedBarId) ?? null,
+    [barsWithDistance, selectedBarId]
   );
 
   const visibleBars = useMemo(() => {
     const normalizedSearch = normalizeText(searchTerm.trim());
 
-    let nextBars = bars.filter((bar) => {
+    let nextBars = barsWithDistance.filter((bar) => {
       const searchableText = normalizeText(
         `${bar.name} ${bar.neighborhood} ${bar.city}`
       );
@@ -103,8 +133,17 @@ export default function App() {
         !activeFilters.includes("promo") || Boolean(bar.promotion);
       const matchesFavorite =
         !showFavoritesOnly || favoriteIds.includes(bar.id);
+      const matchesRadius =
+        !hasLocation ||
+        (bar.hasRealDistance && bar.distanceKm <= radiusKm);
 
-      return matchesSearch && matchesOpen && matchesPromo && matchesFavorite;
+      return (
+        matchesSearch &&
+        matchesOpen &&
+        matchesPromo &&
+        matchesFavorite &&
+        matchesRadius
+      );
     });
 
     if (activeFilters.includes("cheap")) {
@@ -113,12 +152,20 @@ export default function App() {
       );
     }
 
-    if (activeFilters.includes("near")) {
+    if (activeFilters.includes("near") && hasLocation) {
       nextBars = [...nextBars].sort((a, b) => a.distanceKm - b.distanceKm);
     }
 
     return nextBars;
-  }, [activeFilters, bars, favoriteIds, searchTerm, showFavoritesOnly]);
+  }, [
+    activeFilters,
+    barsWithDistance,
+    favoriteIds,
+    hasLocation,
+    radiusKm,
+    searchTerm,
+    showFavoritesOnly
+  ]);
 
   function toggleFavorite(barId) {
     setFavoriteIds((currentIds) =>
@@ -263,9 +310,27 @@ export default function App() {
           isLoading={isLoadingBars}
           resultCount={visibleBars.length}
           searchTerm={searchTerm}
+          summaryLabel={
+            hasLocation
+              ? `${visibleBars.length} bares perto de voce`
+              : `${visibleBars.length} bares encontrados`
+          }
           onSearchChange={setSearchTerm}
         />
         <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
+        <GeoControls
+          activeFilters={activeFilters}
+          locationError={locationError}
+          locationStatus={locationStatus}
+          radiusKm={radiusKm}
+          onRadiusChange={setRadiusKm}
+          onRequestLocation={requestLocation}
+        />
+        <BarMap
+          bars={visibleBars}
+          onSelectBar={selectBar}
+          userLocation={hasLocation ? userLocation : null}
+        />
         <BarList
           bars={visibleBars}
           favoriteIds={favoriteIds}

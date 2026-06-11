@@ -1,5 +1,6 @@
 import { BadgePercent, ChevronRight, Heart, MapPin, WalletCards } from "lucide-react";
 import StatusBadge from "./StatusBadge.jsx";
+import { formatDistanceKm } from "../utils/geo.js";
 import { formatCurrency, getStartingPrice } from "../utils/format.js";
 
 export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite }) {
@@ -36,7 +37,7 @@ export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite })
           <div className="bar-meta-grid">
             <span>
               <MapPin size={16} aria-hidden="true" />
-              {bar.distanceKm.toFixed(1).replace(".", ",")} km
+              {bar.hasCoordinates ? formatDistanceKm(bar.distanceKm) : "Distancia indisponivel"}
             </span>
             <span>
               <WalletCards size={16} aria-hidden="true" />

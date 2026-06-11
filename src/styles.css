@@ -259,6 +259,176 @@ p {
   font-weight: 900;
 }
 
+.geo-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(260px, 320px);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(18, 18, 15, 0.72);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+  padding: 14px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.geo-copy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.geo-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 199, 68, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 199, 68, 0.14);
+  color: var(--gold);
+}
+
+.geo-copy h2 {
+  color: var(--ink);
+  font-size: 1.08rem;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+
+.geo-copy p {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  margin-bottom: 0;
+}
+
+.geo-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #15150f;
+  cursor: pointer;
+  font-weight: 950;
+  padding: 0 15px;
+  white-space: nowrap;
+}
+
+.geo-action:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.radius-control {
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.radius-control legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(248, 241, 223, 0.84);
+  font-size: 0.88rem;
+  font-weight: 850;
+  margin-bottom: 8px;
+}
+
+.radius-control:disabled {
+  opacity: 0.54;
+}
+
+.radius-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.radius-chip {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 241, 223, 0.82);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.radius-chip.is-active {
+  border-color: rgba(255, 199, 68, 0.68);
+  background: rgba(255, 199, 68, 0.18);
+  color: var(--gold);
+}
+
+.bar-map-section {
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(24, 24, 20, 0.9);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+}
+
+.map-heading {
+  padding: 16px 16px 12px;
+}
+
+.bar-map {
+  width: 100%;
+  height: clamp(260px, 38vh, 430px);
+  background: #25261f;
+}
+
+.bar-map .leaflet-container,
+.leaflet-container {
+  background: #25261f;
+  color: #15150f;
+  font: inherit;
+}
+
+.bar-map-marker {
+  display: grid;
+  place-items: center;
+}
+
+.bar-map-marker span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid rgba(17, 18, 14, 0.86);
+  border-radius: 50%;
+  background: var(--gold);
+  color: #15150f;
+  font-size: 0.8rem;
+  font-weight: 950;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
+.user-location-marker {
+  filter: drop-shadow(0 0 10px rgba(255, 199, 68, 0.62));
+}
+
+.leaflet-tooltip {
+  border: 1px solid rgba(255, 199, 68, 0.26);
+  border-radius: 8px;
+  background: rgba(24, 24, 20, 0.94);
+  color: var(--ink);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+  line-height: 1.35;
+}
+
 .bar-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1139,6 +1309,14 @@ p {
     grid-template-columns: 1fr;
   }
 
+  .geo-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .geo-action {
+    width: fit-content;
+  }
+
   .location-summary {
     justify-content: flex-start;
   }
@@ -1237,5 +1415,32 @@ p {
 
   .star-button {
     width: 40px;
+  }
+
+  .geo-panel {
+    padding: 12px;
+  }
+
+  .geo-copy {
+    align-items: flex-start;
+  }
+
+  .geo-action {
+    width: 100%;
+  }
+
+  .radius-options {
+    grid-template-columns: repeat(4, minmax(64px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .radius-options::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bar-map {
+    height: 300px;
   }
 }

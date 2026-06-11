@@ -8,6 +8,9 @@ create table if not exists public.bars (
   city text not null,
   image_url text not null,
   distance_km numeric(5, 2) not null default 0,
+  latitude numeric(10, 7),
+  longitude numeric(10, 7),
+  is_active boolean not null default true,
   is_open boolean not null default false,
   price_level text not null default '$$',
   promotion text not null default '',
@@ -45,6 +48,15 @@ alter table public.profiles enable row level security;
 
 alter table public.reviews
 add column if not exists user_id uuid references auth.users(id) on delete cascade;
+
+alter table public.bars
+add column if not exists latitude numeric(10, 7);
+
+alter table public.bars
+add column if not exists longitude numeric(10, 7);
+
+alter table public.bars
+add column if not exists is_active boolean not null default true;
 
 drop policy if exists "Anyone can read bars" on public.bars;
 create policy "Anyone can read bars"
@@ -172,6 +184,9 @@ for each row execute procedure public.prepare_review_insert();
 
 create index if not exists bars_city_neighborhood_idx
 on public.bars (city, neighborhood);
+
+create index if not exists bars_coordinates_idx
+on public.bars (latitude, longitude);
 
 create index if not exists reviews_bar_created_idx
 on public.reviews (bar_id, created_at desc);

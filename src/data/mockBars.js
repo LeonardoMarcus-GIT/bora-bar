@@ -7,6 +7,8 @@ export const mockBars = [
     image:
       "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 0.8,
+    latitude: -23.586276,
+    longitude: -46.637946,
     isOpen: true,
     priceLevel: "$$",
     promotion: "Chopp em dobro até 20h",
@@ -45,6 +47,8 @@ export const mockBars = [
     image:
       "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 1.4,
+    latitude: -23.565063,
+    longitude: -46.686349,
     isOpen: true,
     priceLevel: "$",
     promotion: "Combo pastel + cerveja por R$ 29",
@@ -83,6 +87,8 @@ export const mockBars = [
     image:
       "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 2.1,
+    latitude: -19.939112,
+    longitude: -43.936572,
     isOpen: false,
     priceLevel: "$$$",
     promotion: "",
@@ -121,6 +127,8 @@ export const mockBars = [
     image:
       "https://images.unsplash.com/photo-1538488881038-e252a119ace7?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 0.5,
+    latitude: -8.121212,
+    longitude: -34.900818,
     isOpen: true,
     priceLevel: "$$",
     promotion: "Caipirinha de frutas com 25% off",
@@ -159,6 +167,8 @@ export const mockBars = [
     image:
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 3.3,
+    latitude: -25.428603,
+    longitude: -49.269519,
     isOpen: false,
     priceLevel: "$$",
     promotion: "Música ao vivo sem couvert às quintas",
@@ -197,6 +207,8 @@ export const mockBars = [
     image:
       "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 1.9,
+    latitude: -22.913226,
+    longitude: -43.180886,
     isOpen: true,
     priceLevel: "$$",
     promotion: "",
