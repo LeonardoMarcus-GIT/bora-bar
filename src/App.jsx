@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import AppHeader from "./components/AppHeader.jsx";
 import AuthPage from "./components/AuthPage.jsx";
-import BarMap from "./components/BarMap.jsx";
 import BarDetails from "./components/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
 import BottomNav from "./components/BottomNav.jsx";
@@ -325,11 +324,6 @@ export default function App() {
           radiusKm={radiusKm}
           onRadiusChange={setRadiusKm}
           onRequestLocation={requestLocation}
-        />
-        <BarMap
-          bars={visibleBars}
-          onSelectBar={selectBar}
-          userLocation={hasLocation ? userLocation : null}
         />
         <BarList
           bars={visibleBars}
