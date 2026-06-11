@@ -157,7 +157,7 @@ export const mockBars = [
     neighborhood: "Centro",
     city: "Curitiba",
     image:
-      "https://images.unsplash.com/photo-1566737236500-c8ac43014a8e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
     distanceKm: 3.3,
     isOpen: false,
     priceLevel: "$$",
