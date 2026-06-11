@@ -1,5 +1,5 @@
 import { mockBars } from "../data/mockBars.js";
-import { barCoordinates } from "../data/barCoordinates.js";
+import { mockBarLocations } from "../data/barCoordinates.js";
 import { isSupabaseConfigured, supabase } from "./supabaseClient.js";
 
 const imageReplacements = {
@@ -17,22 +17,22 @@ function getCoordinate(value, fallbackValue) {
 }
 
 function mapBarFromDatabase(bar) {
-  const fallbackCoordinates = barCoordinates[bar.id] ?? {};
+  const mockLocation = mockBarLocations[bar.id] ?? {};
 
   return {
     id: bar.id,
     name: bar.name,
-    neighborhood: bar.neighborhood,
-    city: bar.city,
+    neighborhood: mockLocation.neighborhood ?? bar.neighborhood,
+    city: mockLocation.city ?? bar.city,
     image: getSafeImageUrl(bar.image_url),
     distanceKm: Number(bar.distance_km ?? 0),
-    latitude: getCoordinate(bar.latitude, fallbackCoordinates.latitude),
-    longitude: getCoordinate(bar.longitude, fallbackCoordinates.longitude),
+    latitude: getCoordinate(mockLocation.latitude, bar.latitude),
+    longitude: getCoordinate(mockLocation.longitude, bar.longitude),
     isActive: bar.is_active ?? true,
     isOpen: Boolean(bar.is_open),
     priceLevel: bar.price_level,
     promotion: bar.promotion ?? "",
-    address: bar.address,
+    address: mockLocation.address ?? bar.address,
     hours: bar.hours,
     phone: bar.phone,
     description: bar.description,

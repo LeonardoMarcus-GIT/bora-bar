@@ -1,26 +1,54 @@
-export const barCoordinates = {
+export const mockBarLocations = {
   "esquina-77": {
-    latitude: -23.586276,
-    longitude: -46.637946
+    address: "Rua 33, 77 - Vila Santa Cecilia, Volta Redonda",
+    city: "Volta Redonda",
+    latitude: -22.51965,
+    longitude: -44.10398,
+    neighborhood: "Vila Santa Cecilia"
   },
   "boteco-do-porto": {
-    latitude: -23.565063,
-    longitude: -46.686349
+    address: "Rua 14, 420 - Aterrado, Volta Redonda",
+    city: "Volta Redonda",
+    latitude: -22.51028,
+    longitude: -44.09478,
+    neighborhood: "Aterrado"
   },
   "varanda-aurora": {
-    latitude: -19.939112,
-    longitude: -43.936572
+    address: "Rua Paulo de Frontin, 1200 - Jardim Amalia, Volta Redonda",
+    city: "Volta Redonda",
+    latitude: -22.51692,
+    longitude: -44.11322,
+    neighborhood: "Jardim Amalia"
   },
   "marola-bar": {
-    latitude: -8.121212,
-    longitude: -34.900818
+    address: "Av. Sávio Gama, 1888 - Retiro, Volta Redonda",
+    city: "Volta Redonda",
+    latitude: -22.49782,
+    longitude: -44.10635,
+    neighborhood: "Retiro"
   },
   "quintal-boa-prosa": {
-    latitude: -25.428603,
-    longitude: -49.269519
+    address: "Rua Gustavo Lira, 310 - Centro, Volta Redonda",
+    city: "Volta Redonda",
+    latitude: -22.52346,
+    longitude: -44.10391,
+    neighborhood: "Centro"
   },
   "samba-da-rua": {
-    latitude: -22.913226,
-    longitude: -43.180886
+    address: "Rua Sessenta, 91 - Conforto, Volta Redonda",
+    city: "Volta Redonda",
+    latitude: -22.52694,
+    longitude: -44.08384,
+    neighborhood: "Conforto"
   }
 };
+
+export const barCoordinates = Object.fromEntries(
+  Object.entries(mockBarLocations).map(([id, location]) => [
+    id,
+    {
+      latitude: location.latitude,
+      longitude: location.longitude
+    }
+  ])
+);
