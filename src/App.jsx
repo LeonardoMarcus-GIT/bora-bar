@@ -134,6 +134,7 @@ export default function App() {
         !showFavoritesOnly || favoriteIds.includes(bar.id);
       const matchesRadius =
         !hasLocation ||
+        !activeFilters.includes("near") ||
         (bar.hasRealDistance && bar.distanceKm <= radiusKm);
 
       return (
