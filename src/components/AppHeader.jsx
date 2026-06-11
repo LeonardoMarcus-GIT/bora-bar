@@ -1,4 +1,5 @@
 import { Bell, MapPin, Search } from "lucide-react";
+import logoSrc from "../assets/bora-bar-icon.png";
 
 export default function AppHeader({
   isLoading,
@@ -10,13 +11,20 @@ export default function AppHeader({
     <header className="app-header">
       <div className="app-topbar">
         <div className="brand-lockup">
-          <span className="brand-mark">BB</span>
-          <div>
-            <p className="brand-kicker">Bora Bar</p>
-            <h1>Escolha o bar antes de sair</h1>
+          <span className="brand-logo-slot" aria-label="Logo Bora Bar">
+            <img src={logoSrc} alt="Bora Bar" />
+          </span>
+          <div className="brand-copy">
+            <h1>Bora Bar</h1>
+            <p className="brand-kicker">Escolha o bar antes de sair</p>
           </div>
         </div>
-        <button className="icon-action" type="button" aria-label="Notificações" title="Notificações">
+        <button
+          className="icon-action"
+          type="button"
+          aria-label="Notificacoes"
+          title="Notificacoes"
+        >
           <Bell size={19} aria-hidden="true" />
         </button>
       </div>
