@@ -2,8 +2,46 @@ import { LockKeyhole, Mail, MapPin, UserRound } from "lucide-react";
 import { useState } from "react";
 import { resetPassword, signIn, signUp } from "../services/authService.js";
 
-function getFriendlyAuthError() {
-  return "Email ou senha invalidos.";
+function getFriendlyAuthError(error, flow) {
+  const message = `${error?.message ?? ""} ${error?.code ?? ""}`.toLowerCase();
+
+  if (message.includes("email not confirmed")) {
+    return "Confirme seu email antes de entrar.";
+  }
+
+  if (message.includes("invalid login") || message.includes("invalid credentials")) {
+    return "Email ou senha invalidos.";
+  }
+
+  if (message.includes("already registered") || message.includes("user already")) {
+    return "Esse email ja tem uma conta. Tente entrar ou recuperar a senha.";
+  }
+
+  if (message.includes("password")) {
+    return "Use uma senha com pelo menos 6 caracteres.";
+  }
+
+  if (message.includes("redirect") || message.includes("not allowed")) {
+    return "O dominio do app precisa estar liberado no Supabase.";
+  }
+
+  if (message.includes("signup") && message.includes("disabled")) {
+    return "Cadastro por email esta desativado no Supabase.";
+  }
+
+  if (message.includes("rate limit") || message.includes("too many")) {
+    return "Muitas tentativas agora. Tente novamente em alguns minutos.";
+  }
+
+  if (flow === "recover") {
+    return "Nao foi possivel enviar o link agora.";
+  }
+
+  if (flow === "signup") {
+    return "Nao foi possivel criar a conta agora.";
+  }
+
+  return "Nao foi possivel entrar agora.";
 }
 
 export default function AuthPage({ onAuthenticated }) {
@@ -38,7 +76,7 @@ export default function AuthPage({ onAuthenticated }) {
           throw error;
         }
 
-        setFeedback("Enviamos o link de recuperacao para seu email.");
+        setFeedback("Se esse email estiver cadastrado, enviamos o link de recuperacao.");
         return;
       }
 
@@ -65,8 +103,10 @@ export default function AuthPage({ onAuthenticated }) {
       }
 
       onAuthenticated();
-    } catch {
-      setFeedback(isRecover ? "Nao foi possivel enviar agora." : getFriendlyAuthError());
+    } catch (error) {
+      const flow = isRecover ? "recover" : isSignup ? "signup" : "login";
+      console.warn("Falha no fluxo de autenticacao.", error);
+      setFeedback(getFriendlyAuthError(error, flow));
     } finally {
       setIsSubmitting(false);
     }
