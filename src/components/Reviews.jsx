@@ -1,11 +1,8 @@
-import { MessageSquare, Send, Star, Trash2, UserRound } from "lucide-react";
+import { LogIn, MessageSquare, Send, Star, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  canDeleteReviews,
-  createReview,
-  deleteStoredReview,
-  fetchReviews
-} from "../services/reviewsService.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { fetchProfile } from "../services/profilesService.js";
+import { createReview, deleteReview, fetchReviews } from "../services/reviewsService.js";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -16,13 +13,18 @@ function formatDate(value) {
 }
 
 export default function Reviews({ barId }) {
+  const { isAuthReady, user } = useAuth();
   const [reviews, setReviews] = useState([]);
-  const [author, setAuthor] = useState("");
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const allowDelete = canDeleteReviews();
+  const [profileName, setProfileName] = useState("");
+  const reviewerName =
+    profileName ||
+    user?.user_metadata?.display_name ||
+    user?.email?.split("@")[0] ||
+    "sua conta";
 
   useEffect(() => {
     let isMounted = true;
@@ -33,7 +35,6 @@ export default function Reviews({ barId }) {
       }
     });
 
-    setAuthor("");
     setComment("");
     setRating(5);
     setFeedback("");
@@ -42,6 +43,31 @@ export default function Reviews({ barId }) {
       isMounted = false;
     };
   }, [barId]);
+
+  useEffect(() => {
+    if (!user) {
+      setProfileName("");
+      return;
+    }
+
+    let isMounted = true;
+
+    fetchProfile(user.id)
+      .then((profile) => {
+        if (isMounted) {
+          setProfileName(profile?.display_name?.trim() ?? "");
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProfileName("");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const averageRating = useMemo(() => {
     if (!reviews.length) {
@@ -55,10 +81,14 @@ export default function Reviews({ barId }) {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const trimmedAuthor = author.trim();
     const trimmedComment = comment.trim();
 
-    if (!trimmedAuthor || !trimmedComment) {
+    if (!user) {
+      window.location.hash = "login";
+      return;
+    }
+
+    if (!trimmedComment) {
       return;
     }
 
@@ -67,13 +97,12 @@ export default function Reviews({ barId }) {
 
     try {
       const nextReview = await createReview(barId, {
-        author: trimmedAuthor,
+        author: reviewerName,
         comment: trimmedComment,
         rating
-      });
+      }, user);
 
       setReviews((currentReviews) => [nextReview, ...currentReviews]);
-      setAuthor("");
       setComment("");
       setRating(5);
     } catch {
@@ -84,8 +113,20 @@ export default function Reviews({ barId }) {
   }
 
   async function handleDelete(reviewId) {
-    const nextReviews = await deleteStoredReview(barId, reviewId);
-    setReviews(nextReviews);
+    try {
+      const nextReviews = await deleteReview(barId, reviewId);
+
+      if (nextReviews) {
+        setReviews(nextReviews);
+        return;
+      }
+
+      setReviews((currentReviews) =>
+        currentReviews.filter((review) => review.id !== reviewId)
+      );
+    } catch {
+      setFeedback("Nao foi possivel remover agora. Tente novamente em instantes.");
+    }
   }
 
   return (
@@ -99,64 +140,80 @@ export default function Reviews({ barId }) {
       </div>
 
       <div className="reviews-layout">
-        <form className="review-form" onSubmit={handleSubmit}>
-          <label>
-            <span>Seu nome ou apelido</span>
-            <div className="field-with-icon">
-              <UserRound size={18} aria-hidden="true" />
-              <input
-                type="text"
-                value={author}
-                onChange={(event) => setAuthor(event.target.value)}
-                placeholder="Ex: Ana"
-                required
-              />
-            </div>
-          </label>
+        {isAuthReady && user ? (
+          <form className="review-form" onSubmit={handleSubmit}>
+            <p className="review-author-note">
+              Avaliando como: <strong>{reviewerName}</strong>
+            </p>
 
-          <fieldset className="rating-field">
-            <legend>Nota</legend>
-            <div className="rating-buttons">
-              {[1, 2, 3, 4, 5].map((value) => (
-                <button
-                  className={`star-button ${value <= rating ? "is-selected" : ""}`}
-                  key={value}
-                  type="button"
-                  onClick={() => setRating(value)}
-                  aria-label={`${value} estrela${value > 1 ? "s" : ""}`}
-                  aria-pressed={value === rating}
-                  title={`${value} estrela${value > 1 ? "s" : ""}`}
-                >
-                  <Star size={22} aria-hidden="true" />
-                </button>
-              ))}
-            </div>
-          </fieldset>
+            <fieldset className="rating-field">
+              <legend>Nota</legend>
+              <div className="rating-buttons">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    className={`star-button ${value <= rating ? "is-selected" : ""}`}
+                    key={value}
+                    type="button"
+                    onClick={() => setRating(value)}
+                    aria-label={`${value} estrela${value > 1 ? "s" : ""}`}
+                    aria-pressed={value === rating}
+                    title={`${value} estrela${value > 1 ? "s" : ""}`}
+                  >
+                    <Star size={22} aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
+            </fieldset>
 
-          <label>
-            <span>Comentario</span>
-            <div className="field-with-icon textarea-field">
-              <MessageSquare size={18} aria-hidden="true" />
-              <textarea
-                value={comment}
-                onChange={(event) => setComment(event.target.value)}
-                placeholder="O que voce achou do bar?"
-                required
-                rows={4}
-              />
-            </div>
-          </label>
+            <label>
+              <span>Comentario</span>
+              <div className="field-with-icon textarea-field">
+                <MessageSquare size={18} aria-hidden="true" />
+                <textarea
+                  value={comment}
+                  onChange={(event) => setComment(event.target.value)}
+                  placeholder="O que voce achou do bar?"
+                  required
+                  rows={4}
+                />
+              </div>
+            </label>
 
-          <button
-            className="submit-review"
-            type="submit"
-            disabled={isSubmitting}
-          >
-            <Send size={18} aria-hidden="true" />
-            {isSubmitting ? "Enviando..." : "Enviar avaliacao"}
-          </button>
-          {feedback && <p className="form-feedback">{feedback}</p>}
-        </form>
+            <button
+              className="submit-review"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              <Send size={18} aria-hidden="true" />
+              {isSubmitting ? "Enviando..." : "Enviar avaliacao"}
+            </button>
+            {feedback && <p className="form-feedback">{feedback}</p>}
+          </form>
+        ) : (
+          <div className="review-login-card">
+            <div className="review-login-icon">
+              <MessageSquare size={22} aria-hidden="true" />
+            </div>
+            <div>
+              <h3>Entre para deixar sua avaliacao</h3>
+              <p>
+                As opinioes ficam visiveis para todo mundo, mas so quem tem conta
+                consegue comentar e dar nota.
+              </p>
+            </div>
+            <button
+              className="submit-review"
+              type="button"
+              onClick={() => {
+                window.location.hash = "login";
+              }}
+            >
+              <LogIn size={18} aria-hidden="true" />
+              Entrar para avaliar
+            </button>
+            {feedback && <p className="form-feedback">{feedback}</p>}
+          </div>
+        )}
 
         <div className="review-list" aria-live="polite">
           {reviews.length ? (
@@ -167,7 +224,7 @@ export default function Reviews({ barId }) {
                     <strong>{review.author}</strong>
                     <span>{formatDate(review.createdAt)}</span>
                   </div>
-                  {allowDelete && (
+                  {user?.id && review.userId === user.id && (
                     <button
                       className="delete-review"
                       type="button"

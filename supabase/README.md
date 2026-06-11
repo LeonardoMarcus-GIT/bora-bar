@@ -4,7 +4,8 @@
 
 1. Crie um projeto em https://database.new.
 2. Abra o SQL Editor no Supabase.
-3. Cole e rode o conteúdo de `supabase/schema.sql`.
+3. Cole e rode o conteudo de `supabase/schema.sql`.
+4. Depois cole e rode o conteudo de `supabase/seed-mock-bars.sql` para cadastrar os 6 bares iniciais.
 
 ## 2. Pegar as chaves
 
@@ -26,11 +27,11 @@ Reinicie o servidor local depois de criar ou alterar esse arquivo.
 
 ## 4. Publicar na Netlify
 
-No painel da Netlify, adicione as mesmas variáveis em:
+No painel da Netlify, adicione as mesmas variaveis em:
 
 Site configuration > Environment variables
 
-Depois disso, faça um novo deploy.
+Depois disso, faca um novo deploy.
 
 ## 5. Configurar Auth
 
@@ -48,4 +49,5 @@ mais seguro, mantenha a confirmacao de email ativada.
 
 Enquanto a tabela `bars` estiver vazia ou as variaveis nao estiverem configuradas,
 o app continua usando os dados ficticios atuais. As avaliacoes vao para o Supabase
-assim que as variaveis estiverem configuradas e a tabela existir.
+assim que as variaveis estiverem configuradas, os bares estiverem cadastrados e o
+usuario estiver logado.

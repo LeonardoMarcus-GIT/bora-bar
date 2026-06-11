@@ -7,6 +7,7 @@ function getStorageKey(barId) {
 function mapReviewFromDatabase(review) {
   return {
     id: review.id,
+    userId: review.user_id,
     author: review.author,
     comment: review.comment,
     createdAt: review.created_at,
@@ -30,10 +31,6 @@ function saveStoredReviews(barId, reviews) {
   }
 }
 
-export function canDeleteReviews() {
-  return !isSupabaseConfigured;
-}
-
 export async function fetchReviews(barId) {
   if (!isSupabaseConfigured) {
     return readStoredReviews(barId);
@@ -41,7 +38,7 @@ export async function fetchReviews(barId) {
 
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, author, comment, rating, created_at")
+    .select("id, bar_id, user_id, author, comment, rating, created_at")
     .eq("bar_id", barId)
     .order("created_at", { ascending: false });
 
@@ -53,10 +50,16 @@ export async function fetchReviews(barId) {
   return data.map(mapReviewFromDatabase);
 }
 
-export async function createReview(barId, review) {
+export async function createReview(barId, review, user) {
+  if (!user) {
+    throw new Error("LOGIN_REQUIRED");
+  }
+
   const localReview = {
     ...review,
     id: crypto.randomUUID(),
+    userId: user.id,
+    author: review.author,
     createdAt: new Date().toISOString()
   };
 
@@ -70,24 +73,32 @@ export async function createReview(barId, review) {
     .from("reviews")
     .insert({
       bar_id: barId,
-      author: review.author,
       comment: review.comment,
       rating: review.rating
     })
-    .select("id, author, comment, rating, created_at")
+    .select("id, bar_id, user_id, author, comment, rating, created_at")
     .single();
 
   if (error) {
     console.warn("Nao foi possivel salvar avaliacao no Supabase.", error);
-    const nextReviews = [localReview, ...readStoredReviews(barId)];
-    saveStoredReviews(barId, nextReviews);
-    return localReview;
+    throw error;
   }
 
   return mapReviewFromDatabase(data);
 }
 
-export async function deleteStoredReview(barId, reviewId) {
+export async function deleteReview(barId, reviewId) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+
+    if (error) {
+      console.warn("Nao foi possivel remover avaliacao no Supabase.", error);
+      throw error;
+    }
+
+    return null;
+  }
+
   const nextReviews = readStoredReviews(barId).filter(
     (review) => review.id !== reviewId
   );
