@@ -44,6 +44,30 @@ function getFriendlyAuthError(error, flow) {
   return "Nao foi possivel entrar agora.";
 }
 
+function getHeadingText(mode) {
+  if (mode === "recover") {
+    return "Recuperar senha";
+  }
+
+  if (mode === "signup") {
+    return "Criar conta";
+  }
+
+  return "Entrar no Bora Bar";
+}
+
+function getHeadingCopy(mode) {
+  if (mode === "recover") {
+    return "Informe seu email para receber o link de recuperacao.";
+  }
+
+  if (mode === "signup") {
+    return "Crie seu perfil para comentar e avaliar os lugares que visitar.";
+  }
+
+  return "Entre para acessar seu perfil, comentar e salvar suas preferencias.";
+}
+
 export default function AuthPage({ onAuthenticated }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -117,32 +141,9 @@ export default function AuthPage({ onAuthenticated }) {
       <section className="account-panel">
         <div className="account-heading">
           <p className="section-kicker">Sua conta</p>
-          <h1>{isRecover ? "Recuperar senha" : "Entrar no Bora Bar"}</h1>
-          <p>
-            {isRecover
-              ? "Informe seu email para receber o link de recuperacao."
-              : "Salve seu perfil e continue explorando bares sem perder o clima."}
-          </p>
+          <h1>{getHeadingText(mode)}</h1>
+          <p>{getHeadingCopy(mode)}</p>
         </div>
-
-        {!isRecover && (
-          <div className="auth-tabs" role="tablist" aria-label="Acesso">
-            <button
-              className={isLogin ? "is-active" : ""}
-              type="button"
-              onClick={() => resetFeedback("login")}
-            >
-              Entrar
-            </button>
-            <button
-              className={isSignup ? "is-active" : ""}
-              type="button"
-              onClick={() => resetFeedback("signup")}
-            >
-              Criar conta
-            </button>
-          </div>
-        )}
 
         <form className="account-form" onSubmit={handleSubmit}>
           {isSignup && (
@@ -236,10 +237,23 @@ export default function AuthPage({ onAuthenticated }) {
             <button type="button" onClick={() => resetFeedback("login")}>
               Voltar para entrar
             </button>
-          ) : (
-            <button type="button" onClick={() => resetFeedback("recover")}>
-              Esqueci minha senha
+          ) : isSignup ? (
+            <button type="button" onClick={() => resetFeedback("login")}>
+              Ja tenho uma conta
             </button>
+          ) : (
+            <>
+              <button type="button" onClick={() => resetFeedback("signup")}>
+                Criar conta
+              </button>
+              <button
+                className="account-link-muted"
+                type="button"
+                onClick={() => resetFeedback("recover")}
+              >
+                Esqueci minha senha
+              </button>
+            </>
           )}
         </div>
       </section>

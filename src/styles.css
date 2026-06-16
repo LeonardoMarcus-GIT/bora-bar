@@ -848,32 +848,34 @@ p {
   margin-bottom: 0;
 }
 
-.auth-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 18px;
-}
-
-.auth-tabs button {
-  min-height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(248, 241, 223, 0.78);
-  cursor: pointer;
-  font-weight: 900;
-}
-
-.auth-tabs button.is-active {
-  border-color: rgba(255, 199, 68, 0.58);
-  background: var(--gold);
-  color: #15150f;
-}
-
 .account-form {
   display: grid;
   gap: 14px;
+}
+
+.auth-warning {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 199, 68, 0.32);
+  border-radius: 8px;
+  background: rgba(255, 199, 68, 0.1);
+  color: rgba(255, 248, 233, 0.86);
+  padding: 12px;
+}
+
+.auth-warning p {
+  margin-bottom: 0;
+}
+
+.auth-warning button {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+  font-weight: 900;
+  padding: 0;
 }
 
 .account-form label {
@@ -927,6 +929,9 @@ p {
 }
 
 .account-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
   margin-top: 18px;
 }
 
@@ -937,6 +942,10 @@ p {
   cursor: pointer;
   font-weight: 900;
   padding: 0;
+}
+
+.account-links .account-link-muted {
+  color: rgba(248, 241, 223, 0.72);
 }
 
 .profile-summary {

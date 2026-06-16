@@ -18,6 +18,16 @@ const FAVORITES_KEY = "bora-bar-favorites";
 
 function getRoute() {
   const hash = window.location.hash.replace("#", "");
+  const params = new URLSearchParams(window.location.search);
+
+  if (
+    params.get("auth") === "recovery" ||
+    params.get("type") === "recovery" ||
+    hash.startsWith("reset-password") ||
+    hash.includes("type=recovery")
+  ) {
+    return { name: "reset-password" };
+  }
 
   if (hash.startsWith("bar/")) {
     return { name: "bar", barId: hash.replace("bar/", "") };
@@ -29,10 +39,6 @@ function getRoute() {
 
   if (hash.startsWith("login")) {
     return { name: "login" };
-  }
-
-  if (hash.startsWith("reset-password") || hash.includes("type=recovery")) {
-    return { name: "reset-password" };
   }
 
   return { name: "home" };
@@ -218,7 +224,16 @@ export default function App() {
   if (route.name === "reset-password") {
     return (
       <>
-        <PasswordResetPage onDone={() => (window.location.hash = "profile")} />
+        <PasswordResetPage
+          onBackToLogin={() => {
+            window.history.replaceState({}, "", "/#login");
+            setRoute({ name: "login" });
+          }}
+          onDone={() => {
+            window.history.replaceState({}, "", "/#profile");
+            setRoute({ name: "profile" });
+          }}
+        />
         <BottomNav
           mode="profile"
           onFavorites={showFavorites}

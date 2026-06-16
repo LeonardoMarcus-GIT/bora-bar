@@ -6,8 +6,8 @@ function ensureSupabase() {
   }
 }
 
-function getRedirectUrl(hashPath) {
-  return `${window.location.origin}${window.location.pathname}${hashPath}`;
+function getAppUrl(suffix = "") {
+  return `${window.location.origin}/${suffix}`;
 }
 
 export async function signUp(email, password, profileData) {
@@ -18,7 +18,7 @@ export async function signUp(email, password, profileData) {
     password,
     options: {
       data: profileData,
-      emailRedirectTo: getRedirectUrl("#")
+      emailRedirectTo: getAppUrl()
     }
   });
 }
@@ -54,7 +54,7 @@ export async function resetPassword(email) {
   ensureSupabase();
 
   return supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: getRedirectUrl("#reset-password")
+    redirectTo: getAppUrl("?auth=recovery")
   });
 }
 
