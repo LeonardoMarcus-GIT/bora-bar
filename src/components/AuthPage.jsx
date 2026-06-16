@@ -5,14 +5,40 @@ import { emptyAddress, geocodeAddress, toProfilePayload } from "../services/addr
 import { resetPassword, signIn, signUp } from "../services/authService.js";
 
 function getFriendlyAuthError(error, flow) {
-  const message = `${error?.message ?? ""} ${error?.code ?? ""}`.toLowerCase();
+  const message = [
+    error?.message,
+    error?.code,
+    error?.error_code,
+    error?.name,
+    error?.status
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 
   if (message.includes("email not confirmed")) {
     return "Confirme seu email antes de entrar.";
   }
 
-  if (message.includes("invalid login") || message.includes("invalid credentials")) {
+  if (
+    message.includes("invalid login") ||
+    message.includes("invalid credentials") ||
+    message.includes("invalid_credentials") ||
+    message.includes("400")
+  ) {
     return "Email ou senha invalidos.";
+  }
+
+  if (
+    message.includes("login indisponivel") ||
+    message.includes("supabase") ||
+    message.includes("api key")
+  ) {
+    return "Login indisponivel no momento. Verifique a configuracao do app.";
+  }
+
+  if (message.includes("failed to fetch") || message.includes("network")) {
+    return "Nao foi possivel conectar ao login agora. Tente novamente em instantes.";
   }
 
   if (message.includes("already registered") || message.includes("user already")) {
