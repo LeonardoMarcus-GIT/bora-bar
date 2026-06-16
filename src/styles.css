@@ -124,6 +124,7 @@ p {
 .brand-logo-slot,
 .icon-action,
 .bottom-nav button,
+.bottom-nav a,
 .back-button {
   display: grid;
   place-items: center;
@@ -1294,7 +1295,8 @@ p {
   -webkit-backdrop-filter: blur(22px) saturate(160%);
 }
 
-.bottom-nav button {
+.bottom-nav button,
+.bottom-nav a {
   width: 48px;
   height: 48px;
   flex: 1 1 0;
@@ -1303,10 +1305,12 @@ p {
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 248, 233, 0.78);
   cursor: pointer;
+  text-decoration: none;
   touch-action: manipulation;
 }
 
-.bottom-nav button.is-active {
+.bottom-nav button.is-active,
+.bottom-nav a.is-active {
   border-color: rgba(255, 255, 255, 0.24);
   background: rgba(17, 18, 14, 0.72);
   color: var(--ink);

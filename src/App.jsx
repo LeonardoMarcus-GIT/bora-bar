@@ -44,6 +44,10 @@ function getRoute() {
   return { name: "home" };
 }
 
+function isPromotionsHash() {
+  return window.location.hash.replace("#", "").startsWith("promotions");
+}
+
 function readFavoriteIds() {
   try {
     return JSON.parse(localStorage.getItem(FAVORITES_KEY)) ?? [];
@@ -86,7 +90,29 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onHashChange = () => setRoute(getRoute());
+    const onHashChange = () => {
+      setRoute(getRoute());
+
+      if (isPromotionsHash()) {
+        setShowFavoritesOnly(false);
+        setActiveFilters((currentFilters) =>
+          currentFilters.includes("promo")
+            ? currentFilters
+            : [...currentFilters, "promo"]
+        );
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+
+    if (isPromotionsHash()) {
+      setShowFavoritesOnly(false);
+      setActiveFilters((currentFilters) =>
+        currentFilters.includes("promo")
+          ? currentFilters
+          : [...currentFilters, "promo"]
+      );
+    }
+
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
@@ -197,6 +223,7 @@ export default function App() {
   function goBack() {
     window.location.hash = "";
     setShowFavoritesOnly(false);
+    setActiveFilters([]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -212,6 +239,17 @@ export default function App() {
   function showFavorites() {
     window.location.hash = "";
     setShowFavoritesOnly(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function showPromotions() {
+    window.location.hash = "promotions";
+    setShowFavoritesOnly(false);
+    setActiveFilters((currentFilters) =>
+      currentFilters.includes("promo")
+        ? currentFilters
+        : [...currentFilters, "promo"]
+    );
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -239,6 +277,7 @@ export default function App() {
           onFavorites={showFavorites}
           onHome={goBack}
           onProfile={openProfile}
+          onPromotions={showPromotions}
           onSearch={goBack}
         />
       </>
@@ -254,6 +293,7 @@ export default function App() {
           onFavorites={showFavorites}
           onHome={goBack}
           onProfile={openProfile}
+          onPromotions={showPromotions}
           onSearch={goBack}
         />
       </>
@@ -272,6 +312,7 @@ export default function App() {
           onFavorites={showFavorites}
           onHome={goBack}
           onProfile={openProfile}
+          onPromotions={showPromotions}
           onSearch={goBack}
         />
       </>
@@ -291,6 +332,7 @@ export default function App() {
           mode="menu"
           onHome={goBack}
           onProfile={openProfile}
+          onPromotions={showPromotions}
           onSearch={goBack}
         />
       </>
@@ -313,6 +355,7 @@ export default function App() {
           onFavorites={showFavorites}
           onMenu={scrollToMenu}
           onProfile={openProfile}
+          onPromotions={showPromotions}
         />
       </>
     );
@@ -350,10 +393,17 @@ export default function App() {
         />
       </main>
       <BottomNav
-        mode={showFavoritesOnly ? "favorites" : "home"}
+        mode={
+          showFavoritesOnly
+            ? "favorites"
+            : activeFilters.includes("promo")
+              ? "promotions"
+              : "home"
+        }
         onFavorites={showFavorites}
         onHome={goBack}
         onProfile={openProfile}
+        onPromotions={showPromotions}
         onSearch={focusSearch}
       />
     </>

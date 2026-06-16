@@ -1,4 +1,4 @@
-import { Heart, Home, Search, Utensils, UserRound } from "lucide-react";
+import { BadgePercent, Heart, Home, Search, Utensils, UserRound } from "lucide-react";
 
 export default function BottomNav({
   mode = "home",
@@ -6,16 +6,21 @@ export default function BottomNav({
   onHome,
   onMenu,
   onProfile,
+  onPromotions,
   onSearch
 }) {
+  const isMenuMode = mode === "menu";
+  const MiddleIcon = isMenuMode ? Utensils : BadgePercent;
+  const middleLabel = isMenuMode ? "Cardapio" : "Promocoes";
+
   return (
-    <nav className="bottom-nav" aria-label="Navegação principal">
+    <nav className="bottom-nav" aria-label="Navegacao principal">
       <button
         className={mode === "home" ? "is-active" : ""}
         type="button"
         onClick={onHome}
-        aria-label="Início"
-        title="Início"
+        aria-label="Inicio"
+        title="Inicio"
       >
         <Home size={20} aria-hidden="true" />
       </button>
@@ -27,15 +32,27 @@ export default function BottomNav({
       >
         <Search size={20} aria-hidden="true" />
       </button>
-      <button
-        className={mode === "menu" ? "is-active" : ""}
-        type="button"
-        onClick={onMenu}
-        aria-label="Cardápio"
-        title="Cardápio"
-      >
-        <Utensils size={20} aria-hidden="true" />
-      </button>
+      {isMenuMode ? (
+        <button
+          className="is-active"
+          type="button"
+          onClick={onMenu}
+          aria-label={middleLabel}
+          title={middleLabel}
+        >
+          <MiddleIcon size={20} aria-hidden="true" />
+        </button>
+      ) : (
+        <a
+          className={mode === "promotions" ? "is-active" : ""}
+          href="#promotions"
+          onClick={onPromotions}
+          aria-label={middleLabel}
+          title={middleLabel}
+        >
+          <MiddleIcon size={20} aria-hidden="true" />
+        </a>
+      )}
       <button
         className={mode === "favorites" ? "is-active" : ""}
         type="button"
