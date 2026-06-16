@@ -21,12 +21,37 @@ function getFriendlyAuthError(error, flow) {
   }
 
   if (
+    message.includes("email_address_invalid") ||
+    message.includes("email address") ||
+    message.includes("invalid email") ||
+    message.includes("valid email")
+  ) {
+    return "Digite um email valido para criar sua conta.";
+  }
+
+  if (
+    message.includes("already registered") ||
+    message.includes("user already") ||
+    message.includes("user_already_exists") ||
+    message.includes("email_exists")
+  ) {
+    return "Esse email ja tem uma conta. Tente entrar ou recuperar a senha.";
+  }
+
+  if (
     message.includes("invalid login") ||
     message.includes("invalid credentials") ||
-    message.includes("invalid_credentials") ||
-    message.includes("400")
+    message.includes("invalid_credentials")
   ) {
     return "Email ou senha invalidos.";
+  }
+
+  if (message.includes("database") || message.includes("saving new user")) {
+    return "Nao conseguimos criar seu perfil agora. Tente novamente em instantes.";
+  }
+
+  if (message.includes("email") && message.includes("send")) {
+    return "Nao foi possivel enviar o email de confirmacao agora.";
   }
 
   if (
@@ -39,10 +64,6 @@ function getFriendlyAuthError(error, flow) {
 
   if (message.includes("failed to fetch") || message.includes("network")) {
     return "Nao foi possivel conectar ao login agora. Tente novamente em instantes.";
-  }
-
-  if (message.includes("already registered") || message.includes("user already")) {
-    return "Esse email ja tem uma conta. Tente entrar ou recuperar a senha.";
   }
 
   if (message.includes("password")) {
