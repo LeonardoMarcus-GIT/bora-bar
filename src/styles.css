@@ -896,6 +896,32 @@ p {
   gap: 12px;
 }
 
+.address-fields {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid rgba(255, 199, 68, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 199, 68, 0.06);
+  margin: 2px 0 0;
+  padding: 14px;
+}
+
+.address-fields legend {
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 950;
+  padding: 0 6px;
+  text-transform: uppercase;
+}
+
+.address-fields > p {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
 .primary-action,
 .secondary-action {
   display: inline-flex;
@@ -969,7 +995,8 @@ p {
   font-weight: 950;
 }
 
-.field-with-icon input:disabled {
+.field-with-icon input:disabled,
+.field-with-icon select:disabled {
   color: rgba(248, 241, 223, 0.64);
   cursor: not-allowed;
 }
@@ -1125,6 +1152,7 @@ p {
 }
 
 .field-with-icon input,
+.field-with-icon select,
 .field-with-icon textarea {
   width: 100%;
   min-width: 0;
@@ -1136,6 +1164,24 @@ p {
 
 .field-with-icon input {
   min-height: 46px;
+}
+
+.field-with-icon select {
+  min-height: 46px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.field-with-icon select option {
+  background: #171713;
+  color: var(--ink);
+}
+
+.form-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: -2px 0 0;
 }
 
 .textarea-field {

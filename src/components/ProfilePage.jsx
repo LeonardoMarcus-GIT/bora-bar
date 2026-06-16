@@ -1,14 +1,20 @@
-import { LogOut, Mail, MapPin, Save, UserRound } from "lucide-react";
+import { LogOut, Mail, Save, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import AddressFields from "./AddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import {
+  emptyAddress,
+  geocodeAddress,
+  normalizeAddress,
+  toProfilePayload
+} from "../services/addressService.js";
 import { signOut, updateUserMetadata } from "../services/authService.js";
 import { fetchProfile, saveProfile } from "../services/profilesService.js";
 
 export default function ProfilePage({ onLoginRequired, onSignedOut }) {
-  const { isAuthReady, user } = useAuth();
+  const { isAuthReady, session, user } = useAuth();
   const [displayName, setDisplayName] = useState("");
-  const [city, setCity] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
+  const [address, setAddress] = useState(emptyAddress);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -37,8 +43,20 @@ export default function ProfilePage({ onLoginRequired, onSignedOut }) {
     setIsLoadingProfile(true);
     setFeedback("");
     setDisplayName(user.user_metadata?.display_name ?? "");
-    setCity(user.user_metadata?.city ?? "");
-    setNeighborhood(user.user_metadata?.neighborhood ?? "");
+    setAddress(
+      normalizeAddress({
+        city: user.user_metadata?.city,
+        cityIbgeCode: user.user_metadata?.city_ibge_code,
+        latitude: user.user_metadata?.latitude,
+        locationSource: user.user_metadata?.location_source,
+        locationUpdatedAt: user.user_metadata?.location_updated_at,
+        longitude: user.user_metadata?.longitude,
+        neighborhood: user.user_metadata?.neighborhood,
+        postalCode: user.user_metadata?.postal_code,
+        state: user.user_metadata?.state,
+        stateCode: user.user_metadata?.state_code
+      })
+    );
 
     fetchProfile(user.id)
       .then((profile) => {
@@ -47,9 +65,19 @@ export default function ProfilePage({ onLoginRequired, onSignedOut }) {
         }
 
         setDisplayName(profile?.display_name ?? user.user_metadata?.display_name ?? "");
-        setCity(profile?.city ?? user.user_metadata?.city ?? "");
-        setNeighborhood(
-          profile?.neighborhood ?? user.user_metadata?.neighborhood ?? ""
+        setAddress(
+          normalizeAddress({
+            ...profile,
+            cityIbgeCode:
+              profile?.city_ibge_code ?? user.user_metadata?.city_ibge_code,
+            locationSource:
+              profile?.location_source ?? user.user_metadata?.location_source,
+            locationUpdatedAt:
+              profile?.location_updated_at ??
+              user.user_metadata?.location_updated_at,
+            postalCode: profile?.postal_code ?? user.user_metadata?.postal_code,
+            stateCode: profile?.state_code ?? user.user_metadata?.state_code
+          })
         );
       })
       .catch(() => {
@@ -72,11 +100,27 @@ export default function ProfilePage({ onLoginRequired, onSignedOut }) {
     setFeedback("");
 
     try {
-      const profile = {
+      let profile = {
         displayName: displayName.trim(),
-        city: city.trim(),
-        neighborhood: neighborhood.trim()
+        ...toProfilePayload(address)
       };
+
+      try {
+        const { location } = await geocodeAddress(
+          profile,
+          session?.access_token
+        );
+        profile = {
+          ...profile,
+          latitude: location?.latitude ?? profile.latitude,
+          locationSource: location?.source ?? profile.locationSource,
+          locationUpdatedAt: location?.updatedAt ?? profile.locationUpdatedAt,
+          longitude: location?.longitude ?? profile.longitude
+        };
+        setAddress(normalizeAddress(profile));
+      } catch {
+        // O perfil ainda pode ser salvo sem coordenada aproximada.
+      }
 
       try {
         await saveProfile(user.id, profile);
@@ -84,11 +128,24 @@ export default function ProfilePage({ onLoginRequired, onSignedOut }) {
         await updateUserMetadata({
           display_name: profile.displayName,
           city: profile.city,
-          neighborhood: profile.neighborhood
+          city_ibge_code: profile.cityIbgeCode,
+          latitude: profile.latitude,
+          location_source: profile.locationSource,
+          location_updated_at: profile.locationUpdatedAt,
+          longitude: profile.longitude,
+          neighborhood: profile.neighborhood,
+          postal_code: profile.postalCode,
+          state: profile.state,
+          state_code: profile.stateCode
         });
       }
 
       setFeedback("Perfil salvo.");
+      window.dispatchEvent(
+        new CustomEvent("bora-bar-profile-updated", {
+          detail: { profile }
+        })
+      );
     } catch {
       setFeedback("Nao foi possivel salvar agora.");
     } finally {
@@ -151,30 +208,7 @@ export default function ProfilePage({ onLoginRequired, onSignedOut }) {
             </div>
           </label>
 
-          <div className="profile-grid">
-            <label>
-              <span>Cidade</span>
-              <div className="field-with-icon">
-                <MapPin size={18} aria-hidden="true" />
-                <input
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                  placeholder="Sao Paulo"
-                />
-              </div>
-            </label>
-            <label>
-              <span>Bairro</span>
-              <div className="field-with-icon">
-                <MapPin size={18} aria-hidden="true" />
-                <input
-                  value={neighborhood}
-                  onChange={(event) => setNeighborhood(event.target.value)}
-                  placeholder="Pinheiros"
-                />
-              </div>
-            </label>
-          </div>
+          <AddressFields address={address} onChange={setAddress} />
 
           <button className="primary-action" type="submit" disabled={isSaving}>
             <Save size={18} aria-hidden="true" />

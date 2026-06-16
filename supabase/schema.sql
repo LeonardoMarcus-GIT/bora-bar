@@ -36,8 +36,16 @@ create table if not exists public.reviews (
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
+  state text,
+  state_code text,
   city text,
+  city_ibge_code text,
   neighborhood text,
+  postal_code text,
+  latitude numeric(10, 7),
+  longitude numeric(10, 7),
+  location_source text,
+  location_updated_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -57,6 +65,30 @@ add column if not exists longitude numeric(10, 7);
 
 alter table public.bars
 add column if not exists is_active boolean not null default true;
+
+alter table public.profiles
+add column if not exists state text;
+
+alter table public.profiles
+add column if not exists state_code text;
+
+alter table public.profiles
+add column if not exists city_ibge_code text;
+
+alter table public.profiles
+add column if not exists postal_code text;
+
+alter table public.profiles
+add column if not exists latitude numeric(10, 7);
+
+alter table public.profiles
+add column if not exists longitude numeric(10, 7);
+
+alter table public.profiles
+add column if not exists location_source text;
+
+alter table public.profiles
+add column if not exists location_updated_at timestamptz;
 
 drop policy if exists "Anyone can read bars" on public.bars;
 create policy "Anyone can read bars"
@@ -128,12 +160,33 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, display_name, city, neighborhood)
+  insert into public.profiles (
+    id,
+    display_name,
+    state,
+    state_code,
+    city,
+    city_ibge_code,
+    neighborhood,
+    postal_code,
+    latitude,
+    longitude,
+    location_source,
+    location_updated_at
+  )
   values (
     new.id,
     new.raw_user_meta_data ->> 'display_name',
+    new.raw_user_meta_data ->> 'state',
+    new.raw_user_meta_data ->> 'state_code',
     new.raw_user_meta_data ->> 'city',
-    new.raw_user_meta_data ->> 'neighborhood'
+    new.raw_user_meta_data ->> 'city_ibge_code',
+    new.raw_user_meta_data ->> 'neighborhood',
+    new.raw_user_meta_data ->> 'postal_code',
+    nullif(new.raw_user_meta_data ->> 'latitude', '')::numeric,
+    nullif(new.raw_user_meta_data ->> 'longitude', '')::numeric,
+    new.raw_user_meta_data ->> 'location_source',
+    nullif(new.raw_user_meta_data ->> 'location_updated_at', '')::timestamptz
   )
   on conflict (id) do nothing;
 
@@ -193,3 +246,9 @@ on public.reviews (bar_id, created_at desc);
 
 create index if not exists reviews_user_created_idx
 on public.reviews (user_id, created_at desc);
+
+create index if not exists profiles_location_idx
+on public.profiles (latitude, longitude);
+
+create index if not exists profiles_postal_code_idx
+on public.profiles (postal_code);

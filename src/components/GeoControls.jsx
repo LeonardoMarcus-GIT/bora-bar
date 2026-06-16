@@ -2,6 +2,7 @@ import { LocateFixed, MapPin, Navigation, SlidersHorizontal } from "lucide-react
 
 export default function GeoControls({
   activeFilters,
+  isUsingProfileLocation,
   locationError,
   locationStatus,
   onRadiusChange,
@@ -9,15 +10,20 @@ export default function GeoControls({
   radiusKm
 }) {
   const hasLocation = locationStatus === "granted" || locationStatus === "cached";
+  const canUseRadius = hasLocation || isUsingProfileLocation;
   const isLoading = locationStatus === "loading";
-  const needsLocationForNear = activeFilters.includes("near") && !hasLocation;
+  const needsLocationForNear = activeFilters.includes("near") && !canUseRadius;
   const actionLabel = isLoading
     ? "Buscando..."
     : hasLocation
       ? "Atualizar"
       : "Usar localizacao";
 
-  const statusText = getStatusText(locationStatus, locationError);
+  const statusText = getStatusText(
+    locationStatus,
+    locationError,
+    isUsingProfileLocation
+  );
 
   return (
     <section className="geo-panel" aria-label="Localizacao e raio">
@@ -31,7 +37,9 @@ export default function GeoControls({
             )}
           </span>
           <div>
-            <h2>{hasLocation ? "Perto de voce" : "Encontrar por perto"}</h2>
+            <h2>
+              {canUseRadius ? "Perto de voce" : "Encontrar por perto"}
+            </h2>
             <p>{needsLocationForNear ? "Ative para ordenar por distancia." : statusText}</p>
           </div>
         </div>
@@ -47,7 +55,7 @@ export default function GeoControls({
         </button>
       </div>
 
-      <fieldset className="radius-control" disabled={!hasLocation}>
+      <fieldset className="radius-control" disabled={!canUseRadius}>
         <legend className="sr-only">Raio de busca</legend>
         <div className="radius-topline">
           <span>
@@ -71,7 +79,11 @@ export default function GeoControls({
   );
 }
 
-function getStatusText(status, errorMessage) {
+function getStatusText(status, errorMessage, isUsingProfileLocation) {
+  if (isUsingProfileLocation) {
+    return "Usando o endereco salvo no perfil.";
+  }
+
   if (status === "cached") {
     return "Usando sua ultima localizacao salva.";
   }

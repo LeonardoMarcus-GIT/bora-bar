@@ -1,5 +1,7 @@
-import { LockKeyhole, Mail, MapPin, UserRound } from "lucide-react";
+import { LockKeyhole, Mail, UserRound } from "lucide-react";
 import { useState } from "react";
+import AddressFields from "./AddressFields.jsx";
+import { emptyAddress, geocodeAddress, toProfilePayload } from "../services/addressService.js";
 import { resetPassword, signIn, signUp } from "../services/authService.js";
 
 function getFriendlyAuthError(error, flow) {
@@ -73,8 +75,7 @@ export default function AuthPage({ onAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [city, setCity] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
+  const [address, setAddress] = useState(emptyAddress);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -105,10 +106,33 @@ export default function AuthPage({ onAuthenticated }) {
       }
 
       if (isSignup) {
+        let profileAddress = toProfilePayload(address);
+
+        try {
+          const { location } = await geocodeAddress(profileAddress);
+          profileAddress = toProfilePayload({
+            ...profileAddress,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            locationSource: location?.source,
+            locationUpdatedAt: location?.updatedAt
+          });
+        } catch {
+          // Cadastro continua mesmo se a localizacao aproximada nao estiver disponivel.
+        }
+
         const { error } = await signUp(email.trim(), password, {
           display_name: displayName.trim(),
-          city: city.trim(),
-          neighborhood: neighborhood.trim()
+          city: profileAddress.city,
+          city_ibge_code: profileAddress.cityIbgeCode,
+          latitude: profileAddress.latitude,
+          location_source: profileAddress.locationSource,
+          location_updated_at: profileAddress.locationUpdatedAt,
+          longitude: profileAddress.longitude,
+          neighborhood: profileAddress.neighborhood,
+          postal_code: profileAddress.postalCode,
+          state: profileAddress.state,
+          state_code: profileAddress.stateCode
         });
 
         if (error) {
@@ -192,32 +216,7 @@ export default function AuthPage({ onAuthenticated }) {
             </label>
           )}
 
-          {isSignup && (
-            <div className="profile-grid">
-              <label>
-                <span>Cidade</span>
-                <div className="field-with-icon">
-                  <MapPin size={18} aria-hidden="true" />
-                  <input
-                    value={city}
-                    onChange={(event) => setCity(event.target.value)}
-                    placeholder="Sao Paulo"
-                  />
-                </div>
-              </label>
-              <label>
-                <span>Bairro</span>
-                <div className="field-with-icon">
-                  <MapPin size={18} aria-hidden="true" />
-                  <input
-                    value={neighborhood}
-                    onChange={(event) => setNeighborhood(event.target.value)}
-                    placeholder="Pinheiros"
-                  />
-                </div>
-              </label>
-            </div>
-          )}
+          {isSignup && <AddressFields address={address} onChange={setAddress} />}
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>
             {isSubmitting

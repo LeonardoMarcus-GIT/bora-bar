@@ -10,6 +10,7 @@ import PasswordResetPage from "./components/PasswordResetPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useGeolocation } from "./hooks/useGeolocation.js";
+import { fetchProfile } from "./services/profilesService.js";
 import { fetchBars } from "./services/barsService.js";
 import { calculateDistanceKm } from "./utils/geo.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
@@ -56,6 +57,25 @@ function readFavoriteIds() {
   }
 }
 
+function getProfileLocation(profile = {}, metadata = {}) {
+  const latitude = Number(profile.latitude ?? metadata.latitude);
+  const longitude = Number(profile.longitude ?? metadata.longitude);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return {
+    latitude,
+    longitude,
+    source:
+      profile.locationSource ??
+      profile.location_source ??
+      metadata.location_source ??
+      metadata.locationSource
+  };
+}
+
 export default function App() {
   const { user } = useAuth();
   const [route, setRoute] = useState(getRoute);
@@ -66,6 +86,7 @@ export default function App() {
   const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
   const [radiusKm, setRadiusKm] = useState(5);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [profileLocation, setProfileLocation] = useState(null);
   const {
     coordinates: userLocation,
     errorMessage: locationError,
@@ -125,13 +146,56 @@ export default function App() {
     }
   }, [favoriteIds]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!user) {
+      setProfileLocation(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    fetchProfile(user.id)
+      .then((profile) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setProfileLocation(getProfileLocation(profile, user.user_metadata));
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProfileLocation(getProfileLocation({}, user.user_metadata));
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const onProfileUpdated = (event) => {
+      setProfileLocation(getProfileLocation(event.detail?.profile));
+    };
+
+    window.addEventListener("bora-bar-profile-updated", onProfileUpdated);
+    return () => {
+      window.removeEventListener("bora-bar-profile-updated", onProfileUpdated);
+    };
+  }, []);
+
   const selectedBarId = route.name === "bar" ? route.barId : "";
+  const activeLocation = hasLocation ? userLocation : profileLocation;
+  const hasDistanceLocation = Boolean(activeLocation);
+  const isUsingProfileLocation = !hasLocation && Boolean(profileLocation);
 
   const barsWithDistance = useMemo(
     () =>
       bars.map((bar) => {
-        const calculatedDistanceKm = hasLocation
-          ? calculateDistanceKm(userLocation, bar)
+        const calculatedDistanceKm = hasDistanceLocation
+          ? calculateDistanceKm(activeLocation, bar)
           : null;
 
         return {
@@ -142,7 +206,7 @@ export default function App() {
           hasRealDistance: Number.isFinite(calculatedDistanceKm)
         };
       }),
-    [bars, hasLocation, userLocation]
+    [activeLocation, bars, hasDistanceLocation]
   );
 
   const selectedBar = useMemo(
@@ -165,7 +229,7 @@ export default function App() {
       const matchesFavorite =
         !showFavoritesOnly || favoriteIds.includes(bar.id);
       const matchesRadius =
-        !hasLocation ||
+        !hasDistanceLocation ||
         !activeFilters.includes("near") ||
         (bar.hasRealDistance && bar.distanceKm <= radiusKm);
 
@@ -184,7 +248,7 @@ export default function App() {
       );
     }
 
-    if (activeFilters.includes("near") && hasLocation) {
+    if (activeFilters.includes("near") && hasDistanceLocation) {
       nextBars = [...nextBars].sort((a, b) => a.distanceKm - b.distanceKm);
     }
 
@@ -193,7 +257,7 @@ export default function App() {
     activeFilters,
     barsWithDistance,
     favoriteIds,
-    hasLocation,
+    hasDistanceLocation,
     radiusKm,
     searchTerm,
     showFavoritesOnly
@@ -371,6 +435,8 @@ export default function App() {
           summaryLabel={
             hasLocation
               ? `${visibleBars.length} bares perto de voce`
+              : isUsingProfileLocation
+                ? `${visibleBars.length} bares perto do seu endereco`
               : `${visibleBars.length} bares encontrados`
           }
           onSearchChange={setSearchTerm}
@@ -380,6 +446,7 @@ export default function App() {
           activeFilters={activeFilters}
           locationError={locationError}
           locationStatus={locationStatus}
+          isUsingProfileLocation={isUsingProfileLocation}
           radiusKm={radiusKm}
           onRadiusChange={setRadiusKm}
           onRequestLocation={requestLocation}

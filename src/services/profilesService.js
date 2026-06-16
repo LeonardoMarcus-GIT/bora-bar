@@ -11,7 +11,7 @@ export async function fetchProfile(userId) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, city, neighborhood")
+    .select("*")
     .eq("id", userId)
     .maybeSingle();
 
@@ -28,13 +28,21 @@ export async function saveProfile(userId, profile) {
   const { data, error } = await supabase
     .from("profiles")
     .upsert({
+      city: profile.city,
+      city_ibge_code: profile.cityIbgeCode,
       id: userId,
       display_name: profile.displayName,
-      city: profile.city,
+      latitude: profile.latitude,
+      location_source: profile.locationSource,
+      location_updated_at: profile.locationUpdatedAt,
+      longitude: profile.longitude,
       neighborhood: profile.neighborhood,
+      postal_code: profile.postalCode,
+      state: profile.state,
+      state_code: profile.stateCode,
       updated_at: new Date().toISOString()
     })
-    .select("id, display_name, city, neighborhood")
+    .select("*")
     .single();
 
   if (error) {
