@@ -11,7 +11,7 @@ import {
 import { signOut, updateUserMetadata } from "../services/authService.js";
 import { fetchProfile, saveProfile } from "../services/profilesService.js";
 
-export default function ProfilePage({ onLoginRequired, onSignedOut }) {
+export default function ProfilePage({ onLoginRequired, onSaved, onSignedOut }) {
   const { isAuthReady, session, user } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [address, setAddress] = useState(emptyAddress);
@@ -146,6 +146,7 @@ export default function ProfilePage({ onLoginRequired, onSignedOut }) {
           detail: { profile }
         })
       );
+      onSaved?.();
     } catch {
       setFeedback("Nao foi possivel salvar agora.");
     } finally {

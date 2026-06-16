@@ -369,6 +369,7 @@ export default function App() {
       <>
         <ProfilePage
           onLoginRequired={() => (window.location.hash = "login")}
+          onSaved={goBack}
           onSignedOut={() => (window.location.hash = "login")}
         />
         <BottomNav
