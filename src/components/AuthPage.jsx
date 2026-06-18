@@ -117,6 +117,16 @@ function getHeadingCopy(mode) {
   return "Entre para acessar seu perfil, comentar e salvar suas preferencias.";
 }
 
+function completeAuthentication(onAuthenticated) {
+  try {
+    onAuthenticated();
+  } catch (error) {
+    console.warn("Login concluido, mas o redirecionamento falhou.", error);
+    window.location.hash = "";
+    window.scrollTo({ top: 0 });
+  }
+}
+
 export default function AuthPage({ onAuthenticated }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -168,7 +178,7 @@ export default function AuthPage({ onAuthenticated }) {
           // Cadastro continua mesmo se a localizacao aproximada nao estiver disponivel.
         }
 
-        const { error } = await signUp(email.trim(), password, {
+        const { data, error } = await signUp(email.trim(), password, {
           display_name: displayName.trim(),
           city: profileAddress.city,
           city_ibge_code: profileAddress.cityIbgeCode,
@@ -186,6 +196,11 @@ export default function AuthPage({ onAuthenticated }) {
           throw error;
         }
 
+        if (data.session) {
+          completeAuthentication(onAuthenticated);
+          return;
+        }
+
         setFeedback("Confira seu email para confirmar sua conta.");
         setPassword("");
         return;
@@ -197,7 +212,7 @@ export default function AuthPage({ onAuthenticated }) {
         throw error;
       }
 
-      onAuthenticated();
+      completeAuthentication(onAuthenticated);
     } catch (error) {
       const flow = isRecover ? "recover" : isSignup ? "signup" : "login";
       console.warn("Falha no fluxo de autenticacao.", error);

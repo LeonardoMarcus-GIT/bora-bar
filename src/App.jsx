@@ -62,6 +62,30 @@ function readFavoriteIds() {
   }
 }
 
+function readAuthRedirect() {
+  try {
+    return sessionStorage.getItem("bora-bar-auth-redirect") ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function saveAuthRedirect(routeName) {
+  try {
+    sessionStorage.setItem("bora-bar-auth-redirect", routeName);
+  } catch {
+    // O login continua funcionando mesmo se o navegador bloquear sessionStorage.
+  }
+}
+
+function clearAuthRedirect() {
+  try {
+    sessionStorage.removeItem("bora-bar-auth-redirect");
+  } catch {
+    // Nao ha estado obrigatorio para limpar.
+  }
+}
+
 function getProfileLocation(profile = {}, metadata = {}) {
   const latitude = Number(profile.latitude ?? metadata.latitude);
   const longitude = Number(profile.longitude ?? metadata.longitude);
@@ -330,7 +354,7 @@ export default function App() {
 
   function openBusiness() {
     if (!user) {
-      sessionStorage.setItem("bora-bar-auth-redirect", "business");
+      saveAuthRedirect("business");
       window.location.hash = "login";
       return;
     }
@@ -341,8 +365,8 @@ export default function App() {
   }
 
   function handleAuthenticated() {
-    const redirect = sessionStorage.getItem("bora-bar-auth-redirect");
-    sessionStorage.removeItem("bora-bar-auth-redirect");
+    const redirect = readAuthRedirect();
+    clearAuthRedirect();
 
     if (redirect === "business") {
       window.location.hash = "business";
@@ -428,7 +452,7 @@ export default function App() {
           onBack={goBack}
           onDataChanged={refreshBars}
           onLoginRequired={() => {
-            sessionStorage.setItem("bora-bar-auth-redirect", "business");
+            saveAuthRedirect("business");
             window.location.hash = "login";
           }}
         />
