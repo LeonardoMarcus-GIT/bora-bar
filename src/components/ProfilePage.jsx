@@ -1,4 +1,4 @@
-import { LogOut, Mail, Save, UserRound } from "lucide-react";
+import { LogOut, Mail, Save, Store, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import AddressFields from "./AddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -11,7 +11,12 @@ import {
 import { signOut, updateUserMetadata } from "../services/authService.js";
 import { fetchProfile, saveProfile } from "../services/profilesService.js";
 
-export default function ProfilePage({ onLoginRequired, onSaved, onSignedOut }) {
+export default function ProfilePage({
+  onLoginRequired,
+  onManageBusiness,
+  onSaved,
+  onSignedOut
+}) {
   const { isAuthReady, session, user } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [address, setAddress] = useState(emptyAddress);
@@ -217,6 +222,18 @@ export default function ProfilePage({ onLoginRequired, onSaved, onSignedOut }) {
           </button>
           {feedback && <p className="form-feedback">{feedback}</p>}
         </form>
+
+        <button
+          className="business-entry-button"
+          type="button"
+          onClick={onManageBusiness}
+        >
+          <Store size={20} aria-hidden="true" />
+          <span>
+            <strong>Area do estabelecimento</strong>
+            <small>Solicite acesso ou administre seu bar</small>
+          </span>
+        </button>
 
         <button className="secondary-action" type="button" onClick={handleSignOut}>
           <LogOut size={18} aria-hidden="true" />

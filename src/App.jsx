@@ -4,6 +4,7 @@ import AuthPage from "./components/AuthPage.jsx";
 import BarDetails from "./components/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
 import BottomNav from "./components/BottomNav.jsx";
+import BusinessDashboard from "./components/BusinessDashboard.jsx";
 import FilterBar from "./components/FilterBar.jsx";
 import GeoControls from "./components/GeoControls.jsx";
 import PasswordResetPage from "./components/PasswordResetPage.jsx";
@@ -36,6 +37,10 @@ function getRoute() {
 
   if (hash.startsWith("profile")) {
     return { name: "profile" };
+  }
+
+  if (hash.startsWith("business")) {
+    return { name: "business" };
   }
 
   if (hash.startsWith("login")) {
@@ -323,6 +328,36 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function openBusiness() {
+    if (!user) {
+      sessionStorage.setItem("bora-bar-auth-redirect", "business");
+      window.location.hash = "login";
+      return;
+    }
+
+    window.location.hash = "business";
+    setShowFavoritesOnly(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleAuthenticated() {
+    const redirect = sessionStorage.getItem("bora-bar-auth-redirect");
+    sessionStorage.removeItem("bora-bar-auth-redirect");
+
+    if (redirect === "business") {
+      window.location.hash = "business";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    goBack();
+  }
+
+  async function refreshBars() {
+    const nextBars = await fetchBars();
+    setBars(nextBars);
+  }
+
   if (route.name === "reset-password") {
     return (
       <>
@@ -351,7 +386,7 @@ export default function App() {
   if (route.name === "login") {
     return (
       <>
-        <AuthPage onAuthenticated={goBack} />
+        <AuthPage onAuthenticated={handleAuthenticated} />
         <BottomNav
           mode="profile"
           onFavorites={showFavorites}
@@ -369,8 +404,33 @@ export default function App() {
       <>
         <ProfilePage
           onLoginRequired={() => (window.location.hash = "login")}
+          onManageBusiness={openBusiness}
           onSaved={goBack}
           onSignedOut={() => (window.location.hash = "login")}
+        />
+        <BottomNav
+          mode="profile"
+          onFavorites={showFavorites}
+          onHome={goBack}
+          onProfile={openProfile}
+          onPromotions={showPromotions}
+          onSearch={goBack}
+        />
+      </>
+    );
+  }
+
+  if (route.name === "business") {
+    return (
+      <>
+        <BusinessDashboard
+          bars={bars}
+          onBack={goBack}
+          onDataChanged={refreshBars}
+          onLoginRequired={() => {
+            sessionStorage.setItem("bora-bar-auth-redirect", "business");
+            window.location.hash = "login";
+          }}
         />
         <BottomNav
           mode="profile"

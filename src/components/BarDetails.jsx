@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BadgePercent,
+  CalendarDays,
   Clock3,
   Heart,
   MapPin,
@@ -10,7 +11,15 @@ import {
 import MenuCategory from "./MenuCategory.jsx";
 import Reviews from "./Reviews.jsx";
 import StatusBadge from "./StatusBadge.jsx";
+import { formatCurrency } from "../utils/format.js";
 import { formatDistanceKm } from "../utils/geo.js";
+
+function formatEventDate(value) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(new Date(value));
+}
 
 export default function BarDetails({
   bar,
@@ -76,11 +85,25 @@ export default function BarDetails({
             </a>
           </div>
 
-          {bar.promotion && (
-            <div className="promo-box">
-              <BadgePercent size={20} aria-hidden="true" />
-              <span>{bar.promotion}</span>
+          {bar.promotions?.length ? (
+            <div className="public-feature-list">
+              {bar.promotions.map((promotion) => (
+                <div className="promo-box" key={promotion.id}>
+                  <BadgePercent size={20} aria-hidden="true" />
+                  <span>
+                    <strong>{promotion.title}</strong>
+                    {promotion.description && <small>{promotion.description}</small>}
+                  </span>
+                </div>
+              ))}
             </div>
+          ) : (
+            bar.promotion && (
+              <div className="promo-box">
+                <BadgePercent size={20} aria-hidden="true" />
+                <span>{bar.promotion}</span>
+              </div>
+            )
           )}
         </div>
 
@@ -118,6 +141,30 @@ export default function BarDetails({
           ))}
         </div>
       </section>
+
+      {bar.events?.length > 0 && (
+        <section className="events-section">
+          <div className="section-heading">
+            <h2>Proximos eventos</h2>
+            <span>{bar.events.length}</span>
+          </div>
+          <div className="event-grid">
+            {bar.events.map((event) => (
+              <article className="event-card" key={event.id}>
+                <CalendarDays size={22} aria-hidden="true" />
+                <div>
+                  <strong>{event.title}</strong>
+                  <span>{formatEventDate(event.startsAt)}</span>
+                  {event.description && <p>{event.description}</p>}
+                  {event.price !== null && (
+                    <small>Entrada: {formatCurrency(event.price)}</small>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <Reviews barId={bar.id} />
     </main>
