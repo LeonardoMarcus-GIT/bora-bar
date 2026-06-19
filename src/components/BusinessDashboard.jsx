@@ -149,6 +149,7 @@ export default function BusinessDashboard({
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [setupError, setSetupError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [claim, setClaim] = useState({
     barId: "",
     contactName: "",
@@ -177,6 +178,11 @@ export default function BusinessDashboard({
     [access.memberships, bars, pendingBarIds]
   );
 
+  const barsById = useMemo(
+    () => new Map(bars.map((bar) => [bar.id, bar])),
+    [bars]
+  );
+
   useEffect(() => {
     if (!isAuthReady) {
       return;
@@ -200,11 +206,31 @@ export default function BusinessDashboard({
         ""
     }));
 
-    fetchBusinessAccess(user.id)
-      .then((nextAccess) => {
+    async function loadAccess() {
+      try {
+        return await fetchBusinessAccess(user.id);
+      } catch (firstError) {
+        console.warn("Primeira tentativa de acesso ao painel falhou.", firstError);
+        return fetchBusinessAccess(user.id);
+      }
+    }
+
+    loadAccess()
+      .then((nextAccessResult) => {
         if (!isMounted) {
           return;
         }
+
+        const nextAccess = {
+          memberships: nextAccessResult.memberships.map((membership) => ({
+            ...membership,
+            bar: barsById.get(membership.barId) ?? null
+          })),
+          claims: nextAccessResult.claims.map((item) => ({
+            ...item,
+            bar: barsById.get(item.barId) ?? null
+          }))
+        };
 
         setAccess(nextAccess);
         setSelectedBarId((currentBarId) => {
@@ -220,8 +246,9 @@ export default function BusinessDashboard({
           return nextAccess.memberships[0]?.barId ?? "";
         });
       })
-      .catch(() => {
+      .catch((error) => {
         if (isMounted) {
+          console.warn("Nao foi possivel abrir a area do estabelecimento.", error);
           setSetupError(true);
         }
       })
@@ -234,7 +261,7 @@ export default function BusinessDashboard({
     return () => {
       isMounted = false;
     };
-  }, [isAuthReady, onLoginRequired, user]);
+  }, [barsById, isAuthReady, onLoginRequired, reloadKey, user]);
 
   useEffect(() => {
     if (!selectedBarId) {
@@ -292,7 +319,13 @@ export default function BusinessDashboard({
       const nextClaim = await createBarClaim(user.id, claim);
       setAccess((currentAccess) => ({
         ...currentAccess,
-        claims: [nextClaim, ...currentAccess.claims]
+        claims: [
+          {
+            ...nextClaim,
+            bar: barsById.get(nextClaim.barId) ?? null
+          },
+          ...currentAccess.claims
+        ]
       }));
       setClaim((currentClaim) => ({
         ...currentClaim,
@@ -459,11 +492,18 @@ export default function BusinessDashboard({
             Voltar
           </button>
           <p className="section-kicker">Area do estabelecimento</p>
-          <h1>Falta ativar esta area no banco</h1>
+          <h1>Nao foi possivel abrir esta area</h1>
           <p className="business-muted">
-            Rode a versao atualizada do arquivo schema.sql no Supabase para
-            liberar solicitacoes e o painel do bar.
+            Sua conta esta conectada, mas a consulta do painel falhou. Tente
+            novamente para renovar a conexao.
           </p>
+          <button
+            className="primary-action"
+            type="button"
+            onClick={() => setReloadKey((currentKey) => currentKey + 1)}
+          >
+            Tentar novamente
+          </button>
         </section>
       </main>
     );

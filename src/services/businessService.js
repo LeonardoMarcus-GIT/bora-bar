@@ -6,20 +6,6 @@ function ensureSupabase() {
   }
 }
 
-function mapBarSummary(bar) {
-  if (!bar) {
-    return null;
-  }
-
-  return {
-    id: bar.id,
-    name: bar.name,
-    image: bar.image_url,
-    city: bar.city,
-    neighborhood: bar.neighborhood
-  };
-}
-
 function mapManagedBar(bar) {
   return {
     id: bar.id,
@@ -86,15 +72,13 @@ export async function fetchBusinessAccess(userId) {
   const [membershipsResult, claimsResult] = await Promise.all([
     supabase
       .from("bar_members")
-      .select(
-        "bar_id, role, created_at, bars(id, name, image_url, city, neighborhood)"
-      )
+      .select("bar_id, role, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: true }),
     supabase
       .from("bar_claims")
       .select(
-        "id, bar_id, status, contact_name, contact_phone, business_document, message, review_notes, created_at, updated_at, bars(id, name, image_url, city, neighborhood)"
+        "id, bar_id, status, contact_name, contact_phone, business_document, message, review_notes, created_at, updated_at"
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
@@ -112,8 +96,7 @@ export async function fetchBusinessAccess(userId) {
     memberships: membershipsResult.data.map((membership) => ({
       barId: membership.bar_id,
       role: membership.role,
-      createdAt: membership.created_at,
-      bar: mapBarSummary(membership.bars)
+      createdAt: membership.created_at
     })),
     claims: claimsResult.data.map((claim) => ({
       id: claim.id,
@@ -125,8 +108,7 @@ export async function fetchBusinessAccess(userId) {
       message: claim.message ?? "",
       reviewNotes: claim.review_notes ?? "",
       createdAt: claim.created_at,
-      updatedAt: claim.updated_at,
-      bar: mapBarSummary(claim.bars)
+      updatedAt: claim.updated_at
     }))
   };
 }
@@ -145,7 +127,7 @@ export async function createBarClaim(userId, claim) {
       message: claim.message.trim() || null
     })
     .select(
-      "id, bar_id, status, contact_name, contact_phone, business_document, message, review_notes, created_at, updated_at, bars(id, name, image_url, city, neighborhood)"
+      "id, bar_id, status, contact_name, contact_phone, business_document, message, review_notes, created_at, updated_at"
     )
     .single();
 
@@ -163,8 +145,7 @@ export async function createBarClaim(userId, claim) {
     message: data.message ?? "",
     reviewNotes: data.review_notes ?? "",
     createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    bar: mapBarSummary(data.bars)
+    updatedAt: data.updated_at
   };
 }
 
