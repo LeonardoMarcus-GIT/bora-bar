@@ -1,4 +1,8 @@
 import { isSupabaseConfigured, supabase } from "./supabaseClient.js";
+import {
+  formatFullAddress,
+  normalizeAddress
+} from "./addressService.js";
 
 function ensureSupabase() {
   if (!isSupabaseConfigured) {
@@ -6,7 +10,44 @@ function ensureSupabase() {
   }
 }
 
+function parseLegacyAddress(address) {
+  const match = String(address ?? "").match(
+    /^(.+?),\s*([^,-]+)\s*-\s*([^,]+),\s*(.+)$/
+  );
+
+  if (!match) {
+    return {};
+  }
+
+  return {
+    street: match[1].trim(),
+    addressNumber: match[2].trim(),
+    neighborhood: match[3].trim(),
+    city: match[4].trim()
+  };
+}
+
 function mapManagedBar(bar) {
+  const legacyAddress = parseLegacyAddress(bar.address);
+  const inferredState =
+    (bar.city ?? legacyAddress.city) === "Volta Redonda"
+      ? { state: "Rio de Janeiro", stateCode: "RJ" }
+      : {};
+  const structuredAddress = normalizeAddress({
+    ...legacyAddress,
+    ...inferredState,
+    addressComplement: bar.address_complement,
+    addressNumber: bar.address_number ?? legacyAddress.addressNumber,
+    city: bar.city ?? legacyAddress.city,
+    latitude: bar.latitude,
+    longitude: bar.longitude,
+    neighborhood: bar.neighborhood ?? legacyAddress.neighborhood,
+    postalCode: bar.postal_code,
+    state: bar.state ?? inferredState.state,
+    stateCode: bar.state_code ?? inferredState.stateCode,
+    street: bar.street ?? legacyAddress.street
+  });
+
   return {
     id: bar.id,
     name: bar.name,
@@ -16,6 +57,7 @@ function mapManagedBar(bar) {
     isOpen: Boolean(bar.is_open),
     priceLevel: bar.price_level,
     address: bar.address,
+    ...structuredAddress,
     hours: bar.hours,
     phone: bar.phone,
     description: bar.description,
@@ -194,6 +236,9 @@ export async function fetchManagedBarData(barId) {
 
 export async function updateManagedBar(barId, bar) {
   ensureSupabase();
+  const structuredAddress = normalizeAddress(bar);
+  const publicAddress =
+    formatFullAddress(structuredAddress) || String(bar.address ?? "").trim();
 
   const { data, error } = await supabase
     .from("bars")
@@ -202,9 +247,17 @@ export async function updateManagedBar(barId, bar) {
       neighborhood: bar.neighborhood.trim(),
       city: bar.city.trim(),
       image_url: bar.image.trim(),
+      latitude: structuredAddress.latitude,
+      longitude: structuredAddress.longitude,
       is_open: bar.isOpen,
       price_level: bar.priceLevel,
-      address: bar.address.trim(),
+      address: publicAddress,
+      postal_code: structuredAddress.postalCode || null,
+      street: structuredAddress.street || null,
+      address_number: structuredAddress.addressNumber || null,
+      address_complement: structuredAddress.addressComplement || null,
+      state: structuredAddress.state || null,
+      state_code: structuredAddress.stateCode || null,
       hours: bar.hours.trim(),
       phone: bar.phone.trim(),
       description: bar.description.trim(),

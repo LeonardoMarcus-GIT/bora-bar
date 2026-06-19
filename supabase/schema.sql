@@ -15,6 +15,12 @@ create table if not exists public.bars (
   price_level text not null default '$$',
   promotion text not null default '',
   address text not null,
+  postal_code text,
+  street text,
+  address_number text,
+  address_complement text,
+  state text,
+  state_code text,
   hours text not null,
   phone text not null,
   description text not null,
@@ -144,6 +150,24 @@ add column if not exists longitude numeric(10, 7);
 
 alter table public.bars
 add column if not exists is_active boolean not null default true;
+
+alter table public.bars
+add column if not exists postal_code text;
+
+alter table public.bars
+add column if not exists street text;
+
+alter table public.bars
+add column if not exists address_number text;
+
+alter table public.bars
+add column if not exists address_complement text;
+
+alter table public.bars
+add column if not exists state text;
+
+alter table public.bars
+add column if not exists state_code text;
 
 alter table public.profiles
 add column if not exists state text;
@@ -388,9 +412,17 @@ grant update (
   neighborhood,
   city,
   image_url,
+  latitude,
+  longitude,
   is_open,
   price_level,
   address,
+  postal_code,
+  street,
+  address_number,
+  address_complement,
+  state,
+  state_code,
   hours,
   phone,
   description,
@@ -703,6 +735,9 @@ on public.bars (city, neighborhood);
 
 create index if not exists bars_coordinates_idx
 on public.bars (latitude, longitude);
+
+create index if not exists bars_postal_code_idx
+on public.bars (postal_code);
 
 create index if not exists reviews_bar_created_idx
 on public.reviews (bar_id, created_at desc);

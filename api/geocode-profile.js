@@ -17,21 +17,37 @@ function toNullableNumber(value) {
   return Number.isFinite(numberValue) ? numberValue : null;
 }
 
-function buildQuery(address) {
-  const parts = [
-    cleanPostalCode(address.postalCode),
-    cleanText(address.neighborhood),
-    cleanText(address.city),
-    cleanText(address.stateCode || address.state),
-    "Brasil"
-  ].filter(Boolean);
+function joinQuery(parts) {
+  return [...parts.filter(Boolean), "Brasil"].join(", ");
+}
 
-  return parts.join(", ");
+function buildQueries(address) {
+  const postalCode = cleanPostalCode(address.postalCode);
+  const street = cleanText(address.street);
+  const streetWithNumber = [street, cleanText(address.addressNumber)]
+    .filter(Boolean)
+    .join(", ");
+  const neighborhood = cleanText(address.neighborhood);
+  const city = cleanText(address.city);
+  const state = cleanText(address.stateCode || address.state);
+
+  return [
+    joinQuery([postalCode, streetWithNumber, neighborhood, city, state]),
+    joinQuery([street, neighborhood, city, state]),
+    joinQuery([postalCode, city, state]),
+    joinQuery([neighborhood, city, state]),
+    joinQuery([city, state])
+  ].filter(
+    (query, index, queries) =>
+      query !== "Brasil" && queries.indexOf(query) === index
+  );
 }
 
 function buildCacheKey(address) {
   return [
     cleanPostalCode(address.postalCode),
+    cleanText(address.street).toLowerCase(),
+    cleanText(address.addressNumber).toLowerCase(),
     cleanText(address.neighborhood).toLowerCase(),
     cleanText(address.city).toLowerCase(),
     cleanText(address.stateCode || address.state).toLowerCase()
@@ -78,33 +94,41 @@ async function fetchNominatimLocation(address) {
     return cached.location;
   }
 
-  const query = buildQuery(address);
+  const queries = buildQueries(address);
 
-  if (!query || query === "Brasil") {
+  if (queries.length === 0) {
     return null;
   }
 
-  await waitForRateLimit();
+  let firstResult = null;
 
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("format", "jsonv2");
-  url.searchParams.set("limit", "1");
-  url.searchParams.set("countrycodes", "br");
-  url.searchParams.set("q", query);
+  for (const query of queries) {
+    await waitForRateLimit();
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "BoraBar/1.0 (https://bora-bar-three.vercel.app)"
+    const url = new URL("https://nominatim.openstreetmap.org/search");
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("limit", "1");
+    url.searchParams.set("countrycodes", "br");
+    url.searchParams.set("q", query);
+
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "BoraBar/1.0 (https://bora-bar-three.vercel.app)"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Nominatim request failed.");
     }
-  });
 
-  if (!response.ok) {
-    throw new Error("Nominatim request failed.");
+    const results = await response.json();
+    firstResult = results[0] ?? null;
+
+    if (firstResult) {
+      break;
+    }
   }
-
-  const results = await response.json();
-  const firstResult = results[0];
 
   if (!firstResult) {
     return null;
@@ -199,7 +223,10 @@ export default async function handler(request, response) {
       return;
     }
 
-    const profileSaved = await saveProfileLocation(request, address, location);
+    const profileSaved =
+      address.saveProfile === false
+        ? false
+        : await saveProfileLocation(request, address, location);
 
     sendJson(response, 200, {
       location,

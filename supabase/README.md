@@ -83,3 +83,13 @@ o motivo.
 
 As policies RLS permitem alteracoes apenas em estabelecimentos vinculados ao
 usuario nas funcoes `owner` ou `manager`.
+
+## 8. Ativar endereco por CEP para estabelecimentos
+
+Em projetos que ja rodaram o `schema.sql`, execute uma vez o arquivo
+`supabase/business-address-migration.sql` no SQL Editor.
+
+Essa migracao adiciona CEP, rua, numero, complemento, estado e UF aos bares sem
+apagar nenhum dado existente. Depois disso, o responsavel pode consultar o CEP,
+corrigir qualquer campo manualmente e salvar a nova localizacao do
+estabelecimento.

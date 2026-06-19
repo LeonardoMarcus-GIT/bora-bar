@@ -1,6 +1,8 @@
 const IBGE_BASE_URL = "https://servicodados.ibge.gov.br/api/v1/localidades";
 
 export const emptyAddress = {
+  addressComplement: "",
+  addressNumber: "",
   city: "",
   cityIbgeCode: "",
   latitude: null,
@@ -10,7 +12,8 @@ export const emptyAddress = {
   neighborhood: "",
   postalCode: "",
   state: "",
-  stateCode: ""
+  stateCode: "",
+  street: ""
 };
 
 export function onlyDigits(value) {
@@ -27,29 +30,41 @@ export function formatCep(value) {
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
+function toNullableCoordinate(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
 export function normalizeAddress(address = {}) {
   return {
     ...emptyAddress,
     ...address,
+    addressComplement: String(
+      address.addressComplement ?? address.address_complement ?? ""
+    ),
+    addressNumber: String(
+      address.addressNumber ?? address.address_number ?? ""
+    ),
     cityIbgeCode: String(
       address.cityIbgeCode ?? address.city_ibge_code ?? ""
     ),
-    latitude: Number.isFinite(Number(address.latitude))
-      ? Number(address.latitude)
-      : null,
+    latitude: toNullableCoordinate(address.latitude),
     locationSource: String(
       address.locationSource ?? address.location_source ?? ""
     ),
     locationUpdatedAt: String(
       address.locationUpdatedAt ?? address.location_updated_at ?? ""
     ),
-    longitude: Number.isFinite(Number(address.longitude))
-      ? Number(address.longitude)
-      : null,
+    longitude: toNullableCoordinate(address.longitude),
     neighborhood: String(address.neighborhood ?? ""),
     postalCode: formatCep(address.postalCode ?? address.postal_code ?? ""),
     state: String(address.state ?? ""),
-    stateCode: String(address.stateCode ?? address.state_code ?? "").toUpperCase()
+    stateCode: String(address.stateCode ?? address.state_code ?? "").toUpperCase(),
+    street: String(address.street ?? "")
   };
 }
 
@@ -58,6 +73,7 @@ export function hasAddressData(address = {}) {
 
   return Boolean(
     onlyDigits(normalizedAddress.postalCode) ||
+      normalizedAddress.street ||
       normalizedAddress.city ||
       normalizedAddress.neighborhood ||
       normalizedAddress.stateCode
@@ -77,8 +93,35 @@ export function toProfilePayload(address = {}) {
     neighborhood: normalizedAddress.neighborhood.trim(),
     postalCode: normalizedAddress.postalCode,
     state: normalizedAddress.state.trim(),
-    stateCode: normalizedAddress.stateCode
+    stateCode: normalizedAddress.stateCode,
+    street: normalizedAddress.street.trim(),
+    addressNumber: normalizedAddress.addressNumber.trim(),
+    addressComplement: normalizedAddress.addressComplement.trim()
   };
+}
+
+export function formatFullAddress(address = {}) {
+  const normalizedAddress = normalizeAddress(address);
+  const streetLine = [
+    normalizedAddress.street,
+    normalizedAddress.addressNumber
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const complement = normalizedAddress.addressComplement
+    ? ` - ${normalizedAddress.addressComplement}`
+    : "";
+  const locationLine = [
+    normalizedAddress.neighborhood,
+    normalizedAddress.city,
+    normalizedAddress.stateCode
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  return [streetLine ? `${streetLine}${complement}` : "", locationLine]
+    .filter(Boolean)
+    .join(" - ");
 }
 
 export async function fetchAddressByCep(cep) {
@@ -106,7 +149,8 @@ export async function fetchAddressByCep(cep) {
     neighborhood: data.bairro ?? "",
     postalCode: data.cep ?? digits,
     state: data.estado ?? "",
-    stateCode: data.uf ?? ""
+    stateCode: data.uf ?? "",
+    street: data.logradouro ?? ""
   });
 }
 
@@ -147,7 +191,11 @@ export async function fetchCitiesByState(stateCode) {
   }));
 }
 
-export async function geocodeAddress(address, accessToken) {
+export async function geocodeAddress(
+  address,
+  accessToken,
+  { saveProfile = Boolean(accessToken) } = {}
+) {
   if (!hasAddressData(address)) {
     return {
       location: null,
@@ -161,7 +209,10 @@ export async function geocodeAddress(address, accessToken) {
       "Content-Type": "application/json",
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
     },
-    body: JSON.stringify(toProfilePayload(address))
+    body: JSON.stringify({
+      ...toProfilePayload(address),
+      saveProfile
+    })
   });
 
   if (!response.ok) {

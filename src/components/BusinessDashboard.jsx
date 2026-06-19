@@ -4,7 +4,6 @@ import {
   CalendarDays,
   Clock3,
   Image,
-  MapPin,
   Phone,
   Plus,
   Save,
@@ -14,7 +13,9 @@ import {
   UtensilsCrossed
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import BarAddressFields from "./BarAddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { geocodeAddress } from "../services/addressService.js";
 import {
   createBarClaim,
   fetchBusinessAccess,
@@ -140,7 +141,7 @@ export default function BusinessDashboard({
   onDataChanged,
   onLoginRequired
 }) {
-  const { isAuthReady, user } = useAuth();
+  const { isAuthReady, session, user } = useAuth();
   const [access, setAccess] = useState({ memberships: [], claims: [] });
   const [selectedBarId, setSelectedBarId] = useState("");
   const [managedData, setManagedData] = useState(null);
@@ -428,8 +429,31 @@ export default function BusinessDashboard({
     setFeedback("");
 
     try {
+      let successMessage = "Alteracoes salvas e publicadas.";
+
       if (activeTab === "overview") {
-        const nextBar = await updateManagedBar(selectedBarId, managedData.bar);
+        let barToSave = managedData.bar;
+
+        try {
+          const { location } = await geocodeAddress(
+            barToSave,
+            session?.access_token,
+            { saveProfile: false }
+          );
+
+          if (location) {
+            barToSave = {
+              ...barToSave,
+              latitude: location.latitude,
+              longitude: location.longitude
+            };
+          }
+        } catch {
+          successMessage =
+            "Endereco salvo. Nao foi possivel atualizar a distancia agora.";
+        }
+
+        const nextBar = await updateManagedBar(selectedBarId, barToSave);
         setManagedData((currentData) => ({ ...currentData, bar: nextBar }));
       }
 
@@ -459,7 +483,7 @@ export default function BusinessDashboard({
         );
       }
 
-      setFeedback("Alteracoes salvas e publicadas.");
+      setFeedback(successMessage);
       onDataChanged?.();
     } catch {
       setFeedback("Nao foi possivel salvar agora. Verifique os campos e tente novamente.");
@@ -728,25 +752,10 @@ export default function BusinessDashboard({
                   onChange={(value) => updateBar({ description: value })}
                 />
 
-                <BusinessField
-                  label="Endereco"
-                  icon={MapPin}
-                  value={managedData.bar.address}
-                  onChange={(value) => updateBar({ address: value })}
+                <BarAddressFields
+                  address={managedData.bar}
+                  onChange={(nextAddress) => updateBar(nextAddress)}
                 />
-
-                <div className="profile-grid">
-                  <BusinessField
-                    label="Bairro"
-                    value={managedData.bar.neighborhood}
-                    onChange={(value) => updateBar({ neighborhood: value })}
-                  />
-                  <BusinessField
-                    label="Cidade"
-                    value={managedData.bar.city}
-                    onChange={(value) => updateBar({ city: value })}
-                  />
-                </div>
 
                 <BusinessField
                   label="Horario de funcionamento"
