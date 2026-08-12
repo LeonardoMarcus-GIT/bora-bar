@@ -2010,39 +2010,49 @@ p {
   margin: 0;
 }
 
-.business-switch-row input {
+.business-editor .business-switch-row > input,
+.business-editor .publish-status-switch > input,
+.business-editor .menu-availability-switch > input {
   appearance: none;
-  width: 42px;
-  height: 24px;
-  margin: 0;
+  display: grid;
+  width: 28px !important;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px !important;
+  margin: 0 !important;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none !important;
   cursor: pointer;
   position: relative;
-  transition: background 180ms ease, border-color 180ms ease;
+  place-items: center;
+  padding: 0 !important;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
-.business-switch-row input::after {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--ink);
-  content: "";
-  transition: transform 180ms ease;
+.business-editor .business-switch-row > input::after,
+.business-editor .publish-status-switch > input::after,
+.business-editor .menu-availability-switch > input::after {
+  color: transparent;
+  content: "✓";
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1;
 }
 
-.business-switch-row input:checked {
-  border-color: rgba(255, 199, 68, 0.78);
-  background: var(--gold);
+.business-editor .business-switch-row > input:checked,
+.business-editor .publish-status-switch > input:checked,
+.business-editor .menu-availability-switch > input:checked {
+  border-color: rgba(66, 184, 115, 0.8);
+  background: rgba(66, 184, 115, 0.22);
+  color: #9de0b9;
 }
 
-.business-switch-row input:checked::after {
-  transform: translateX(18px);
-  background: #171713;
+.business-editor .business-switch-row > input:checked::after,
+.business-editor .publish-status-switch > input:checked::after,
+.business-editor .menu-availability-switch > input:checked::after {
+  color: #9de0b9;
 }
 
 .business-switch-row input,
@@ -2282,42 +2292,6 @@ p {
   white-space: nowrap;
 }
 
-.menu-availability-switch input {
-  appearance: none;
-  width: 36px;
-  height: 21px;
-  min-height: 0 !important;
-  margin: 0;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  cursor: pointer;
-  position: relative;
-  transition: background 180ms ease, border-color 180ms ease;
-}
-
-.menu-availability-switch input::after {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--ink);
-  content: "";
-  transition: transform 180ms ease;
-}
-
-.menu-availability-switch input:checked {
-  border-color: rgba(255, 199, 68, 0.78);
-  background: var(--gold);
-}
-
-.menu-availability-switch input:checked::after {
-  transform: translateX(15px);
-  background: #171713;
-}
-
 .compact-check {
   display: flex !important;
   grid-column: auto;
@@ -2335,42 +2309,6 @@ p {
   color: var(--muted);
   font-size: 0.84rem;
   white-space: nowrap;
-}
-
-.publish-status-switch input {
-  appearance: none;
-  width: 36px;
-  height: 21px;
-  min-height: 0 !important;
-  margin: 0;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  cursor: pointer;
-  position: relative;
-  transition: background 180ms ease, border-color 180ms ease;
-}
-
-.publish-status-switch input::after {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--ink);
-  content: "";
-  transition: transform 180ms ease;
-}
-
-.publish-status-switch input:checked {
-  border-color: rgba(255, 199, 68, 0.78);
-  background: var(--gold);
-}
-
-.publish-status-switch input:checked::after {
-  transform: translateX(15px);
-  background: #171713;
 }
 
 .icon-delete,
@@ -3188,20 +3126,6 @@ p {
     border: 0;
     background: transparent;
     padding: 0;
-  }
-
-  .publish-status-switch input {
-    width: 34px;
-    height: 20px;
-  }
-
-  .publish-status-switch input::after {
-    width: 12px;
-    height: 12px;
-  }
-
-  .publish-status-switch input:checked::after {
-    transform: translateX(14px);
   }
 
   .timed-item-add {
