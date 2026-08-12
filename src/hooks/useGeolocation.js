@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "bora-bar-user-location";
+const STORAGE_KEY = "bora-bar-user-location-v2";
+const CACHE_MAX_AGE_MS = 30 * 60 * 1000;
+const MAX_ACCEPTED_ACCURACY_METERS = 1000;
 
 function readCachedLocation() {
   try {
     const cachedLocation = JSON.parse(localStorage.getItem(STORAGE_KEY));
 
+    const isFresh = Date.now() - Number(cachedLocation?.timestamp) <= CACHE_MAX_AGE_MS;
+    const hasUsableAccuracy =
+      Number.isFinite(cachedLocation?.accuracy) &&
+      cachedLocation.accuracy <= MAX_ACCEPTED_ACCURACY_METERS;
+
     if (
+      isFresh &&
+      hasUsableAccuracy &&
       Number.isFinite(cachedLocation?.latitude) &&
       Number.isFinite(cachedLocation?.longitude)
     ) {
@@ -48,6 +57,7 @@ export function useGeolocation() {
       return;
     }
 
+    setCoordinates(null);
     setStatus("loading");
     setErrorMessage("");
 
@@ -59,6 +69,14 @@ export function useGeolocation() {
           longitude: position.coords.longitude,
           timestamp: Date.now()
         };
+
+        if (nextLocation.accuracy > MAX_ACCEPTED_ACCURACY_METERS) {
+          setStatus("unavailable");
+          setErrorMessage(
+            "A localizacao encontrada esta muito imprecisa. Tente novamente em um local aberto."
+          );
+          return;
+        }
 
         setCoordinates(nextLocation);
         setStatus("granted");
@@ -75,8 +93,8 @@ export function useGeolocation() {
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 5 * 60 * 1000,
-        timeout: 10000
+        maximumAge: 0,
+        timeout: 20000
       }
     );
   }, []);
@@ -85,7 +103,11 @@ export function useGeolocation() {
     () => ({
       coordinates,
       errorMessage,
-      hasLocation: Boolean(coordinates),
+      hasLocation: Boolean(
+        coordinates &&
+          Number.isFinite(coordinates.accuracy) &&
+          coordinates.accuracy <= MAX_ACCEPTED_ACCURACY_METERS
+      ),
       isLoadingLocation: status === "loading",
       requestLocation,
       status

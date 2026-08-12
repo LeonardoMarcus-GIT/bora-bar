@@ -19,6 +19,7 @@ import { calculateDistanceKm } from "./utils/geo.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
+const MAX_DISCOVERY_DISTANCE_KM = 20;
 
 function getRoute() {
   const hash = window.location.hash.replace("#", "");
@@ -104,14 +105,20 @@ function getProfileLocation(profile = {}, metadata = {}) {
     return null;
   }
 
+  const source =
+    profile.locationSource ??
+    profile.location_source ??
+    metadata.location_source ??
+    metadata.locationSource;
+
+  if (source !== "profile_address_verified") {
+    return null;
+  }
+
   return {
     latitude,
     longitude,
-    source:
-      profile.locationSource ??
-      profile.location_source ??
-      metadata.location_source ??
-      metadata.locationSource
+    source
   };
 }
 
@@ -358,12 +365,15 @@ export default function App() {
         !activeFilters.includes("promo") || Boolean(bar.promotion);
       const matchesFavorite =
         !showFavoritesOnly || favoriteIds.includes(bar.id);
+      const isWithinDiscoveryRange =
+        !bar.hasRealDistance || bar.distanceKm <= MAX_DISCOVERY_DISTANCE_KM;
 
       return (
         matchesSearch &&
         matchesOpen &&
         matchesPromo &&
-        matchesFavorite
+        matchesFavorite &&
+        isWithinDiscoveryRange
       );
     });
 

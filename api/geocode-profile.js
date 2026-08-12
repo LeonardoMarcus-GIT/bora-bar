@@ -8,6 +8,13 @@ function cleanText(value) {
   return String(value ?? "").trim();
 }
 
+function normalizeComparisonText(value) {
+  return cleanText(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function cleanPostalCode(value) {
   return cleanText(value).replace(/\D/g, "").slice(0, 8);
 }
@@ -52,6 +59,43 @@ function buildCacheKey(address) {
     cleanText(address.city).toLowerCase(),
     cleanText(address.stateCode || address.state).toLowerCase()
   ].join("|");
+}
+
+function isResultForAddress(result, address) {
+  const details = result.address ?? {};
+  const expectedCity = normalizeComparisonText(address.city);
+  const expectedState = normalizeComparisonText(address.state);
+  const expectedStateCode = cleanText(address.stateCode).toUpperCase();
+  const expectedPostalCode = cleanPostalCode(address.postalCode);
+  const resultCities = [
+    details.city,
+    details.town,
+    details.municipality,
+    details.village,
+    details.county
+  ]
+    .map(normalizeComparisonText)
+    .filter(Boolean);
+  const hasMatchingCity =
+    !expectedCity || resultCities.some((city) => city === expectedCity);
+  const resultState = normalizeComparisonText(details.state);
+  const resultStateCode = cleanText(details["ISO3166-2-lvl4"]).toUpperCase();
+  const hasMatchingState =
+    (!expectedState && !expectedStateCode) ||
+    resultState === expectedState ||
+    resultStateCode === `BR-${expectedStateCode}`;
+  const resultPostalCode = cleanPostalCode(details.postcode);
+  const hasMatchingPostalCode =
+    !expectedPostalCode ||
+    !resultPostalCode ||
+    resultPostalCode === expectedPostalCode;
+
+  return (
+    cleanText(details.country_code).toLowerCase() === "br" &&
+    hasMatchingCity &&
+    hasMatchingState &&
+    hasMatchingPostalCode
+  );
 }
 
 function sendJson(response, statusCode, payload) {
@@ -107,6 +151,7 @@ async function fetchNominatimLocation(address) {
 
     const url = new URL("https://nominatim.openstreetmap.org/search");
     url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("addressdetails", "1");
     url.searchParams.set("limit", "1");
     url.searchParams.set("countrycodes", "br");
     url.searchParams.set("q", query);
@@ -123,7 +168,7 @@ async function fetchNominatimLocation(address) {
     }
 
     const results = await response.json();
-    firstResult = results[0] ?? null;
+    firstResult = results.find((result) => isResultForAddress(result, address)) ?? null;
 
     if (firstResult) {
       break;
@@ -137,7 +182,7 @@ async function fetchNominatimLocation(address) {
   const location = {
     latitude: toNullableNumber(firstResult.lat),
     longitude: toNullableNumber(firstResult.lon),
-    source: "profile_address",
+    source: "profile_address_verified",
     updatedAt: new Date().toISOString()
   };
 
