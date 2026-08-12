@@ -16,13 +16,15 @@ import {
   Store,
   Tag,
   Trash2,
+  Upload,
   UtensilsCrossed
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BarAddressFields from "./BarAddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
 import { fetchBarMetrics } from "../services/analyticsService.js";
+import { uploadBusinessCoverImage } from "../services/businessImageService.js";
 import {
   createBarClaim,
   fetchBusinessAccess,
@@ -143,6 +145,47 @@ function getClaimStatusLabel(status) {
   return "Em analise";
 }
 
+const WEEK_DAYS = [
+  { id: "mon", label: "Seg" },
+  { id: "tue", label: "Ter" },
+  { id: "wed", label: "Qua" },
+  { id: "thu", label: "Qui" },
+  { id: "fri", label: "Sex" },
+  { id: "sat", label: "Sab" },
+  { id: "sun", label: "Dom" }
+];
+
+function parseHours(hours) {
+  const text = String(hours ?? "");
+  const match = text.match(/(\d{1,2})h\s*(?:as|a|-)\s*(\d{1,2})h/i);
+  const dayText = text.split(":")[0].toLowerCase();
+  const selectedDays = dayText.includes("todos")
+    ? WEEK_DAYS.map((day) => day.id)
+    : WEEK_DAYS.filter((day) => dayText.includes(day.label.toLowerCase())).map(
+        (day) => day.id
+      );
+
+  return {
+    days: selectedDays.length ? selectedDays : WEEK_DAYS.map((day) => day.id),
+    opensAt: `${String(match ? Number(match[1]) : 16).padStart(2, "0")}:00`,
+    closesAt: `${String(match ? Number(match[2]) : 1).padStart(2, "0")}:00`
+  };
+}
+
+function formatBusinessHours({ days, opensAt, closesAt }) {
+  if (!days.length) {
+    return "Horario a confirmar";
+  }
+
+  const dayLabels = WEEK_DAYS.filter((day) => days.includes(day.id)).map(
+    (day) => day.label
+  );
+  const dayText = days.length === WEEK_DAYS.length ? "Todos os dias" : dayLabels.join(", ");
+  const openHour = opensAt?.slice(0, 2) || "16";
+  const closeHour = closesAt?.slice(0, 2) || "01";
+  return `${dayText}: ${openHour}h-${closeHour}h`;
+}
+
 export default function BusinessDashboard({
   bars,
   onBack,
@@ -158,6 +201,7 @@ export default function BusinessDashboard({
   const [metrics, setMetrics] = useState({ available: false, days: 30, totals: {} });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [setupError, setSetupError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -383,6 +427,34 @@ export default function BusinessDashboard({
       ...currentData,
       bar: { ...currentData.bar, ...patch }
     }));
+  }
+
+  async function handleCoverImageSelected(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || !selectedBarId) {
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setFeedback("");
+
+    try {
+      const imageUrl = await uploadBusinessCoverImage(selectedBarId, file);
+      updateBar({ image: imageUrl });
+      setFeedback("Foto pronta. Salve o perfil publico para publicar a alteracao.");
+    } catch (error) {
+      if (error?.message === "INVALID_IMAGE_TYPE") {
+        setFeedback("Escolha uma imagem JPG, PNG ou WebP.");
+      } else if (error?.message === "IMAGE_TOO_LARGE") {
+        setFeedback("A imagem deve ter no maximo 8 MB.");
+      } else {
+        setFeedback("Nao foi possivel enviar a imagem agora. Tente novamente.");
+      }
+    } finally {
+      setIsUploadingImage(false);
+    }
   }
 
   function updateCategory(categoryId, patch) {
@@ -808,18 +880,16 @@ export default function BusinessDashboard({
                   onChange={(nextAddress) => updateBar(nextAddress)}
                 />
 
-                <BusinessField
-                  label="Horario de funcionamento"
-                  icon={Clock3}
+                <BusinessHoursEditor
                   value={managedData.bar.hours}
-                  onChange={(value) => updateBar({ hours: value })}
+                  onChange={(hours) => updateBar({ hours })}
                 />
 
-                <BusinessField
-                  label="URL da imagem principal"
-                  icon={Image}
-                  value={managedData.bar.image}
-                  onChange={(value) => updateBar({ image: value })}
+                <BusinessCoverImagePicker
+                  image={managedData.bar.image}
+                  isUploading={isUploadingImage}
+                  onFileSelected={handleCoverImageSelected}
+                  onUrlChange={(value) => updateBar({ image: value })}
                 />
 
                 <div className="profile-grid">
@@ -1167,6 +1237,129 @@ function BusinessField({
         )}
       </div>
     </label>
+  );
+}
+
+function BusinessCoverImagePicker({ image, isUploading, onFileSelected, onUrlChange }) {
+  const inputRef = useRef(null);
+
+  return (
+    <section className="cover-image-editor">
+      <div className="cover-image-heading">
+        <div>
+          <span>Foto principal</span>
+          <small>Mostre o ambiente que mais representa seu estabelecimento.</small>
+        </div>
+        <button
+          className="secondary-action cover-image-upload"
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+        >
+          <Upload size={17} aria-hidden="true" />
+          {isUploading ? "Enviando foto" : "Escolher foto"}
+        </button>
+      </div>
+
+      <input
+        ref={inputRef}
+        className="visually-hidden"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={onFileSelected}
+      />
+
+      <div className="cover-image-preview">
+        {image ? <img src={image} alt="Previa da foto principal" /> : <Image size={24} aria-hidden="true" />}
+      </div>
+
+      <label className="cover-image-url">
+        <span>Ou use uma URL de imagem</span>
+        <div className="field-with-icon">
+          <Image size={18} aria-hidden="true" />
+          <input value={image} onChange={(event) => onUrlChange(event.target.value)} />
+        </div>
+      </label>
+    </section>
+  );
+}
+
+function BusinessHoursEditor({ value, onChange }) {
+  const [schedule, setSchedule] = useState(() => parseHours(value));
+
+  useEffect(() => {
+    setSchedule(parseHours(value));
+  }, [value]);
+
+  function updateSchedule(patch) {
+    setSchedule((currentSchedule) => {
+      const nextSchedule = { ...currentSchedule, ...patch };
+      onChange(formatBusinessHours(nextSchedule));
+      return nextSchedule;
+    });
+  }
+
+  function toggleDay(dayId) {
+    updateSchedule({
+      days: schedule.days.includes(dayId)
+        ? schedule.days.filter((id) => id !== dayId)
+        : [...schedule.days, dayId]
+    });
+  }
+
+  const allDaysSelected = schedule.days.length === WEEK_DAYS.length;
+
+  return (
+    <section className="business-hours-editor">
+      <div className="hours-editor-heading">
+        <div>
+          <span>Horario de funcionamento</span>
+          <small>{formatBusinessHours(schedule)}</small>
+        </div>
+        <Clock3 size={20} aria-hidden="true" />
+      </div>
+
+      <div className="hours-days" role="group" aria-label="Dias de funcionamento">
+        <button
+          className={allDaysSelected ? "is-active" : ""}
+          type="button"
+          onClick={() =>
+            updateSchedule({ days: allDaysSelected ? [] : WEEK_DAYS.map((day) => day.id) })
+          }
+        >
+          Todos
+        </button>
+        {WEEK_DAYS.map((day) => (
+          <button
+            className={schedule.days.includes(day.id) ? "is-active" : ""}
+            type="button"
+            key={day.id}
+            onClick={() => toggleDay(day.id)}
+          >
+            {day.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="hours-time-fields">
+        <label>
+          <span>Abre</span>
+          <input
+            type="time"
+            value={schedule.opensAt}
+            onChange={(event) => updateSchedule({ opensAt: event.target.value })}
+          />
+        </label>
+        <label>
+          <span>Fecha</span>
+          <input
+            type="time"
+            value={schedule.closesAt}
+            onChange={(event) => updateSchedule({ closesAt: event.target.value })}
+          />
+        </label>
+      </div>
+    </section>
   );
 }
 
