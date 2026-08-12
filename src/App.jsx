@@ -21,6 +21,10 @@ import { getStartingPrice, normalizeText } from "./utils/format.js";
 const FAVORITES_KEY = "bora-bar-favorites";
 const MAX_DISCOVERY_DISTANCE_KM = 20;
 
+function isWithinDiscoveryRange(bar) {
+  return !bar.hasRealDistance || bar.distanceKm <= MAX_DISCOVERY_DISTANCE_KM;
+}
+
 function getRoute() {
   const hash = window.location.hash.replace("#", "");
   const params = new URLSearchParams(window.location.search);
@@ -302,6 +306,18 @@ export default function App() {
     }
 
     barsWithDistance.forEach((bar) => {
+      if (!isWithinDiscoveryRange(bar)) {
+        return;
+      }
+
+      addSuggestion({
+        type: "bar",
+        value: bar.name,
+        label: bar.name,
+        city: bar.city,
+        bar
+      });
+
       addSuggestion({
         type: "neighborhood",
         value: bar.neighborhood,
@@ -321,14 +337,21 @@ export default function App() {
 
     return [...suggestions.values()]
       .map((suggestion) => {
-        const typeLabel = suggestion.type === "city" ? "Cidade" : "Bairro";
+        const typeLabel =
+          suggestion.type === "bar"
+            ? "Estabelecimento"
+            : suggestion.type === "city"
+              ? "Cidade"
+              : "Bairro";
         const countLabel = `${suggestion.count} ${suggestion.count === 1 ? "bar" : "bares"}`;
 
         return {
           ...suggestion,
           typeLabel,
           detail:
-            suggestion.type === "city"
+            suggestion.type === "bar"
+              ? `${suggestion.city} - ${suggestion.bar.neighborhood}`
+              : suggestion.type === "city"
               ? `${typeLabel} • ${countLabel}`
               : `${typeLabel} em ${suggestion.city} • ${countLabel}`
         };
@@ -344,7 +367,8 @@ export default function App() {
         }
 
         if (a.type !== b.type) {
-          return a.type === "neighborhood" ? -1 : 1;
+          const typeOrder = { bar: 0, neighborhood: 1, city: 2 };
+          return typeOrder[a.type] - typeOrder[b.type];
         }
 
         return a.label.localeCompare(b.label, "pt-BR");
@@ -365,15 +389,12 @@ export default function App() {
         !activeFilters.includes("promo") || Boolean(bar.promotion);
       const matchesFavorite =
         !showFavoritesOnly || favoriteIds.includes(bar.id);
-      const isWithinDiscoveryRange =
-        !bar.hasRealDistance || bar.distanceKm <= MAX_DISCOVERY_DISTANCE_KM;
-
       return (
         matchesSearch &&
         matchesOpen &&
         matchesPromo &&
         matchesFavorite &&
-        isWithinDiscoveryRange
+        isWithinDiscoveryRange(bar)
       );
     });
 
@@ -383,7 +404,7 @@ export default function App() {
       );
     }
 
-    if (activeFilters.includes("near") && hasDistanceLocation) {
+    if (!activeFilters.includes("cheap") && hasDistanceLocation) {
       nextBars = [...nextBars].sort((a, b) => a.distanceKm - b.distanceKm);
     }
 
@@ -422,6 +443,11 @@ export default function App() {
   }
 
   function selectSearchSuggestion(suggestion) {
+    if (suggestion.type === "bar") {
+      selectBar(suggestion.bar);
+      return;
+    }
+
     setSearchTerm(suggestion.value);
     setShowFavoritesOnly(false);
     setActiveFilters((currentFilters) =>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Bell, LocateFixed, MapPin, MapPinned, Navigation, Search } from "lucide-react";
+import { Bell, LocateFixed, MapPin, MapPinned, Navigation, Search, Store } from "lucide-react";
 import logoSrc from "../assets/bora-bar-icon.png";
 import { normalizeText } from "../utils/format.js";
 import { formatDistanceKm } from "../utils/geo.js";
@@ -79,8 +79,8 @@ export default function AppHeader({
           }}
           onFocus={() => setIsSuggestionsOpen(true)}
           onBlur={() => window.setTimeout(() => setIsSuggestionsOpen(false), 120)}
-          placeholder="Cidade ou bairro"
-          aria-label="Buscar por cidade ou bairro"
+          placeholder="Bar, bairro ou cidade"
+          aria-label="Buscar por nome do bar, cidade ou bairro"
           aria-expanded={shouldShowSuggestions}
           aria-controls="search-suggestions"
           autoComplete="off"
@@ -111,7 +111,11 @@ export default function AppHeader({
                 onClick={() => handleSuggestionSelect(suggestion)}
                 role="option"
               >
-                <MapPinned size={16} aria-hidden="true" />
+                {suggestion.type === "bar" ? (
+                  <Store size={16} aria-hidden="true" />
+                ) : (
+                  <MapPinned size={16} aria-hidden="true" />
+                )}
                 <span>
                   <strong>{suggestion.label}</strong>
                   <small>{suggestion.detail}</small>
