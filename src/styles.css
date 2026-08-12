@@ -1996,19 +1996,63 @@ p {
 }
 
 .business-switch-row {
-  align-content: start;
-  min-height: 70px;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
-  padding: 11px 12px;
+  padding: 0 12px;
+}
+
+.business-switch-row > span {
+  margin: 0;
+}
+
+.business-switch-row input {
+  appearance: none;
+  width: 42px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  position: relative;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.business-switch-row input::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink);
+  content: "";
+  transition: transform 180ms ease;
+}
+
+.business-switch-row input:checked {
+  border-color: rgba(255, 199, 68, 0.78);
+  background: var(--gold);
+}
+
+.business-switch-row input:checked::after {
+  transform: translateX(18px);
+  background: #171713;
 }
 
 .business-switch-row input,
 .compact-check input {
+  min-height: 0;
+}
+
+.compact-check input {
   width: 20px;
   height: 20px;
-  min-height: 0;
   accent-color: var(--gold);
 }
 
