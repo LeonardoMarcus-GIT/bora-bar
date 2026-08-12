@@ -2328,6 +2328,51 @@ p {
   white-space: nowrap;
 }
 
+.publish-status-switch {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+  color: var(--muted);
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.publish-status-switch input {
+  appearance: none;
+  width: 36px;
+  height: 21px;
+  min-height: 0 !important;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  position: relative;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.publish-status-switch input::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--ink);
+  content: "";
+  transition: transform 180ms ease;
+}
+
+.publish-status-switch input:checked {
+  border-color: rgba(255, 199, 68, 0.78);
+  background: var(--gold);
+}
+
+.publish-status-switch input:checked::after {
+  transform: translateX(15px);
+  background: #171713;
+}
+
 .icon-delete,
 .business-add-button {
   display: inline-flex;
@@ -3135,6 +3180,35 @@ p {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  .publish-status-switch {
+    justify-content: flex-end;
+    min-height: 30px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .publish-status-switch input {
+    width: 34px;
+    height: 20px;
+  }
+
+  .publish-status-switch input::after {
+    width: 12px;
+    height: 12px;
+  }
+
+  .publish-status-switch input:checked::after {
+    transform: translateX(14px);
+  }
+
+  .timed-item-add {
+    min-height: 38px;
+    margin-top: 4px;
+    padding: 0 11px;
+    font-size: 0.84rem;
   }
 
   .business-save-bar {

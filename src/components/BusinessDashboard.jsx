@@ -1449,20 +1449,21 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
             </label>
           )}
 
-          <label className="compact-check">
+          <label className="publish-status-switch">
             <input
               type="checkbox"
+              aria-label={isEvent ? "Evento publicado" : "Promocao publicada"}
               checked={item.isActive}
               onChange={(event) =>
                 onUpdate(item.id, { isActive: event.target.checked })
               }
             />
-            {isEvent ? "Evento publicado" : "Promocao publicada"}
+            <span>{isEvent ? "Evento publicado" : "Promocao publicada"}</span>
           </label>
         </section>
       ))}
 
-      <button className="secondary-action" type="button" onClick={onAdd}>
+      <button className="secondary-action timed-item-add" type="button" onClick={onAdd}>
         <Plus size={17} aria-hidden="true" />
         {isEvent ? "Novo evento" : "Nova promocao"}
       </button>
