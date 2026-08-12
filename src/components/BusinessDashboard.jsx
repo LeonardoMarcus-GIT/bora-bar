@@ -962,61 +962,70 @@ export default function BusinessDashboard({
                     <div className="business-items">
                       {category.items.map((item) => (
                         <article className="business-item-row" key={item.id}>
-                          <input
-                            aria-label="Nome do item"
-                            value={item.name}
-                            onChange={(event) =>
-                              updateMenuItem(category.id, item.id, {
-                                name: event.target.value
-                              })
-                            }
-                            placeholder="Nome do item"
-                          />
-                          <input
-                            aria-label="Descricao do item"
-                            value={item.description}
-                            onChange={(event) =>
-                              updateMenuItem(category.id, item.id, {
-                                description: event.target.value
-                              })
-                            }
-                            placeholder="Descricao opcional"
-                          />
-                          <input
-                            aria-label="Preco do item"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.price}
-                            onChange={(event) =>
-                              updateMenuItem(category.id, item.id, {
-                                price: event.target.value
-                              })
-                            }
-                            placeholder="R$ 0,00"
-                          />
-                          <label className="compact-check">
+                          <div className="menu-item-main">
                             <input
-                              type="checkbox"
-                              checked={item.isAvailable}
+                              aria-label="Nome do item"
+                              value={item.name}
                               onChange={(event) =>
                                 updateMenuItem(category.id, item.id, {
-                                  isAvailable: event.target.checked
+                                  name: event.target.value
                                 })
                               }
+                              placeholder="Nome do item"
                             />
-                            Disponivel
-                          </label>
-                          <button
-                            className="icon-delete"
-                            type="button"
-                            onClick={() =>
-                              removeMenuItem(category.id, item.id)
-                            }
-                            aria-label={`Remover ${item.name}`}
-                          >
-                            <Trash2 size={17} aria-hidden="true" />
-                          </button>
+                            <button
+                              className="icon-delete"
+                              type="button"
+                              onClick={() =>
+                                removeMenuItem(category.id, item.id)
+                              }
+                              aria-label={`Remover ${item.name}`}
+                            >
+                              <Trash2 size={17} aria-hidden="true" />
+                            </button>
+                          </div>
+
+                          <div className="menu-item-details">
+                            <input
+                              aria-label="Descricao do item"
+                              value={item.description}
+                              onChange={(event) =>
+                                updateMenuItem(category.id, item.id, {
+                                  description: event.target.value
+                                })
+                              }
+                              placeholder="Descricao opcional"
+                            />
+                            <label className="menu-price-field">
+                              <span className="sr-only">Preco do item</span>
+                              <b aria-hidden="true">R$</b>
+                              <input
+                                aria-label="Preco do item"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.price}
+                                onChange={(event) =>
+                                  updateMenuItem(category.id, item.id, {
+                                    price: event.target.value
+                                  })
+                                }
+                                placeholder="0,00"
+                              />
+                            </label>
+                            <label className="menu-availability-switch">
+                              <span>Disponivel</span>
+                              <input
+                                type="checkbox"
+                                checked={item.isAvailable}
+                                onChange={(event) =>
+                                  updateMenuItem(category.id, item.id, {
+                                    isAvailable: event.target.checked
+                                  })
+                                }
+                              />
+                            </label>
+                          </div>
                         </article>
                       ))}
                     </div>
