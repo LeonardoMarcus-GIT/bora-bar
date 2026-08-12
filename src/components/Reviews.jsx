@@ -106,7 +106,7 @@ export default function Reviews({ barId }) {
       setComment("");
       setRating(5);
     } catch {
-      setFeedback("Nao foi possivel enviar agora. Tente novamente em instantes.");
+      setFeedback("Não foi possível enviar agora. Tente novamente em instantes.");
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +125,7 @@ export default function Reviews({ barId }) {
         currentReviews.filter((review) => review.id !== reviewId)
       );
     } catch {
-      setFeedback("Nao foi possivel remover agora. Tente novamente em instantes.");
+      setFeedback("Não foi possível remover agora. Tente novamente em instantes.");
     }
   }
 
@@ -134,7 +134,7 @@ export default function Reviews({ barId }) {
       <div className="section-heading reviews-heading">
         <div>
           <p className="section-kicker">Opiniao da galera</p>
-          <h2>Avaliacoes</h2>
+          <h2>Avaliações</h2>
         </div>
         <span>{averageRating ? `${averageRating} / 5` : "Sem notas"}</span>
       </div>
@@ -166,13 +166,13 @@ export default function Reviews({ barId }) {
             </fieldset>
 
             <label>
-              <span>Comentario</span>
+              <span>Comentário</span>
               <div className="field-with-icon textarea-field">
                 <MessageSquare size={18} aria-hidden="true" />
                 <textarea
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
-                  placeholder="O que voce achou do bar?"
+                  placeholder="O que você achou do bar?"
                   required
                   rows={4}
                 />
@@ -185,7 +185,7 @@ export default function Reviews({ barId }) {
               disabled={isSubmitting}
             >
               <Send size={18} aria-hidden="true" />
-              {isSubmitting ? "Enviando..." : "Enviar avaliacao"}
+              {isSubmitting ? "Enviando..." : "Enviar avaliação"}
             </button>
             {feedback && <p className="form-feedback">{feedback}</p>}
           </form>
@@ -195,9 +195,9 @@ export default function Reviews({ barId }) {
               <MessageSquare size={22} aria-hidden="true" />
             </div>
             <div>
-              <h3>Entre para deixar sua avaliacao</h3>
+              <h3>Entre para deixar sua avaliação</h3>
               <p>
-                As opinioes ficam visiveis para todo mundo, mas so quem tem conta
+                As opiniões ficam visiveis para todo mundo, mas só quem tem conta
                 consegue comentar e dar nota.
               </p>
             </div>
@@ -229,8 +229,8 @@ export default function Reviews({ barId }) {
                       className="delete-review"
                       type="button"
                       onClick={() => handleDelete(review.id)}
-                      aria-label={`Remover avaliacao de ${review.author}`}
-                      title="Remover avaliacao"
+                      aria-label={`Remover avaliação de ${review.author}`}
+                      title="Remover avaliação"
                     >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
@@ -252,7 +252,7 @@ export default function Reviews({ barId }) {
           ) : (
             <div className="review-empty">
               <MessageSquare size={22} aria-hidden="true" />
-              <p>Ainda nao ha avaliacoes para este bar.</p>
+              <p>Ainda não há avaliações para este bar.</p>
             </div>
           )}
         </div>

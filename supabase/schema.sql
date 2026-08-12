@@ -638,7 +638,7 @@ begin
   new.author := coalesce(
     reviewer_name,
     nullif(split_part(coalesce(reviewer_email, ''), '@', 1), ''),
-    'Usuario'
+    'Usuário'
   );
 
   return new;

@@ -43,7 +43,7 @@ export async function fetchReviews(barId) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.warn("Nao foi possivel carregar avaliacoes do Supabase.", error);
+    console.warn("Não foi possível carregar avaliações do Supabase.", error);
     return readStoredReviews(barId);
   }
 
@@ -80,7 +80,7 @@ export async function createReview(barId, review, user) {
     .single();
 
   if (error) {
-    console.warn("Nao foi possivel salvar avaliacao no Supabase.", error);
+    console.warn("Não foi possível salvar avaliação no Supabase.", error);
     throw error;
   }
 
@@ -92,7 +92,7 @@ export async function deleteReview(barId, reviewId) {
     const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
 
     if (error) {
-      console.warn("Nao foi possivel remover avaliacao no Supabase.", error);
+      console.warn("Não foi possível remover avaliação no Supabase.", error);
       throw error;
     }
 

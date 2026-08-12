@@ -22,7 +22,7 @@ function readCachedLocation() {
       return cachedLocation;
     }
   } catch {
-    // O app continua sem localizacao salva.
+    // O app continua sem localização salva.
   }
 
   return null;
@@ -53,7 +53,7 @@ export function useGeolocation() {
   const requestLocation = useCallback(() => {
     if (!("geolocation" in navigator)) {
       setStatus("unavailable");
-      setErrorMessage("Localizacao indisponivel neste navegador.");
+      setErrorMessage("Localização indisponível neste navegador.");
       return;
     }
 
@@ -73,7 +73,7 @@ export function useGeolocation() {
         if (nextLocation.accuracy > MAX_ACCEPTED_ACCURACY_METERS) {
           setStatus("unavailable");
           setErrorMessage(
-            "A localizacao encontrada esta muito imprecisa. Tente novamente em um local aberto."
+            "A localização encontrada está muito imprecisa. Tente novamente em um local aberto."
           );
           return;
         }
@@ -87,8 +87,8 @@ export function useGeolocation() {
         setStatus(error.code === error.PERMISSION_DENIED ? "denied" : "unavailable");
         setErrorMessage(
           error.code === error.PERMISSION_DENIED
-            ? "Permissao de localizacao negada."
-            : "Nao foi possivel encontrar sua localizacao agora."
+            ? "Permissão de localização negada."
+            : "Não foi possível encontrar sua localização agora."
         );
       },
       {

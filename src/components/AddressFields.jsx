@@ -30,7 +30,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
       })
       .catch(() => {
         if (isMounted) {
-          setFeedback("Nao foi possivel carregar estados agora.");
+          setFeedback("Não foi possível carregar estados agora.");
         }
       })
       .finally(() => {
@@ -65,7 +65,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
       .catch(() => {
         if (isMounted) {
           setCities([]);
-          setFeedback("Nao foi possivel carregar cidades agora.");
+          setFeedback("Não foi possível carregar cidades agora.");
         }
       })
       .finally(() => {
@@ -106,9 +106,9 @@ export default function AddressFields({ address, disabled = false, onChange }) {
           locationUpdatedAt: ""
         })
       );
-      setFeedback("Endereco encontrado.");
+      setFeedback("Endereço encontrado.");
     } catch {
-      setFeedback("Nao encontramos esse CEP. Voce pode preencher manualmente.");
+      setFeedback("Não encontramos esse CEP. Você pode preencher manualmente.");
     } finally {
       setIsLoadingCep(false);
     }
@@ -153,8 +153,8 @@ export default function AddressFields({ address, disabled = false, onChange }) {
 
   return (
     <fieldset className="address-fields" disabled={disabled}>
-      <legend>Endereco para sugestoes proximas</legend>
-      <p>Opcional. Usaremos esse endereco apenas para melhorar sugestoes proximas.</p>
+      <legend>Endereço para sugestões próximas</legend>
+      <p>Opcional. Usaremos esse endereço apenas para melhorar sugestões próximas.</p>
 
       <div className="profile-grid">
         <label>
@@ -226,7 +226,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
         </label>
       </div>
 
-      {isLoadingCep && <p className="form-hint">Buscando endereco...</p>}
+      {isLoadingCep && <p className="form-hint">Buscando endereço...</p>}
       {feedback && <p className="form-feedback">{feedback}</p>}
     </fieldset>
   );

@@ -1,10 +1,10 @@
 export const mockBarLocations = {
   "esquina-77": {
-    address: "Rua 33, 77 - Vila Santa Cecilia, Volta Redonda",
+    address: "Rua 33, 77 - Vila Santa Cecília, Volta Redonda",
     city: "Volta Redonda",
     latitude: -22.51965,
     longitude: -44.10398,
-    neighborhood: "Vila Santa Cecilia"
+    neighborhood: "Vila Santa Cecília"
   },
   "boteco-do-porto": {
     address: "Rua 14, 420 - Aterrado, Volta Redonda",
@@ -14,11 +14,11 @@ export const mockBarLocations = {
     neighborhood: "Aterrado"
   },
   "varanda-aurora": {
-    address: "Rua Paulo de Frontin, 1200 - Jardim Amalia, Volta Redonda",
+    address: "Rua Paulo de Frontin, 1200 - Jardim Amália, Volta Redonda",
     city: "Volta Redonda",
     latitude: -22.51692,
     longitude: -44.11322,
-    neighborhood: "Jardim Amalia"
+    neighborhood: "Jardim Amália"
   },
   "marola-bar": {
     address: "Av. Sávio Gama, 1888 - Retiro, Volta Redonda",

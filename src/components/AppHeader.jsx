@@ -20,12 +20,12 @@ export default function AppHeader({
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const isLoadingLocation = locationStatus === "loading";
   const locationLabel = isLoadingLocation
-    ? "Buscando localizacao"
+    ? "Buscando localização"
     : hasLocation
-      ? "Atualizar localizacao"
+      ? "Atualizar localização"
       : isUsingProfileLocation
-        ? "Usar GPS em vez do endereco salvo"
-        : "Usar minha localizacao";
+        ? "Usar GPS em vez do endereço salvo"
+        : "Usar minha localização";
   const normalizedSearch = normalizeText(searchTerm.trim());
   const visibleSuggestions = useMemo(() => {
     const matches = normalizedSearch

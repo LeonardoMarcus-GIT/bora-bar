@@ -134,13 +134,13 @@ export async function fetchAddressByCep(cep) {
   const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel consultar o CEP.");
+    throw new Error("Não foi possível consultar o CEP.");
   }
 
   const data = await response.json();
 
   if (data.erro) {
-    throw new Error("CEP nao encontrado.");
+    throw new Error("CEP não encontrado.");
   }
 
   return normalizeAddress({
@@ -158,7 +158,7 @@ export async function fetchStates() {
   const response = await fetch(`${IBGE_BASE_URL}/estados?orderBy=nome`);
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel carregar estados.");
+    throw new Error("Não foi possível carregar estados.");
   }
 
   const states = await response.json();
@@ -180,7 +180,7 @@ export async function fetchCitiesByState(stateCode) {
   );
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel carregar cidades.");
+    throw new Error("Não foi possível carregar cidades.");
   }
 
   const cities = await response.json();
@@ -216,7 +216,7 @@ export async function geocodeAddress(
   });
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel calcular a localizacao aproximada.");
+    throw new Error("Não foi possível calcular a localização aproximada.");
   }
 
   return response.json();

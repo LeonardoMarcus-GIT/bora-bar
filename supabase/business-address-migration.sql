@@ -1,4 +1,4 @@
--- Bora Bar - endereco estruturado para estabelecimentos
+-- Bora Bar - endereço estruturado para estabelecimentos
 -- Rode este arquivo uma vez no SQL Editor do Supabase.
 
 alter table public.bars

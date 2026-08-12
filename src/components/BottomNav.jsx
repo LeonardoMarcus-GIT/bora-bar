@@ -11,7 +11,7 @@ export default function BottomNav({
 }) {
   const isMenuMode = mode === "menu";
   const MiddleIcon = isMenuMode ? Utensils : BadgePercent;
-  const middleLabel = isMenuMode ? "Cardapio" : "Promocoes";
+  const middleLabel = isMenuMode ? "Cardápio" : "Promoções";
 
   return (
     <nav className="bottom-nav" aria-label="Navegacao principal">

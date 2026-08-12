@@ -35,7 +35,7 @@ function getFriendlyAuthError(error, flow) {
     message.includes("user_already_exists") ||
     message.includes("email_exists")
   ) {
-    return "Esse email ja tem uma conta. Tente entrar ou recuperar a senha.";
+    return "Esse email já tem uma conta. Tente entrar ou recuperar a senha.";
   }
 
   if (
@@ -47,23 +47,23 @@ function getFriendlyAuthError(error, flow) {
   }
 
   if (message.includes("database") || message.includes("saving new user")) {
-    return "Nao conseguimos criar seu perfil agora. Tente novamente em instantes.";
+    return "Não conseguimos criar seu perfil agora. Tente novamente em instantes.";
   }
 
   if (message.includes("email") && message.includes("send")) {
-    return "Nao foi possivel enviar o email de confirmacao agora.";
+    return "Não foi possível enviar o email de confirmação agora.";
   }
 
   if (
-    message.includes("login indisponivel") ||
+    message.includes("login indisponível") ||
     message.includes("supabase") ||
     message.includes("api key")
   ) {
-    return "Login indisponivel no momento. Verifique a configuracao do app.";
+    return "Login indisponível no momento. Verifique a configuracao do app.";
   }
 
   if (message.includes("failed to fetch") || message.includes("network")) {
-    return "Nao foi possivel conectar ao login agora. Tente novamente em instantes.";
+    return "Não foi possível conectar ao login agora. Tente novamente em instantes.";
   }
 
   if (message.includes("password")) {
@@ -75,7 +75,7 @@ function getFriendlyAuthError(error, flow) {
   }
 
   if (message.includes("signup") && message.includes("disabled")) {
-    return "Cadastro por email esta desativado no Supabase.";
+    return "Cadastro por email está desativado no Supabase.";
   }
 
   if (message.includes("rate limit") || message.includes("too many")) {
@@ -83,14 +83,14 @@ function getFriendlyAuthError(error, flow) {
   }
 
   if (flow === "recover") {
-    return "Nao foi possivel enviar o link agora.";
+    return "Não foi possível enviar o link agora.";
   }
 
   if (flow === "signup") {
-    return "Nao foi possivel criar a conta agora.";
+    return "Não foi possível criar a conta agora.";
   }
 
-  return "Nao foi possivel entrar agora.";
+  return "Não foi possível entrar agora.";
 }
 
 function getHeadingText(mode) {
@@ -107,7 +107,7 @@ function getHeadingText(mode) {
 
 function getHeadingCopy(mode) {
   if (mode === "recover") {
-    return "Informe seu email para receber o link de recuperacao.";
+    return "Informe seu email para receber o link de recuperação.";
   }
 
   if (mode === "signup") {
@@ -158,7 +158,7 @@ export default function AuthPage({ onAuthenticated }) {
           throw error;
         }
 
-        setFeedback("Se esse email estiver cadastrado, enviamos o link de recuperacao.");
+        setFeedback("Se esse email estiver cadastrado, enviamos o link de recuperação.");
         return;
       }
 
@@ -175,7 +175,7 @@ export default function AuthPage({ onAuthenticated }) {
             locationUpdatedAt: location?.updatedAt
           });
         } catch {
-          // Cadastro continua mesmo se a localizacao aproximada nao estiver disponivel.
+          // Cadastro continua mesmo se a localização aproximada não estiver disponível.
         }
 
         const { data, error } = await signUp(email.trim(), password, {
@@ -255,7 +255,7 @@ export default function AuthPage({ onAuthenticated }) {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="voce@email.com"
+                placeholder="você@email.com"
                 required
               />
             </div>
@@ -300,7 +300,7 @@ export default function AuthPage({ onAuthenticated }) {
             </button>
           ) : isSignup ? (
             <button type="button" onClick={() => resetFeedback("login")}>
-              Ja tenho uma conta
+              Já tenho uma conta
             </button>
           ) : (
             <>

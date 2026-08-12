@@ -32,7 +32,7 @@ export function calculateDistanceKm(origin, destination) {
 
 export function formatDistanceKm(value) {
   if (!Number.isFinite(value)) {
-    return "Distancia indisponivel";
+    return "Distância indisponível";
   }
 
   if (value < 1) {

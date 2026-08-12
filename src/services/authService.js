@@ -2,7 +2,7 @@ import { isSupabaseConfigured, supabase } from "./supabaseClient.js";
 
 function ensureSupabase() {
   if (!isSupabaseConfigured) {
-    throw new Error("Login indisponivel no momento.");
+    throw new Error("Login indisponível no momento.");
   }
 }
 

@@ -2,7 +2,7 @@ export const mockBars = [
   {
     id: "esquina-77",
     name: "Esquina 77",
-    neighborhood: "Vila Santa Cecilia",
+    neighborhood: "Vila Santa Cecília",
     city: "Volta Redonda",
     image:
       "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80",
@@ -12,7 +12,7 @@ export const mockBars = [
     isOpen: true,
     priceLevel: "$$",
     promotion: "Chopp em dobro até 20h",
-    address: "Rua 33, 77 - Vila Santa Cecilia, Volta Redonda",
+    address: "Rua 33, 77 - Vila Santa Cecília, Volta Redonda",
     hours: "Seg a qui: 17h-00h | Sex e sab: 17h-02h | Dom: 16h-23h",
     phone: "(11) 95555-0177",
     description:
@@ -24,12 +24,12 @@ export const mockBars = [
         { name: "Lager artesanal 600ml", price: 24.9 }
       ],
       drinks: [
-        { name: "Caipirinha de limao", price: 18.0 },
-        { name: "Gin tonica classico", price: 26.0 },
+        { name: "Caipirinha de limão", price: 18.0 },
+        { name: "Gin tônica clássico", price: 26.0 },
         { name: "Moscow mule", price: 29.0 }
       ],
       porcoes: [
-        { name: "Batata rustica", price: 28.0 },
+        { name: "Batata rústica", price: 28.0 },
         { name: "Isca de frango", price: 34.0 },
         { name: "Dadinho de tapioca", price: 31.0 }
       ],
@@ -82,7 +82,7 @@ export const mockBars = [
   {
     id: "varanda-aurora",
     name: "Varanda Aurora",
-    neighborhood: "Jardim Amalia",
+    neighborhood: "Jardim Amália",
     city: "Volta Redonda",
     image:
       "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=1200&q=80",
@@ -92,7 +92,7 @@ export const mockBars = [
     isOpen: false,
     priceLevel: "$$$",
     promotion: "",
-    address: "Rua Paulo de Frontin, 1200 - Jardim Amalia, Volta Redonda",
+    address: "Rua Paulo de Frontin, 1200 - Jardim Amália, Volta Redonda",
     hours: "Qua a sab: 18h-02h | Dom: 12h-18h",
     phone: "(31) 98888-1200",
     description:
@@ -115,7 +115,7 @@ export const mockBars = [
       ],
       combos: [
         { name: "2 drinks + croquete", price: 92.0 },
-        { name: "Degustacao de cervejas", price: 65.0 }
+        { name: "Degustação de cervejas", price: 65.0 }
       ]
     }
   },
@@ -132,7 +132,7 @@ export const mockBars = [
     isOpen: true,
     priceLevel: "$$",
     promotion: "Caipirinha de frutas com 25% off",
-    address: "Av. Savio Gama, 1888 - Retiro, Volta Redonda",
+    address: "Av. Sávio Gama, 1888 - Retiro, Volta Redonda",
     hours: "Todos os dias: 16h-01h",
     phone: "(81) 97777-1888",
     description:
@@ -185,7 +185,7 @@ export const mockBars = [
       ],
       drinks: [
         { name: "Rabo de galo", price: 20.0 },
-        { name: "Gin tonica da casa", price: 28.0 },
+        { name: "Gin tônica da casa", price: 28.0 },
         { name: "Spritz de maracujá", price: 26.0 }
       ],
       porcoes: [

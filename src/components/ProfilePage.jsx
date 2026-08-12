@@ -87,7 +87,7 @@ export default function ProfilePage({
         );
       })
       .catch(() => {
-        console.warn("Perfil em tabela ainda indisponivel. Usando metadados do usuario.");
+        console.warn("Perfil em tabela ainda indisponível. Usando metadados do usuário.");
       })
       .finally(() => {
         if (isMounted) {
@@ -156,7 +156,7 @@ export default function ProfilePage({
       );
       onSaved?.();
     } catch {
-      setFeedback("Nao foi possivel salvar agora.");
+      setFeedback("Não foi possível salvar agora.");
     } finally {
       setIsSaving(false);
     }
@@ -204,7 +204,7 @@ export default function ProfilePage({
               <input
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                placeholder="Como voce quer aparecer"
+                placeholder="Como você quer aparecer"
               />
             </div>
           </label>
@@ -233,7 +233,7 @@ export default function ProfilePage({
         >
           <Store size={20} aria-hidden="true" />
           <span>
-            <strong>Area do estabelecimento</strong>
+            <strong>Área do estabelecimento</strong>
             <small>Solicite acesso ou administre seu bar</small>
           </span>
         </button>

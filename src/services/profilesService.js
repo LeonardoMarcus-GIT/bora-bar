@@ -2,7 +2,7 @@ import { isSupabaseConfigured, supabase } from "./supabaseClient.js";
 
 function ensureSupabase() {
   if (!isSupabaseConfigured) {
-    throw new Error("Perfil indisponivel no momento.");
+    throw new Error("Perfil indisponível no momento.");
   }
 }
 

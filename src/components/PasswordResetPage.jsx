@@ -11,14 +11,14 @@ function getPasswordResetError(error) {
     message.includes("jwt") ||
     message.includes("not authenticated")
   ) {
-    return "Esse link expirou ou ja foi usado. Peca um novo link de recuperacao.";
+    return "Esse link expirou ou já foi usado. Peça um novo link de recuperação.";
   }
 
   if (message.includes("password")) {
     return "Use uma senha com pelo menos 6 caracteres.";
   }
 
-  return "Nao foi possivel atualizar a senha agora.";
+  return "Não foi possível atualizar a senha agora.";
 }
 
 export default function PasswordResetPage({ onBackToLogin, onDone }) {
@@ -75,7 +75,7 @@ export default function PasswordResetPage({ onBackToLogin, onDone }) {
 
         {isAuthReady && !canUpdatePassword && (
           <div className="auth-warning">
-            <p>O link de recuperacao nao esta ativo nesta janela.</p>
+            <p>O link de recuperação não está ativo nesta janela.</p>
             <button type="button" onClick={onBackToLogin}>
               Pedir novo link
             </button>

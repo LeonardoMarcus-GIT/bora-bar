@@ -8,7 +8,7 @@ with seed as (
     {
       "id": "esquina-77",
       "name": "Esquina 77",
-      "neighborhood": "Vila Santa Cecilia",
+      "neighborhood": "Vila Santa Cecília",
       "city": "Volta Redonda",
       "image_url": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80",
       "distance_km": 0.8,
@@ -18,7 +18,7 @@ with seed as (
       "is_open": true,
       "price_level": "$$",
       "promotion": "Chopp em dobro até 20h",
-      "address": "Rua 33, 77 - Vila Santa Cecilia, Volta Redonda",
+      "address": "Rua 33, 77 - Vila Santa Cecília, Volta Redonda",
       "hours": "Seg a qui: 17h-00h | Sex e sab: 17h-02h | Dom: 16h-23h",
       "phone": "(11) 95555-0177",
       "description": "Bar de esquina com mesas na calçada, chopp gelado e porções clássicas para dividir.",
@@ -39,11 +39,11 @@ with seed as (
         ],
         "drinks": [
           {
-            "name": "Caipirinha de limao",
+            "name": "Caipirinha de limão",
             "price": 18
           },
           {
-            "name": "Gin tonica classico",
+            "name": "Gin tônica clássico",
             "price": 26
           },
           {
@@ -53,7 +53,7 @@ with seed as (
         ],
         "porcoes": [
           {
-            "name": "Batata rustica",
+            "name": "Batata rústica",
             "price": 28
           },
           {
@@ -152,7 +152,7 @@ with seed as (
     {
       "id": "varanda-aurora",
       "name": "Varanda Aurora",
-      "neighborhood": "Jardim Amalia",
+      "neighborhood": "Jardim Amália",
       "city": "Volta Redonda",
       "image_url": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=1200&q=80",
       "distance_km": 1.1,
@@ -162,7 +162,7 @@ with seed as (
       "is_open": false,
       "price_level": "$$$",
       "promotion": "",
-      "address": "Rua Paulo de Frontin, 1200 - Jardim Amalia, Volta Redonda",
+      "address": "Rua Paulo de Frontin, 1200 - Jardim Amália, Volta Redonda",
       "hours": "Qua a sab: 18h-02h | Dom: 12h-18h",
       "phone": "(31) 98888-1200",
       "description": "Varanda arejada, cozinha de bar autoral e carta de drinks para noites mais longas.",
@@ -215,7 +215,7 @@ with seed as (
             "price": 92
           },
           {
-            "name": "Degustacao de cervejas",
+            "name": "Degustação de cervejas",
             "price": 65
           }
         ]
@@ -234,7 +234,7 @@ with seed as (
       "is_open": true,
       "price_level": "$$",
       "promotion": "Caipirinha de frutas com 25% off",
-      "address": "Av. Savio Gama, 1888 - Retiro, Volta Redonda",
+      "address": "Av. Sávio Gama, 1888 - Retiro, Volta Redonda",
       "hours": "Todos os dias: 16h-01h",
       "phone": "(81) 97777-1888",
       "description": "Bar descontraído perto da praia, com petiscos de frutos do mar e drinks tropicais.",
@@ -331,7 +331,7 @@ with seed as (
             "price": 20
           },
           {
-            "name": "Gin tonica da casa",
+            "name": "Gin tônica da casa",
             "price": 28
           },
           {

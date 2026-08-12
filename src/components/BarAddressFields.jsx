@@ -49,11 +49,11 @@ export default function BarAddressFields({ address, onChange }) {
         })
       );
       setFeedback(
-        "Endereco encontrado. Confira e ajuste numero ou qualquer outro campo."
+        "Endereço encontrado. Confira e ajuste número ou qualquer outro campo."
       );
     } catch {
       setFeedback(
-        "Nao encontramos esse CEP. Preencha os campos manualmente."
+        "Não encontramos esse CEP. Preencha os campos manualmente."
       );
     } finally {
       setIsLoadingCep(false);
@@ -71,7 +71,7 @@ export default function BarAddressFields({ address, onChange }) {
 
   return (
     <fieldset className="bar-address-fields">
-      <legend>Endereco do estabelecimento</legend>
+      <legend>Endereço do estabelecimento</legend>
       <p>
         O CEP preenche os dados automaticamente, mas todos os campos podem ser
         corrigidos.
@@ -108,7 +108,7 @@ export default function BarAddressFields({ address, onChange }) {
 
       <div className="bar-address-number-grid">
         <label>
-          <span>Numero</span>
+          <span>Número</span>
           <div className="field-with-icon">
             <Hash size={18} aria-hidden="true" />
             <input
@@ -148,7 +148,7 @@ export default function BarAddressFields({ address, onChange }) {
               onChange={(event) =>
                 updateAddress({ neighborhood: event.target.value })
               }
-              placeholder="Vila Santa Cecilia"
+              placeholder="Vila Santa Cecília"
             />
           </div>
         </label>
@@ -198,14 +198,14 @@ export default function BarAddressFields({ address, onChange }) {
         </label>
       </div>
 
-      {isLoadingCep && <p className="form-hint">Buscando endereco...</p>}
+      {isLoadingCep && <p className="form-hint">Buscando endereço...</p>}
       {feedback && <p className="bar-address-feedback">{feedback}</p>}
 
       <div className="bar-address-preview">
         <MapPin size={18} aria-hidden="true" />
         <span>
           <strong>Como aparecera no app</strong>
-          <small>{addressPreview || "Preencha o endereco acima."}</small>
+          <small>{addressPreview || "Preencha o endereço acima."}</small>
         </span>
       </div>
     </fieldset>

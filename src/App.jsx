@@ -93,7 +93,7 @@ function clearAuthRedirect() {
   try {
     sessionStorage.removeItem("bora-bar-auth-redirect");
   } catch {
-    // Nao ha estado obrigatorio para limpar.
+    // Não há estado obrigatório para limpar.
   }
 }
 
@@ -657,7 +657,7 @@ export default function App() {
         <main className="details-page">
           <section className="empty-state">
             <h2>Carregando bar</h2>
-            <p>Estamos buscando as informacoes desse lugar.</p>
+            <p>Estamos buscando as informações desse lugar.</p>
           </section>
         </main>
         <BottomNav
@@ -706,9 +706,9 @@ export default function App() {
           searchSuggestions={searchSuggestions}
           summaryLabel={
             hasLocation
-              ? `${visibleBars.length} bares perto de voce`
+              ? `${visibleBars.length} bares perto de você`
               : isUsingProfileLocation
-                ? `${visibleBars.length} bares perto do seu endereco`
+                ? `${visibleBars.length} bares perto do seu endereço`
               : `${visibleBars.length} bares encontrados`
           }
           onRequestLocation={requestLocation}

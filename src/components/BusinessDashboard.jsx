@@ -139,10 +139,10 @@ function getClaimStatusLabel(status) {
   }
 
   if (status === "rejected") {
-    return "Nao aprovado";
+    return "Não aprovado";
   }
 
-  return "Em analise";
+  return "Em análise";
 }
 
 const WEEK_DAYS = [
@@ -174,7 +174,7 @@ function parseHours(hours) {
 
 function formatBusinessHours({ days, opensAt, closesAt }) {
   if (!days.length) {
-    return "Horario a confirmar";
+    return "Horário a confirmar";
   }
 
   const dayLabels = WEEK_DAYS.filter((day) => days.includes(day.id)).map(
@@ -303,7 +303,7 @@ export default function BusinessDashboard({
       })
       .catch((error) => {
         if (isMounted) {
-          console.warn("Nao foi possivel abrir a area do estabelecimento.", error);
+          console.warn("Não foi possível abrir a área do estabelecimento.", error);
           setSetupError(true);
         }
       })
@@ -345,7 +345,7 @@ export default function BusinessDashboard({
       })
       .catch(() => {
         if (isMounted) {
-          setFeedback("Nao foi possivel carregar os dados do estabelecimento.");
+          setFeedback("Não foi possível carregar os dados do estabelecimento.");
         }
       })
       .finally(() => {
@@ -409,13 +409,13 @@ export default function BusinessDashboard({
         businessDocument: "",
         message: ""
       }));
-      setFeedback("Solicitacao enviada. Vamos verificar o vinculo com o bar.");
+      setFeedback("Solicitação enviada. Vamos verificar o vínculo com o bar.");
     } catch (error) {
       const message = `${error?.message ?? ""} ${error?.code ?? ""}`.toLowerCase();
       setFeedback(
         message.includes("duplicate")
-          ? "Ja existe uma solicitacao em analise para esse bar."
-          : "Nao foi possivel enviar a solicitacao agora."
+          ? "Já existe uma solicitação em análise para esse bar."
+          : "Não foi possível enviar a solicitação agora."
       );
     } finally {
       setIsSaving(false);
@@ -443,14 +443,14 @@ export default function BusinessDashboard({
     try {
       const imageUrl = await uploadBusinessCoverImage(selectedBarId, file);
       updateBar({ image: imageUrl });
-      setFeedback("Foto pronta. Salve o perfil publico para publicar a alteracao.");
+      setFeedback("Foto pronta. Salve o perfil público para publicar a alteração.");
     } catch (error) {
       if (error?.message === "INVALID_IMAGE_TYPE") {
         setFeedback("Escolha uma imagem JPG, PNG ou WebP.");
       } else if (error?.message === "IMAGE_TOO_LARGE") {
-        setFeedback("A imagem deve ter no maximo 8 MB.");
+        setFeedback("A imagem deve ter no máximo 8 MB.");
       } else {
-        setFeedback("Nao foi possivel enviar a imagem agora. Tente novamente.");
+        setFeedback("Não foi possível enviar a imagem agora. Tente novamente.");
       }
     } finally {
       setIsUploadingImage(false);
@@ -561,7 +561,7 @@ export default function BusinessDashboard({
           }
         } catch {
           successMessage =
-            "Endereco salvo. Nao foi possivel atualizar a distancia agora.";
+            "Endereço salvo. Não foi possível atualizar a distância agora.";
         }
 
         const nextBar = await updateManagedBar(selectedBarId, barToSave);
@@ -597,7 +597,7 @@ export default function BusinessDashboard({
       setFeedback(successMessage);
       onDataChanged?.();
     } catch {
-      setFeedback("Nao foi possivel salvar agora. Verifique os campos e tente novamente.");
+      setFeedback("Não foi possível salvar agora. Verifique os campos e tente novamente.");
     } finally {
       setIsSaving(false);
     }
@@ -607,7 +607,7 @@ export default function BusinessDashboard({
     return (
       <main className="account-page business-page">
         <section className="empty-state">
-          <h2>Carregando area do estabelecimento</h2>
+          <h2>Carregando área do estabelecimento</h2>
           <p>Estamos verificando seus acessos.</p>
         </section>
       </main>
@@ -626,11 +626,11 @@ export default function BusinessDashboard({
             <ArrowLeft size={18} aria-hidden="true" />
             Voltar
           </button>
-          <p className="section-kicker">Area do estabelecimento</p>
-          <h1>Nao foi possivel abrir esta area</h1>
+          <p className="section-kicker">Área do estabelecimento</p>
+          <h1>Não foi possível abrir esta área</h1>
           <p className="business-muted">
-            Sua conta esta conectada, mas a consulta do painel falhou. Tente
-            novamente para renovar a conexao.
+            Sua conta está conectada, mas a consulta do painel falhou. Tente
+            novamente para renovar a conexão.
           </p>
           <button
             className="primary-action"
@@ -661,8 +661,8 @@ export default function BusinessDashboard({
               <p className="section-kicker">Para estabelecimentos</p>
               <h1>Administre seu bar no Bora Bar</h1>
               <p>
-                Solicite o acesso ao estabelecimento. Depois da verificacao,
-                voce podera manter cardapio, precos, promocoes e eventos.
+                Solicite o acesso ao estabelecimento. Depois da verificação,
+                você poderá manter cardápio, preços, promoções e eventos.
               </p>
             </div>
           </div>
@@ -706,7 +706,7 @@ export default function BusinessDashboard({
 
               <div className="profile-grid">
                 <label>
-                  <span>Nome do responsavel</span>
+                  <span>Nome do responsável</span>
                   <input
                     value={claim.contactName}
                     onChange={(event) =>
@@ -748,7 +748,7 @@ export default function BusinessDashboard({
               </label>
 
               <label>
-                <span>Como podemos confirmar seu vinculo?</span>
+                <span>Como podemos confirmar seu vínculo?</span>
                 <textarea
                   value={claim.message}
                   onChange={(event) =>
@@ -773,7 +773,7 @@ export default function BusinessDashboard({
             </form>
           ) : (
             <p className="business-muted">
-              Nao ha outro estabelecimento disponivel para uma nova solicitacao.
+              Não há outro estabelecimento disponível para uma nova solicitação.
             </p>
           )}
 
@@ -815,7 +815,7 @@ export default function BusinessDashboard({
                 <p className="section-kicker">Painel do estabelecimento</p>
                 <h1>{managedData.bar.name}</h1>
                 <p>
-                  Edite as informacoes que aparecem para os clientes no Bora Bar.
+                  Edite as informações que aparecem para os clientes no Bora Bar.
                 </p>
               </div>
             </div>
@@ -871,7 +871,7 @@ export default function BusinessDashboard({
                 </div>
 
                 <BusinessField
-                  label="Descricao"
+                  label="Descrição"
                   multiline
                   value={managedData.bar.description}
                   onChange={(value) => updateBar({ description: value })}
@@ -903,7 +903,7 @@ export default function BusinessDashboard({
                         updateBar({ priceLevel: event.target.value })
                       }
                     >
-                      <option value="$">$ - Economico</option>
+                      <option value="$">$ - Econômico</option>
                       <option value="$$">$$ - Moderado</option>
                       <option value="$$$">$$$ - Premium</option>
                     </select>
@@ -987,14 +987,14 @@ export default function BusinessDashboard({
 
                           <div className="menu-item-details">
                             <input
-                              aria-label="Descricao do item"
+                              aria-label="Descrição do item"
                               value={item.description}
                               onChange={(event) =>
                                 updateMenuItem(category.id, item.id, {
                                   description: event.target.value
                                 })
                               }
-                              placeholder="Descricao opcional"
+                              placeholder="Descrição opcional"
                             />
                             <label className="menu-price-field">
                               <span className="sr-only">Preco do item</span>
@@ -1014,10 +1014,10 @@ export default function BusinessDashboard({
                               />
                             </label>
                             <label className="menu-availability-switch">
-                              <span>Disponivel</span>
+                              <span>Disponível</span>
                               <input
                                 type="checkbox"
-                                aria-label="Item disponivel"
+                                aria-label="Item disponível"
                                 checked={item.isAvailable}
                                 onChange={(event) =>
                                   updateMenuItem(category.id, item.id, {
@@ -1120,15 +1120,15 @@ export default function BusinessDashboard({
 
 function BusinessOverview({ data, metrics, onEditProfile, onNewPromotion, onPreview }) {
   const checks = [
-    { label: "Foto e descricao", done: Boolean(data.bar.image && data.bar.description) },
-    { label: "Endereco e contato", done: Boolean(data.bar.address && data.bar.phone) },
-    { label: "Horario publicado", done: Boolean(data.bar.hours) },
+    { label: "Foto e descrição", done: Boolean(data.bar.image && data.bar.description) },
+    { label: "Endereço e contato", done: Boolean(data.bar.address && data.bar.phone) },
+    { label: "Horário publicado", done: Boolean(data.bar.hours) },
     {
-      label: "Cardapio com itens",
+      label: "Cardápio com itens",
       done: data.categories.some((category) => category.items.length > 0)
     },
     {
-      label: "Promocao ou evento ativo",
+      label: "Promoção ou evento ativo",
       done: data.promotions.some((item) => item.isActive) ||
         data.events.some((item) => item.isActive)
     }
@@ -1201,21 +1201,21 @@ function BusinessOverview({ data, metrics, onEditProfile, onNewPromotion, onPrev
         <div className="business-overview-title">
           <div>
             <p className="section-kicker">Atalhos</p>
-            <h2>O que voce quer fazer?</h2>
+            <h2>O que você quer fazer?</h2>
           </div>
         </div>
         <div className="business-quick-grid">
           <button type="button" onClick={onPreview}>
             <Eye size={19} aria-hidden="true" />
-            <span><strong>Ver perfil publico</strong><small>Confira como o cliente ve seu bar</small></span>
+            <span><strong>Ver perfil público</strong><small>Confira como o cliente vê seu bar</small></span>
           </button>
           <button type="button" onClick={onEditProfile}>
             <Store size={19} aria-hidden="true" />
-            <span><strong>Atualizar informacoes</strong><small>Contato, endereco, foto e horario</small></span>
+            <span><strong>Atualizar informações</strong><small>Contato, endereço, foto e horário</small></span>
           </button>
           <button type="button" onClick={onNewPromotion}>
             <Tag size={19} aria-hidden="true" />
-            <span><strong>Publicar promocao</strong><small>Crie um motivo para visitar hoje</small></span>
+            <span><strong>Publicar promoção</strong><small>Crie um motivo para visitar hoje</small></span>
           </button>
         </div>
       </section>
@@ -1325,7 +1325,7 @@ function BusinessHoursEditor({ value, onChange }) {
     <section className="business-hours-editor">
       <div className="hours-editor-heading">
         <div>
-          <span>Horario de funcionamento</span>
+          <span>Horário de funcionamento</span>
           <small>{formatBusinessHours(schedule)}</small>
         </div>
         <Clock3 size={20} aria-hidden="true" />
@@ -1384,7 +1384,7 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
         <section className="business-list-section" key={item.id}>
           <div className="business-section-heading">
             <input
-              aria-label={isEvent ? "Nome do evento" : "Titulo da promocao"}
+              aria-label={isEvent ? "Nome do evento" : "Título da promoção"}
               value={item.title}
               onChange={(event) =>
                 onUpdate(item.id, { title: event.target.value })
@@ -1406,7 +1406,7 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
             onChange={(event) =>
               onUpdate(item.id, { description: event.target.value })
             }
-            placeholder="Descricao opcional"
+            placeholder="Descrição opcional"
             rows={3}
           />
 
@@ -1452,20 +1452,20 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
           <label className="publish-status-switch">
             <input
               type="checkbox"
-              aria-label={isEvent ? "Evento publicado" : "Promocao publicada"}
+              aria-label={isEvent ? "Evento publicado" : "Promoção publicada"}
               checked={item.isActive}
               onChange={(event) =>
                 onUpdate(item.id, { isActive: event.target.checked })
               }
             />
-            <span>{isEvent ? "Evento publicado" : "Promocao publicada"}</span>
+            <span>{isEvent ? "Evento publicado" : "Promoção publicada"}</span>
           </label>
         </section>
       ))}
 
       <button className="secondary-action timed-item-add" type="button" onClick={onAdd}>
         <Plus size={17} aria-hidden="true" />
-        {isEvent ? "Novo evento" : "Nova promocao"}
+        {isEvent ? "Novo evento" : "Nova promoção"}
       </button>
     </div>
   );

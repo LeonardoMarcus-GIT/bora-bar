@@ -39,7 +39,7 @@ export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite })
           <div className="bar-meta-grid">
             <span>
               <MapPin size={16} aria-hidden="true" />
-              {bar.hasCoordinates ? formatDistanceKm(bar.distanceKm) : "Distancia indisponivel"}
+              {bar.hasCoordinates ? formatDistanceKm(bar.distanceKm) : "Distância indisponível"}
             </span>
             <span>
               <WalletCards size={16} aria-hidden="true" />

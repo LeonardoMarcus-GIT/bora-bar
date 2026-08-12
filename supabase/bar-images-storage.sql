@@ -1,5 +1,5 @@
 -- Rode este arquivo uma vez no SQL Editor do Supabase.
--- Ele cria o espaco publico de fotos e deixa cada dono enviar imagens apenas
+-- Ele cria o espaco público de fotos e deixa cada dono enviar imagens apenas
 -- para os estabelecimentos que administra.
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

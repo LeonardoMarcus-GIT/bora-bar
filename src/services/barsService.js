@@ -145,7 +145,7 @@ export async function fetchBars() {
     .order("name", { ascending: true });
 
   if (error) {
-    console.warn("Nao foi possivel carregar bares do Supabase.", error);
+    console.warn("Não foi possível carregar bares do Supabase.", error);
     return mockBars;
   }
 

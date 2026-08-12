@@ -38,7 +38,7 @@ export async function recordBarEvent(barId, eventType) {
   });
 
   if (error) {
-    console.warn("Metrica do estabelecimento ainda indisponivel.", error);
+    console.warn("Métrica do estabelecimento ainda indisponível.", error);
     return false;
   }
 
@@ -75,7 +75,7 @@ export async function fetchBarMetrics(barId, days = 30) {
   });
 
   if (error) {
-    console.warn("Nao foi possivel carregar as metricas do bar.", error);
+    console.warn("Não foi possível carregar as métricas do bar.", error);
     return { available: false, days, totals: {} };
   }
 
