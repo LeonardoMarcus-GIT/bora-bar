@@ -1017,6 +1017,7 @@ export default function BusinessDashboard({
                               <span>Disponivel</span>
                               <input
                                 type="checkbox"
+                                aria-label="Item disponivel"
                                 checked={item.isAvailable}
                                 onChange={(event) =>
                                   updateMenuItem(category.id, item.id, {

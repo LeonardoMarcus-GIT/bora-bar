@@ -3101,7 +3101,7 @@ p {
   }
 
   .menu-item-details {
-    grid-template-columns: minmax(0, 1fr) 88px;
+    grid-template-columns: minmax(0, 1fr) 42px;
     gap: 6px;
   }
 
@@ -3118,12 +3118,23 @@ p {
   }
 
   .menu-availability-switch {
-    justify-content: space-between;
+    justify-content: center;
+    width: 42px;
     min-height: 38px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 7px;
     background: rgba(255, 255, 255, 0.035);
-    padding: 0 8px;
+    padding: 0;
+  }
+
+  .menu-availability-switch > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .business-save-bar {
