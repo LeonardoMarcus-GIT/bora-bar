@@ -35,6 +35,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
   background:
     linear-gradient(180deg, rgba(11, 12, 9, 0.28), rgba(17, 18, 14, 0.86) 76%),
     url("./assets/bora-bar-bg-test.png");
@@ -1650,10 +1651,12 @@ p {
 
 .business-page {
   align-items: start;
+  min-width: 0;
 }
 
 .business-panel {
   width: min(960px, 100%);
+  min-width: 0;
   margin: 0 auto;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1759,6 +1762,10 @@ p {
   cursor: pointer;
   padding: 0 13px;
   white-space: nowrap;
+}
+
+.business-tabs button svg {
+  flex: 0 0 auto;
 }
 
 .business-tabs button.is-active {
@@ -1929,6 +1936,7 @@ p {
 .business-editor {
   display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .business-form label,
@@ -2149,6 +2157,7 @@ p {
 .business-list-section {
   display: grid;
   gap: 12px;
+  min-width: 0;
   border-top: 1px solid var(--line);
   padding-top: 15px;
 }
@@ -2185,6 +2194,7 @@ p {
     42px;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .compact-check {
@@ -2810,7 +2820,9 @@ p {
   }
 
   .business-panel {
-    padding: 16px;
+    width: 100%;
+    overflow: hidden;
+    padding: 14px;
   }
 
   .for-business-hero {
@@ -2861,6 +2873,20 @@ p {
 
   .business-metrics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .business-metric {
+    min-height: 88px;
+    padding: 9px 10px;
+  }
+
+  .business-metric strong {
+    font-size: 1.25rem;
+  }
+
+  .business-metric span {
+    font-size: 0.72rem;
   }
 
   .business-quick-grid {
@@ -2873,18 +2899,57 @@ p {
   }
 
   .business-heading {
-    align-items: flex-start;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 14px;
   }
 
   .business-heading > img,
   .business-heading-icon {
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .business-heading h1 {
+    font-size: 1.45rem;
+  }
+
+  .business-heading p:not(.section-kicker) {
+    display: none;
+  }
+
+  .business-tabs {
+    position: sticky;
+    top: 8px;
+    z-index: 4;
+    gap: 7px;
+    margin: 0 -14px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(24, 24, 20, 0.94);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+    padding: 8px 14px;
+    backdrop-filter: blur(16px);
+  }
+
+  .business-tabs button {
+    width: 42px;
+    min-width: 42px;
+    flex: 0 0 42px;
+    gap: 0;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .business-tabs button svg {
+    width: 18px;
+    height: 18px;
   }
 
   .business-toolbar {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 14px;
   }
 
   .business-toolbar select {
@@ -2892,8 +2957,18 @@ p {
     min-width: 0;
   }
 
+  .business-toolbar .back-button {
+    min-height: 38px;
+    padding: 0 10px;
+  }
+
   .business-item-row {
-    grid-template-columns: minmax(0, 1fr) 92px 42px;
+    grid-template-columns: minmax(0, 1fr) 84px 42px;
+    gap: 7px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
   }
 
   .business-item-row input:nth-child(2) {
@@ -2905,9 +2980,87 @@ p {
     grid-column: 1 / 2;
   }
 
+  .business-item-row .icon-delete {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
   .business-save-bar {
     align-items: stretch;
     flex-direction: column;
+    position: sticky;
+    bottom: 74px;
+    z-index: 3;
+    margin: 18px -14px 0;
+    border-top-color: rgba(255, 199, 68, 0.26);
+    background: rgba(24, 24, 20, 0.94);
+    box-shadow: 0 -12px 24px rgba(0, 0, 0, 0.22);
+    padding: 12px 14px;
+    backdrop-filter: blur(16px);
+  }
+
+  .business-save-bar .primary-action {
+    width: 100%;
+  }
+
+  .business-overview {
+    gap: 18px;
+  }
+
+  .business-overview-section {
+    padding-top: 14px;
+  }
+
+  .business-quick-grid button {
+    min-height: 58px;
+    padding: 10px;
+  }
+
+  .business-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .business-checklist span {
+    min-width: 0;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    padding: 7px 8px;
+  }
+
+  .cover-image-editor,
+  .business-hours-editor {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .cover-image-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cover-image-upload {
+    width: 100%;
+  }
+
+  .cover-image-preview {
+    min-height: 116px;
+  }
+
+  .cover-image-preview img {
+    height: 132px;
+  }
+
+  .hours-days {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .hours-days button,
+  .hours-days button:first-child {
+    min-width: 0;
   }
 
   .bar-address-number-grid,

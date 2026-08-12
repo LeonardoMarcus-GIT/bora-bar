@@ -829,6 +829,8 @@ export default function BusinessDashboard({
                     key={tab.id}
                     role="tab"
                     aria-selected={activeTab === tab.id}
+                    aria-label={tab.label}
+                    title={tab.label}
                     type="button"
                     onClick={() => {
                       setActiveTab(tab.id);
