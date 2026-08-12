@@ -289,6 +289,7 @@ export default function App() {
         value,
         label,
         city,
+        bar,
         count: 0,
         distanceKm: null
       };
