@@ -1,4 +1,4 @@
-import { LogOut, Mail, Save, Store, UserRound } from "lucide-react";
+import { ChevronRight, LogOut, Mail, Save, Store, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import AddressFields from "./AddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -14,6 +14,7 @@ import { fetchProfile, saveProfile } from "../services/profilesService.js";
 export default function ProfilePage({
   onLoginRequired,
   onManageBusiness,
+  onOpenForBusiness,
   onSaved,
   onSignedOut
 }) {
@@ -127,6 +128,8 @@ export default function ProfilePage({
         // O perfil ainda pode ser salvo sem coordenada aproximada.
       }
 
+      profile = cleanNullIsland(profile);
+
       try {
         await saveProfile(user.id, profile);
       } catch {
@@ -235,6 +238,18 @@ export default function ProfilePage({
           </span>
         </button>
 
+        <button
+          className="business-learn-button"
+          type="button"
+          onClick={onOpenForBusiness}
+        >
+          <span>
+            <strong>Ainda não faz parte?</strong>
+            <small>Conheça os benefícios e planos para estabelecimentos</small>
+          </span>
+          <ChevronRight size={19} aria-hidden="true" />
+        </button>
+
         <button className="secondary-action" type="button" onClick={handleSignOut}>
           <LogOut size={18} aria-hidden="true" />
           Sair da conta
@@ -242,4 +257,18 @@ export default function ProfilePage({
       </section>
     </main>
   );
+}
+
+function cleanNullIsland(profile) {
+  if (Number(profile.latitude) !== 0 || Number(profile.longitude) !== 0) {
+    return profile;
+  }
+
+  return {
+    ...profile,
+    latitude: null,
+    locationSource: "",
+    locationUpdatedAt: "",
+    longitude: null
+  };
 }

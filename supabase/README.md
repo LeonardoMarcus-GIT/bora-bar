@@ -93,3 +93,14 @@ Essa migracao adiciona CEP, rua, numero, complemento, estado e UF aos bares sem
 apagar nenhum dado existente. Depois disso, o responsavel pode consultar o CEP,
 corrigir qualquer campo manualmente e salvar a nova localizacao do
 estabelecimento.
+
+## 9. Ativar metricas dos estabelecimentos
+
+Rode o arquivo `supabase/engagement-metrics-migration.sql` no SQL Editor. Como
+alternativa, voce pode rodar novamente o `supabase/schema.sql`; os dois caminhos
+criam a tabela `bar_engagement_events` sem apagar os dados existentes.
+
+O app passa a registrar apenas a acao e o estabelecimento, sem nome, email ou
+localizacao do visitante. O responsavel vinculado ao bar pode acompanhar no
+painel as visualizacoes, favoritos e cliques em WhatsApp, ligacao e rotas dos
+ultimos 30 dias.

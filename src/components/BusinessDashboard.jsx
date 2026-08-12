@@ -3,8 +3,14 @@ import {
   BadgeCheck,
   CalendarDays,
   Clock3,
+  Eye,
+  Heart,
   Image,
+  LayoutDashboard,
+  MessageCircle,
+  Navigation,
   Phone,
+  PhoneCall,
   Plus,
   Save,
   Store,
@@ -16,6 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 import BarAddressFields from "./BarAddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
+import { fetchBarMetrics } from "../services/analyticsService.js";
 import {
   createBarClaim,
   fetchBusinessAccess,
@@ -27,9 +34,10 @@ import {
 } from "../services/businessService.js";
 
 const tabs = [
-  { id: "overview", label: "Informacoes", icon: Store },
-  { id: "menu", label: "Cardapio", icon: UtensilsCrossed },
-  { id: "promotions", label: "Promocoes", icon: Tag },
+  { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { id: "overview", label: "Perfil público", icon: Store },
+  { id: "menu", label: "Cardápio", icon: UtensilsCrossed },
+  { id: "promotions", label: "Promoções", icon: Tag },
   { id: "events", label: "Eventos", icon: CalendarDays }
 ];
 
@@ -139,13 +147,15 @@ export default function BusinessDashboard({
   bars,
   onBack,
   onDataChanged,
+  onPreviewBar,
   onLoginRequired
 }) {
   const { isAuthReady, session, user } = useAuth();
   const [access, setAccess] = useState({ memberships: [], claims: [] });
   const [selectedBarId, setSelectedBarId] = useState("");
   const [managedData, setManagedData] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [metrics, setMetrics] = useState({ available: false, days: 30, totals: {} });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -305,6 +315,27 @@ export default function BusinessDashboard({
     };
   }, [selectedBarId]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!selectedBarId) {
+      setMetrics({ available: false, days: 30, totals: {} });
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    fetchBarMetrics(selectedBarId).then((nextMetrics) => {
+      if (isMounted) {
+        setMetrics(nextMetrics);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedBarId]);
+
   async function handleClaimSubmit(event) {
     event.preventDefault();
 
@@ -418,6 +449,14 @@ export default function BusinessDashboard({
       ...currentData,
       [listName]: currentData[listName].filter((item) => item.id !== itemId)
     }));
+  }
+
+  function openNewPromotion() {
+    setManagedData((currentData) => ({
+      ...currentData,
+      promotions: [...currentData.promotions, emptyPromotion()]
+    }));
+    setActiveTab("promotions");
   }
 
   async function saveCurrentTab() {
@@ -716,6 +755,8 @@ export default function BusinessDashboard({
                   <button
                     className={activeTab === tab.id ? "is-active" : ""}
                     key={tab.id}
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
                     type="button"
                     onClick={() => {
                       setActiveTab(tab.id);
@@ -728,6 +769,16 @@ export default function BusinessDashboard({
                 );
               })}
             </div>
+
+            {activeTab === "dashboard" && (
+              <BusinessOverview
+                data={managedData}
+                metrics={metrics}
+                onEditProfile={() => setActiveTab("overview")}
+                onNewPromotion={openNewPromotion}
+                onPreview={() => onPreviewBar?.(selectedBarId)}
+              />
+            )}
 
             {activeTab === "overview" && (
               <div className="business-editor">
@@ -964,22 +1015,129 @@ export default function BusinessDashboard({
               />
             )}
 
-            <div className="business-save-bar">
-              <button
-                className="primary-action"
-                type="button"
-                onClick={saveCurrentTab}
-                disabled={isSaving}
-              >
-                <Save size={18} aria-hidden="true" />
-                {isSaving ? "Salvando..." : `Salvar ${tabs.find((tab) => tab.id === activeTab)?.label}`}
-              </button>
-              {feedback && <p className="form-feedback">{feedback}</p>}
-            </div>
+            {activeTab !== "dashboard" && (
+              <div className="business-save-bar">
+                <button
+                  className="primary-action"
+                  type="button"
+                  onClick={saveCurrentTab}
+                  disabled={isSaving}
+                >
+                  <Save size={18} aria-hidden="true" />
+                  {isSaving ? "Salvando..." : `Salvar ${tabs.find((tab) => tab.id === activeTab)?.label}`}
+                </button>
+                {feedback && <p className="form-feedback">{feedback}</p>}
+              </div>
+            )}
           </>
         )}
       </section>
     </main>
+  );
+}
+
+function BusinessOverview({ data, metrics, onEditProfile, onNewPromotion, onPreview }) {
+  const checks = [
+    { label: "Foto e descricao", done: Boolean(data.bar.image && data.bar.description) },
+    { label: "Endereco e contato", done: Boolean(data.bar.address && data.bar.phone) },
+    { label: "Horario publicado", done: Boolean(data.bar.hours) },
+    {
+      label: "Cardapio com itens",
+      done: data.categories.some((category) => category.items.length > 0)
+    },
+    {
+      label: "Promocao ou evento ativo",
+      done: data.promotions.some((item) => item.isActive) ||
+        data.events.some((item) => item.isActive)
+    }
+  ];
+  const completed = checks.filter((item) => item.done).length;
+  const completion = Math.round((completed / checks.length) * 100);
+  const totals = metrics.totals ?? {};
+  const metricItems = [
+    { label: "Visualizacoes", value: totals.view ?? 0, icon: Eye },
+    { label: "WhatsApp", value: totals.whatsapp ?? 0, icon: MessageCircle },
+    {
+      label: "Rotas abertas",
+      value: (totals.route_google ?? 0) + (totals.route_waze ?? 0),
+      icon: Navigation
+    },
+    { label: "Ligacoes", value: totals.phone ?? 0, icon: PhoneCall },
+    { label: "Favoritos", value: totals.favorite ?? 0, icon: Heart }
+  ];
+
+  return (
+    <div className="business-overview">
+      <section className="business-overview-summary">
+        <div>
+          <p className="section-kicker">Qualidade do perfil</p>
+          <h2>{completion}% completo</h2>
+          <p>
+            Perfis completos ajudam o cliente a decidir com menos duvidas.
+          </p>
+        </div>
+        <div
+          className="business-progress"
+          role="progressbar"
+          aria-label="Progresso do perfil"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow={completion}
+        >
+          <span style={{ width: `${completion}%` }} />
+        </div>
+        <div className="business-checklist">
+          {checks.map((item) => (
+            <span className={item.done ? "is-done" : ""} key={item.label}>
+              <BadgeCheck size={16} aria-hidden="true" />
+              {item.label}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="business-overview-section">
+        <div className="business-overview-title">
+          <div>
+            <p className="section-kicker">Ultimos {metrics.days} dias</p>
+            <h2>Interesse dos clientes</h2>
+          </div>
+          {!metrics.available && <span className="metrics-pending">Sem dados ainda</span>}
+        </div>
+        <div className="business-metrics-grid">
+          {metricItems.map(({ label, value, icon: Icon }) => (
+            <article className="business-metric" key={label}>
+              <Icon size={19} aria-hidden="true" />
+              <strong>{value}</strong>
+              <span>{label}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="business-overview-section">
+        <div className="business-overview-title">
+          <div>
+            <p className="section-kicker">Atalhos</p>
+            <h2>O que voce quer fazer?</h2>
+          </div>
+        </div>
+        <div className="business-quick-grid">
+          <button type="button" onClick={onPreview}>
+            <Eye size={19} aria-hidden="true" />
+            <span><strong>Ver perfil publico</strong><small>Confira como o cliente ve seu bar</small></span>
+          </button>
+          <button type="button" onClick={onEditProfile}>
+            <Store size={19} aria-hidden="true" />
+            <span><strong>Atualizar informacoes</strong><small>Contato, endereco, foto e horario</small></span>
+          </button>
+          <button type="button" onClick={onNewPromotion}>
+            <Tag size={19} aria-hidden="true" />
+            <span><strong>Publicar promocao</strong><small>Crie um motivo para visitar hoje</small></span>
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 

@@ -129,6 +129,22 @@ create table if not exists public.bar_events (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.bar_engagement_events (
+  id uuid primary key default gen_random_uuid(),
+  bar_id text not null references public.bars(id) on delete cascade,
+  event_type text not null
+    check (event_type in (
+      'view',
+      'whatsapp',
+      'phone',
+      'route_google',
+      'route_waze',
+      'favorite'
+    )),
+  session_id uuid not null,
+  created_at timestamptz not null default now()
+);
+
 alter table public.bars enable row level security;
 alter table public.reviews enable row level security;
 alter table public.profiles enable row level security;
@@ -138,6 +154,7 @@ alter table public.menu_categories enable row level security;
 alter table public.menu_items enable row level security;
 alter table public.promotions enable row level security;
 alter table public.bar_events enable row level security;
+alter table public.bar_engagement_events enable row level security;
 
 alter table public.reviews
 add column if not exists user_id uuid references auth.users(id) on delete cascade;
@@ -402,6 +419,56 @@ to authenticated
 using (public.is_bar_manager(bar_id))
 with check (public.is_bar_manager(bar_id));
 
+drop policy if exists "Anyone can record safe bar engagement" on public.bar_engagement_events;
+create policy "Anyone can record safe bar engagement"
+on public.bar_engagement_events
+for insert
+to anon, authenticated
+with check (
+  event_type in (
+    'view',
+    'whatsapp',
+    'phone',
+    'route_google',
+    'route_waze',
+    'favorite'
+  )
+);
+
+drop policy if exists "Managers can read own bar engagement" on public.bar_engagement_events;
+create policy "Managers can read own bar engagement"
+on public.bar_engagement_events
+for select
+to authenticated
+using (public.is_bar_manager(bar_id));
+
+create or replace function public.get_bar_metrics(
+  target_bar_id text,
+  since_at timestamptz
+)
+returns table(event_type text, total bigint)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_bar_manager(target_bar_id) then
+    raise exception 'Not allowed to read metrics for this bar.';
+  end if;
+
+  return query
+  select engagement.event_type, count(*)::bigint
+  from public.bar_engagement_events engagement
+  where engagement.bar_id = target_bar_id
+    and engagement.created_at >= since_at
+  group by engagement.event_type;
+end;
+$$;
+
+revoke all on function public.get_bar_metrics(text, timestamptz) from public;
+grant execute on function public.get_bar_metrics(text, timestamptz) to authenticated;
+
 revoke insert, delete on public.reviews from anon;
 
 grant select on public.bars to anon;
@@ -441,6 +508,8 @@ grant select on public.promotions to anon;
 grant select, insert, update, delete on public.promotions to authenticated;
 grant select on public.bar_events to anon;
 grant select, insert, update, delete on public.bar_events to authenticated;
+grant insert on public.bar_engagement_events to anon;
+grant select, insert on public.bar_engagement_events to authenticated;
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -772,3 +841,9 @@ on public.promotions (bar_id, starts_at, ends_at);
 
 create index if not exists bar_events_bar_start_idx
 on public.bar_events (bar_id, starts_at);
+
+create index if not exists bar_engagement_bar_created_idx
+on public.bar_engagement_events (bar_id, created_at desc);
+
+create index if not exists bar_engagement_type_created_idx
+on public.bar_engagement_events (event_type, created_at desc);
