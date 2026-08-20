@@ -37,7 +37,7 @@ html {
   isolation: isolate;
 }
 
-#root > *:not(.side-rays) {
+#root > *:not(.side-rays-container) {
   position: relative;
   z-index: 1;
 }
@@ -52,7 +52,7 @@ body {
   background-size: cover;
 }
 
-.side-rays {
+.side-rays-container {
   position: fixed;
   z-index: 0;
   inset: 0;
@@ -60,103 +60,24 @@ body {
   pointer-events: none;
   isolation: isolate;
   background:
-    radial-gradient(circle at 100% 0%, rgba(255, 193, 0, 0.08), transparent 34%),
-    linear-gradient(180deg, rgba(11, 12, 9, 0.08), rgba(11, 12, 9, 0.88) 82%);
+    radial-gradient(circle at 100% 0%, rgba(255, 193, 0, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(11, 12, 9, 0.04), rgba(11, 12, 9, 0.82) 82%);
 }
 
-.side-rays-glow,
-.side-rays-haze,
-.side-ray {
-  position: absolute;
+.side-rays-container canvas {
   display: block;
-  pointer-events: none;
+  height: 100%;
+  width: 100%;
 }
 
-.side-rays-glow {
-  top: -42vmax;
-  right: -34vmax;
-  width: 82vmax;
-  height: 82vmax;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--side-ray-color-2) 28%, transparent),
-    transparent 64%
-  );
-  filter: blur(22px) saturate(var(--side-ray-saturation));
-  opacity: calc(var(--side-ray-opacity) * 0.32);
+.bora-side-rays {
   mix-blend-mode: screen;
-  animation: side-rays-pulse calc(var(--side-ray-speed) * 2.7) ease-in-out infinite alternate;
+  opacity: 0.58;
 }
 
-.side-rays-beams {
-  position: absolute;
-  inset: -16% -10% -8% -10%;
-  transform: rotate(var(--side-ray-tilt));
-  transform-origin: 100% 0;
-  opacity: calc(var(--side-ray-opacity) * var(--side-ray-blend) * 0.54);
-  filter: saturate(var(--side-ray-saturation));
-  mix-blend-mode: screen;
-}
-
-.side-ray {
-  top: -10%;
-  right: 2%;
-  width: var(--side-ray-width);
-  height: 120%;
-  transform: rotate(var(--side-ray-angle));
-  transform-origin: 100% 0;
-  clip-path: polygon(56% 0, 100% 0, 72% 100%, 0 100%);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--side-ray-color-1) 62%, transparent),
-    color-mix(in srgb, var(--side-ray-color-2) 12%, transparent) 42%,
-    transparent 100%
-  );
-  opacity: calc(
-    var(--side-ray-intensity) * var(--side-ray-falloff) *
-      var(--side-ray-alpha)
-  );
-  filter: blur(calc(0.4px + var(--side-ray-index) * 0.05px));
-  animation: side-ray-drift var(--side-ray-speed) ease-in-out infinite alternate;
-  animation-delay: var(--side-ray-delay);
-}
-
-.side-ray:nth-child(3n) {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--side-ray-color-2) 78%, transparent),
-    transparent 68%
-  );
-}
-
-.side-rays-haze {
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 93% 0%, rgba(255, 193, 0, 0.13), transparent 34%),
-    linear-gradient(90deg, rgba(13, 14, 12, 0.2), transparent 38%, rgba(13, 14, 12, 0.38));
-  opacity: calc(var(--side-ray-opacity) * 0.42);
-}
-
-@keyframes side-ray-drift {
-  from {
-    translate: 0 0;
-  }
-
-  to {
-    translate: -1.5% 1.2%;
-  }
-}
-
-@keyframes side-rays-pulse {
-  from {
-    transform: scale(0.96);
-    opacity: 0.55;
-  }
-
-  to {
-    transform: scale(1.04);
-    opacity: 0.9;
+@media (max-width: 620px) {
+  .bora-side-rays {
+    opacity: 0.34;
   }
 }
 
