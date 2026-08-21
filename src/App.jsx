@@ -7,6 +7,7 @@ import BottomNav from "./components/BottomNav.jsx";
 import BusinessDashboard from "./components/BusinessDashboard.jsx";
 import FilterBar from "./components/FilterBar.jsx";
 import ForBusinessPage from "./components/ForBusinessPage.jsx";
+import LandingPage from "./components/LandingPage.jsx";
 import PasswordResetPage from "./components/PasswordResetPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import { ChevronRight, Store } from "lucide-react";
@@ -58,7 +59,11 @@ function getRoute() {
     return { name: "login" };
   }
 
-  return { name: "home" };
+  if (hash.startsWith("app")) {
+    return { name: "home" };
+  }
+
+  return { name: "landing" };
 }
 
 function isPromotionsHash() {
@@ -468,7 +473,7 @@ export default function App() {
   }
 
   function goBack() {
-    window.location.hash = "";
+    window.location.hash = "app";
     setShowFavoritesOnly(false);
     setActiveFilters([]);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -484,7 +489,7 @@ export default function App() {
   }
 
   function showFavorites() {
-    window.location.hash = "";
+    window.location.hash = "app";
     setShowFavoritesOnly(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -547,6 +552,19 @@ export default function App() {
     setBars(nextBars);
   }
 
+  if (route.name === "landing") {
+    return (
+      <LandingPage
+        onExplore={goBack}
+        onCreateAccount={() => {
+          window.location.hash = "login";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        onAuthenticated={goBack}
+      />
+    );
+  }
+
   if (route.name === "reset-password") {
     return (
       <>
@@ -575,7 +593,13 @@ export default function App() {
   if (route.name === "login") {
     return (
       <>
-        <AuthPage onAuthenticated={handleAuthenticated} />
+        <AuthPage
+          onAuthenticated={handleAuthenticated}
+          onBackToLanding={() => {
+            window.location.hash = "";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
         <BottomNav
           mode="profile"
           onFavorites={showFavorites}

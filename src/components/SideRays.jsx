@@ -157,7 +157,7 @@ export default function SideRays({
       iFalloff: { value: falloff },
       iOpacity: { value: opacity }
     };
-    const mesh = new Mesh({
+    const mesh = new Mesh(gl, {
       geometry: new Triangle(gl),
       program: new Program(gl, { vertex, fragment, uniforms })
     });

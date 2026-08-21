@@ -1,8 +1,9 @@
-import { LockKeyhole, Mail, UserRound } from "lucide-react";
+import { ArrowLeft, LockKeyhole, Mail, UserRound } from "lucide-react";
 import { useState } from "react";
 import AddressFields from "./AddressFields.jsx";
 import { emptyAddress, geocodeAddress, toProfilePayload } from "../services/addressService.js";
 import { resetPassword, signIn, signUp } from "../services/authService.js";
+import logoIcon from "../assets/bora-bar-icon.png";
 
 function getFriendlyAuthError(error, flow) {
   const message = [
@@ -26,7 +27,7 @@ function getFriendlyAuthError(error, flow) {
     message.includes("invalid email") ||
     message.includes("valid email")
   ) {
-    return "Digite um email valido para criar sua conta.";
+    return "Digite um e-mail válido para criar sua conta.";
   }
 
   if (
@@ -43,7 +44,7 @@ function getFriendlyAuthError(error, flow) {
     message.includes("invalid credentials") ||
     message.includes("invalid_credentials")
   ) {
-    return "Email ou senha invalidos.";
+    return "E-mail ou senha inválidos.";
   }
 
   if (message.includes("database") || message.includes("saving new user")) {
@@ -59,7 +60,7 @@ function getFriendlyAuthError(error, flow) {
     message.includes("supabase") ||
     message.includes("api key")
   ) {
-    return "Login indisponível no momento. Verifique a configuracao do app.";
+    return "Login indisponível no momento. Verifique a configuração do app.";
   }
 
   if (message.includes("failed to fetch") || message.includes("network")) {
@@ -114,20 +115,20 @@ function getHeadingCopy(mode) {
     return "Crie seu perfil para comentar e avaliar os lugares que visitar.";
   }
 
-  return "Entre para acessar seu perfil, comentar e salvar suas preferencias.";
+  return "Entre para acessar seu perfil, comentar e salvar suas preferências.";
 }
 
 function completeAuthentication(onAuthenticated) {
   try {
     onAuthenticated();
   } catch (error) {
-    console.warn("Login concluido, mas o redirecionamento falhou.", error);
-    window.location.hash = "";
+    console.warn("Login concluído, mas o redirecionamento falhou.", error);
+    window.location.hash = "app";
     window.scrollTo({ top: 0 });
   }
 }
 
-export default function AuthPage({ onAuthenticated }) {
+export default function AuthPage({ onAuthenticated, onBackToLanding }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -215,7 +216,7 @@ export default function AuthPage({ onAuthenticated }) {
       completeAuthentication(onAuthenticated);
     } catch (error) {
       const flow = isRecover ? "recover" : isSignup ? "signup" : "login";
-      console.warn("Falha no fluxo de autenticacao.", error);
+      console.warn("Falha no fluxo de autenticação.", error);
       setFeedback(getFriendlyAuthError(error, flow));
     } finally {
       setIsSubmitting(false);
@@ -223,8 +224,16 @@ export default function AuthPage({ onAuthenticated }) {
   }
 
   return (
-    <main className="account-page">
-      <section className="account-panel">
+    <main className="account-page auth-page">
+      <section className="auth-page-intro" aria-hidden="true">
+        <img src={logoIcon} alt="" />
+        <p>Encontre o clima certo para a sua noite.</p>
+        <h2>Todo rolê<br />começa com um <em>bora.</em></h2>
+      </section>
+      <section className="account-panel auth-panel">
+        <button className="auth-back-button" type="button" onClick={onBackToLanding}>
+          <ArrowLeft size={17} aria-hidden="true" /> Voltar
+        </button>
         <div className="account-heading">
           <p className="section-kicker">Sua conta</p>
           <h1>{getHeadingText(mode)}</h1>
