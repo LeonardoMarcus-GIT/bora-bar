@@ -681,6 +681,11 @@ p {
   color: var(--muted);
 }
 
+.empty-state .primary-action {
+  margin: 18px auto 0;
+  padding: 0 22px;
+}
+
 .back-button {
   display: inline-flex;
   align-items: center;

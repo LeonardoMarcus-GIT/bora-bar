@@ -105,8 +105,10 @@ e login/painel ficam indisponíveis.
 1. ~~`is_open` manual~~ — resolvido em 15/10/2026: status calculado por
    `src/utils/openingHours.js`. Pendente: o editor de horário do painel só
    edita um trecho (não suporta "Seg a qui… | Sex e sab…" com horários diferentes).
-2. Se o Supabase falhar ou a tabela estiver vazia, `fetchBars` mostra os bares
-   fictícios de `mockBars.js` em produção.
+2. ~~Bares fictícios em produção quando o banco falha~~ — resolvido em
+   15/10/2026: `fetchBars` lança erro (timeout de 15 s) e o App mostra
+   "Tentar de novo"; `mockBars` só aparece em `npm run dev` sem Supabase.
+   A landing ainda usa fotos/nomes de `mockBars` como ilustração.
 3. Rotas com `#` impedem prévia de link no WhatsApp/Instagram e indexação no Google.
 4. A landing promete "ver o movimento / lugares bombando", que não existe.
 5. Imagens da landing em PNG de 0,8–1,4 MB; bundle JS de ~580 KB sem divisão.

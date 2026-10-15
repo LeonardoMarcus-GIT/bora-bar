@@ -146,6 +146,8 @@ export default function App() {
   const [route, setRoute] = useState(getRoute);
   const [bars, setBars] = useState([]);
   const [isLoadingBars, setIsLoadingBars] = useState(true);
+  const [barsLoadError, setBarsLoadError] = useState(false);
+  const [barsReloadKey, setBarsReloadKey] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
@@ -163,17 +165,31 @@ export default function App() {
   useEffect(() => {
     let isMounted = true;
 
-    fetchBars().then((nextBars) => {
-      if (isMounted) {
-        setBars(nextBars);
-        setIsLoadingBars(false);
-      }
-    });
+    setIsLoadingBars(true);
+    setBarsLoadError(false);
+
+    fetchBars()
+      .then((nextBars) => {
+        if (isMounted) {
+          setBars(nextBars);
+        }
+      })
+      .catch(() => {
+        // Nunca mostrar bares de exemplo no lugar dos reais: mostramos o erro.
+        if (isMounted) {
+          setBarsLoadError(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingBars(false);
+        }
+      });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [barsReloadKey]);
 
   useEffect(() => {
     const timerId = window.setInterval(() => setNow(new Date()), 60 * 1000);
@@ -559,8 +575,17 @@ export default function App() {
   }
 
   async function refreshBars() {
-    const nextBars = await fetchBars();
-    setBars(nextBars);
+    try {
+      const nextBars = await fetchBars();
+      setBars(nextBars);
+      setBarsLoadError(false);
+    } catch {
+      // Mantém a lista atual; o painel já avisou se o salvamento falhou.
+    }
+  }
+
+  function retryLoadBars() {
+    setBarsReloadKey((key) => key + 1);
   }
 
   if (route.name === "landing") {
@@ -740,7 +765,9 @@ export default function App() {
           searchTerm={searchTerm}
           searchSuggestions={searchSuggestions}
           summaryLabel={
-            hasLocation
+            barsLoadError
+              ? "Bares indisponíveis no momento"
+              : hasLocation
               ? `${visibleBars.length} bares perto de você`
               : isUsingProfileLocation
                 ? `${visibleBars.length} bares perto do seu endereço`
@@ -751,13 +778,33 @@ export default function App() {
           onSearchSelect={selectSearchSuggestion}
         />
         <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
-        <BarList
-          bars={visibleBars}
-          favoriteIds={favoriteIds}
-          isFavoritesView={showFavoritesOnly}
-          onSelectBar={selectBar}
-          onToggleFavorite={toggleFavorite}
-        />
+        {isLoadingBars ? (
+          <section className="empty-state" aria-live="polite">
+            <h2>Carregando bares</h2>
+            <p>Buscando o que está rolando perto de você.</p>
+          </section>
+        ) : barsLoadError ? (
+          <section className="empty-state" role="alert">
+            <h2>Não conseguimos carregar os bares agora</h2>
+            <p>Pode ser a conexão ou uma instabilidade rápida. Tente de novo em instantes.</p>
+            <button className="primary-action" type="button" onClick={retryLoadBars}>
+              Tentar de novo
+            </button>
+          </section>
+        ) : bars.length === 0 ? (
+          <section className="empty-state">
+            <h2>Nenhum bar por aqui ainda</h2>
+            <p>Os primeiros estabelecimentos estão chegando. Volte em breve.</p>
+          </section>
+        ) : (
+          <BarList
+            bars={visibleBars}
+            favoriteIds={favoriteIds}
+            isFavoritesView={showFavoritesOnly}
+            onSelectBar={selectBar}
+            onToggleFavorite={toggleFavorite}
+          />
+        )}
         <section className="home-business-invite">
           <span className="home-business-icon">
             <Store size={20} aria-hidden="true" />

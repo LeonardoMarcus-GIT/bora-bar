@@ -64,7 +64,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | Arquivo | O que é |
 | --- | --- |
 | `src/main.jsx` | Ponto de entrada. Renderiza o efeito `SideRays` (luz amarela no canto) e o `App` dentro do `AuthProvider`. Importa `styles.css`. |
-| `src/App.jsx` | Componente raiz (≈780 linhas). Faz o **roteamento por hash** (`getRoute`), carrega os bares, calcula a distância de cada um até o usuário (GPS ou endereço do perfil verificado), limita a descoberta a **20 km**, monta as sugestões de busca (bar, bairro, cidade), aplica filtros (aberto, promoção, mais barato, mais próximo, favoritos), guarda favoritos no `localStorage` e decide qual tela mostrar. Tem um relógio interno (`now`, atualizado a cada minuto) que recalcula o aberto/fechado de cada bar com `getOpenStatus` e adiciona `openStatusDetail` ao bar. |
+| `src/App.jsx` | Componente raiz (≈780 linhas). Faz o **roteamento por hash** (`getRoute`), carrega os bares, calcula a distância de cada um até o usuário (GPS ou endereço do perfil verificado), limita a descoberta a **20 km**, monta as sugestões de busca (bar, bairro, cidade), aplica filtros (aberto, promoção, mais barato, mais próximo, favoritos), guarda favoritos no `localStorage` e decide qual tela mostrar. Tem um relógio interno (`now`, atualizado a cada minuto) que recalcula o aberto/fechado de cada bar com `getOpenStatus` e adiciona `openStatusDetail` ao bar. Na lista mostra três estados: carregando, erro com botão "Tentar de novo" (`barsLoadError` / `retryLoadBars`) e "Nenhum bar por aqui ainda". |
 | `src/styles.css` | Todo o CSS do app (≈2.800 linhas): landing, lista, detalhes, painel, formulários, navegação inferior, responsivo. |
 
 ## `src/context/`
@@ -84,7 +84,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | Arquivo | O que é |
 | --- | --- |
 | `src/services/supabaseClient.js` | Cria o cliente Supabase a partir das variáveis `VITE_*`. Exporta `supabase` (ou `null`) e `isSupabaseConfigured`. |
-| `src/services/barsService.js` | `fetchBars()`: busca bares com categorias, itens, promoções e eventos numa consulta só; filtra promoções vigentes e eventos futuros; converte para o formato do front. **Se o Supabase não estiver configurado, der erro ou vier vazio, devolve `mockBars`.** |
+| `src/services/barsService.js` | `fetchBars()`: busca bares com categorias, itens, promoções e eventos numa consulta só; filtra promoções vigentes e eventos futuros; converte para o formato do front. Tem limite de 15 s. **Se o banco falhar, lança erro** (nunca devolve bares de exemplo em produção); banco sem bares ativos devolve lista vazia. `mockBars` só é usado rodando localmente (`npm run dev`) sem as variáveis do Supabase. |
 | `src/services/businessService.js` | Tudo do painel do dono: `fetchBusinessAccess` (vínculos e pedidos de acesso do usuário), `createBarClaim` (pedir acesso a um bar), `fetchManagedBarData`, `updateManagedBar` (perfil e endereço), `replaceManagedMenu`, `replaceManagedPromotions`, `replaceManagedEvents` (via funções RPC). Converte endereço antigo em texto para campos estruturados. |
 | `src/services/businessImageService.js` | `uploadBusinessCoverImage(barId, file)`: valida tipo (JPG/PNG/WebP) e tamanho (8 MB), envia para o bucket `bar-images/<barId>/<uuid>.<ext>` e devolve a URL pública. |
 | `src/services/analyticsService.js` | Métricas anônimas. `recordBarEvent` grava `view`, `whatsapp`, `phone`, `route_google`, `route_waze` ou `favorite` com um id de sessão aleatório; `recordBarViewOnce` conta uma visualização por bar por sessão; `fetchBarMetrics` chama `get_bar_metrics` (últimos 30 dias). |
@@ -105,7 +105,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 
 | Arquivo | O que é |
 | --- | --- |
-| `src/data/mockBars.js` | 6 bares fictícios de Volta Redonda (Esquina 77, Boteco do Porto, Varanda Aurora, Marola Bar, Quintal Boa Prosa, Samba da Rua) com cardápio, promoção e horário. Usados quando não há Supabase e como fallback. Telefones com DDD 11 (incorreto para a cidade). |
+| `src/data/mockBars.js` | 6 bares fictícios de Volta Redonda (Esquina 77, Boteco do Porto, Varanda Aurora, Marola Bar, Quintal Boa Prosa, Samba da Rua) com cardápio, promoção e horário. Usados só rodando localmente sem Supabase e como ilustração na landing. Telefones com DDD 11 (incorreto para a cidade). |
 | `src/data/barCoordinates.js` | Endereços e coordenadas dos mesmos 6 bares. **Não é importado por nenhum arquivo** (código morto). |
 
 ## `src/assets/`

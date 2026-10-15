@@ -100,9 +100,34 @@ function mapBarFromDatabase(bar) {
   };
 }
 
+const FETCH_TIMEOUT_MS = 15000;
+
+function createTimeoutSignal(milliseconds) {
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    return AbortSignal.timeout(milliseconds);
+  }
+
+  // Navegadores antigos: mesmo efeito com AbortController.
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), milliseconds);
+  return controller.signal;
+}
+
+/**
+ * Carrega os bares do Supabase.
+ * - Em produção, NUNCA devolve os bares de exemplo: se o banco falhar ou
+ *   demorar mais de 15 s, lança erro (o App mostra "tentar de novo").
+ * - Banco sem bares ativos devolve lista vazia.
+ * - Os bares de exemplo (mockBars) só aparecem rodando localmente
+ *   (`npm run dev`) sem as variáveis do Supabase configuradas.
+ */
 export async function fetchBars() {
   if (!isSupabaseConfigured) {
-    return mockBars;
+    if (import.meta.env.DEV) {
+      return mockBars;
+    }
+
+    throw new Error("SUPABASE_NOT_CONFIGURED");
   }
 
   const { data, error } = await supabase
@@ -142,16 +167,13 @@ export async function fetchBars() {
         is_active
       )
     `)
-    .order("name", { ascending: true });
+    .order("name", { ascending: true })
+    .abortSignal(createTimeoutSignal(FETCH_TIMEOUT_MS));
 
   if (error) {
     console.warn("Não foi possível carregar bares do Supabase.", error);
-    return mockBars;
+    throw error;
   }
 
-  if (!data.length) {
-    return mockBars;
-  }
-
-  return data.map(mapBarFromDatabase).filter((bar) => bar.isActive);
+  return (data ?? []).map(mapBarFromDatabase).filter((bar) => bar.isActive);
 }
