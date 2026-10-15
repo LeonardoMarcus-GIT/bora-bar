@@ -374,3 +374,20 @@
 @media (prefers-reduced-motion: reduce) {
   .landing-page *, .landing-page *::before, .landing-page *::after { scroll-behavior: auto !important; transition: none !important; }
 }
+
+/* Topo mais compacto (15/10/2026): menos espaço vazio acima do título */
+.landing-hero { min-height: min(700px, 88svh); }
+.landing-hero-content {
+  align-items: center;
+  min-height: calc(min(700px, 88svh) - 100px);
+  padding: 56px 0 80px;
+}
+
+@media (max-width: 620px) {
+  .landing-hero { min-height: 0; }
+  .landing-hero-content {
+    min-height: 0;
+    padding: 40px 0 72px;
+  }
+  .landing-hero h1 { margin-top: 6px; }
+}

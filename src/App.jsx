@@ -18,6 +18,7 @@ import { fetchProfile } from "./services/profilesService.js";
 import { fetchBars } from "./services/barsService.js";
 import { calculateDistanceKm } from "./utils/geo.js";
 import { getOpenStatus } from "./utils/openingHours.js";
+import { barMatchesVibe, getVibe } from "./utils/vibes.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
@@ -58,6 +59,11 @@ function getRoute() {
 
   if (hash.startsWith("login")) {
     return { name: "login" };
+  }
+
+  // #clima/<id>: lista filtrada pelo clima (vindo de "Qual é o rolê de hoje?").
+  if (hash.startsWith("clima/")) {
+    return { name: "home", vibe: hash.replace("clima/", "") };
   }
 
   if (hash.startsWith("app")) {
@@ -273,6 +279,8 @@ export default function App() {
   }, []);
 
   const selectedBarId = route.name === "bar" ? route.barId : "";
+  const activeVibe = route.name === "home" && route.vibe ? getVibe(route.vibe) : null;
+  const activeVibeId = activeVibe?.id ?? "";
   const activeLocation = hasLocation ? userLocation : profileLocation;
   const hasDistanceLocation = Boolean(activeLocation);
   const isUsingProfileLocation = !hasLocation && Boolean(profileLocation);
@@ -421,6 +429,7 @@ export default function App() {
       const matchesOpen = !activeFilters.includes("open") || bar.isOpen;
       const matchesPromo =
         !activeFilters.includes("promo") || Boolean(bar.promotion);
+      const matchesVibe = barMatchesVibe(bar, activeVibeId);
       const matchesFavorite =
         !showFavoritesOnly || favoriteIds.includes(bar.id);
       return (
@@ -428,6 +437,7 @@ export default function App() {
         matchesOpen &&
         matchesPromo &&
         matchesFavorite &&
+        matchesVibe &&
         isWithinDiscoveryRange(bar)
       );
     });
@@ -449,7 +459,8 @@ export default function App() {
     favoriteIds,
     hasDistanceLocation,
     searchTerm,
-    showFavoritesOnly
+    showFavoritesOnly,
+    activeVibeId
   ]);
 
   function toggleFavorite(barId) {
@@ -779,6 +790,16 @@ export default function App() {
           onSearchSelect={selectSearchSuggestion}
         />
         <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
+        {activeVibe && (
+          <div className="vibe-filter-bar">
+            <span>
+              Mostrando lugares com clima de <strong>{activeVibe.label}</strong>
+            </span>
+            <button type="button" onClick={goBack}>
+              Ver todos
+            </button>
+          </div>
+        )}
         {isLoadingBars ? (
           <section className="empty-state" aria-live="polite">
             <h2>Carregando bares</h2>
@@ -796,6 +817,14 @@ export default function App() {
           <section className="empty-state">
             <h2>Nenhum bar por aqui ainda</h2>
             <p>Os primeiros estabelecimentos estão chegando. Volte em breve.</p>
+          </section>
+        ) : activeVibe && visibleBars.length === 0 ? (
+          <section className="empty-state">
+            <h2>Nenhum lugar com {activeVibe.label.toLowerCase()} por perto ainda</h2>
+            <p>Novos estabelecimentos estão chegando. Enquanto isso, veja todos os lugares.</p>
+            <button className="primary-action" type="button" onClick={goBack}>
+              Ver todos
+            </button>
           </section>
         ) : (
           <BarList

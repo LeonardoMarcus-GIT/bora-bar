@@ -12,6 +12,7 @@ create table if not exists public.bars (
   longitude numeric(10, 7),
   is_active boolean not null default true,
   is_listed boolean not null default true,
+  vibes text[] not null default '{}',
   is_open boolean not null default false,
   price_level text not null default '$$',
   promotion text not null default '',
@@ -171,6 +172,9 @@ add column if not exists is_active boolean not null default true;
 
 alter table public.bars
 add column if not exists is_listed boolean not null default true;
+
+alter table public.bars
+add column if not exists vibes text[] not null default '{}';
 
 alter table public.bars
 add column if not exists postal_code text;
@@ -497,6 +501,7 @@ grant update (
   hours,
   phone,
   description,
+  vibes,
   updated_at
 ) on public.bars to authenticated;
 grant select on public.reviews to anon;

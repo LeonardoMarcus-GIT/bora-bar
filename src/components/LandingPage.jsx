@@ -12,12 +12,10 @@ import {
   GlassWater,
   Heart,
   Instagram,
-  LocateFixed,
   LockKeyhole,
   MapPin,
   Menu,
   Music2,
-  Play,
   Search,
   Sparkles,
   Star,
@@ -36,37 +34,18 @@ import "./LandingPage.css";
 
 const discoveryBars = mockBars.slice(0, 3);
 
+// Cada card leva à lista filtrada pelo clima (#clima/<id>, ver src/utils/vibes.js).
 const nightTypes = [
-  { label: "Barzinho", icon: Beer, image: discoveryBars[0]?.image },
-  { label: "Comer bem", icon: UtensilsCrossed, image: discoveryBars[1]?.image },
-  { label: "Drinks", icon: GlassWater, image: discoveryBars[2]?.image },
-  { label: "Música ao vivo", icon: Music2, image: mockBars[3]?.image },
-  { label: "Festa", icon: Sparkles, image: mockBars[4]?.image },
-  { label: "Date", icon: Heart, image: mockBars[5]?.image },
-  { label: "Assistir jogo", icon: Ticket, image: discoveryBars[1]?.image },
-  { label: "Rooftop", icon: ArrowUpRight, image: discoveryBars[2]?.image }
+  { vibe: "barzinho", label: "Barzinho", icon: Beer, image: discoveryBars[0]?.image },
+  { vibe: "comer-bem", label: "Comer bem", icon: UtensilsCrossed, image: discoveryBars[1]?.image },
+  { vibe: "drinks", label: "Drinks", icon: GlassWater, image: discoveryBars[2]?.image },
+  { vibe: "musica-ao-vivo", label: "Música ao vivo", icon: Music2, image: mockBars[3]?.image },
+  { vibe: "festa", label: "Festa", icon: Sparkles, image: mockBars[4]?.image },
+  { vibe: "date", label: "Date", icon: Heart, image: mockBars[5]?.image },
+  { vibe: "assistir-jogo", label: "Assistir jogo", icon: Ticket, image: discoveryBars[1]?.image },
+  { vibe: "rooftop", label: "Rooftop", icon: ArrowUpRight, image: discoveryBars[2]?.image }
 ];
 
-const stories = [
-  {
-    label: "Tá bombando",
-    icon: Flame,
-    title: "A noite começa no primeiro brinde.",
-    image: discoveryBars[0]?.image
-  },
-  {
-    label: "Happy Hour começou",
-    icon: Beer,
-    title: "Chopp gelado, conversa solta.",
-    image: discoveryBars[1]?.image
-  },
-  {
-    label: "Música ao vivo agora",
-    icon: Music2,
-    title: "Seu próximo refrão favorito.",
-    image: discoveryBars[2]?.image
-  }
-];
 
 function LandingMedia({ image, alt, className = "", priority = false }) {
   return (
@@ -296,32 +275,22 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
         </div>
       </section>
 
-      <section className="landing-map-section landing-section" id="movimento">
-        <div className="landing-map-copy">
-          <p className="landing-eyebrow">O pulso da cidade</p>
-          <h2>Veja o que está<br /><em>rolando agora.</em></h2>
-          <p>Os lugares ganham vida no mapa para você sentir o movimento e escolher o momento certo de chegar.</p>
-          <button className="landing-cta landing-cta-primary" type="button" onClick={onExplore}>Abrir o mapa <LocateFixed size={18} /></button>
-        </div>
-        <div className="landing-map-canvas" aria-label="Mapa ilustrativo com estabelecimentos próximos">
-          <div className="landing-map-grid" />
-          <div className="landing-map-road road-one" /><div className="landing-map-road road-two" /><div className="landing-map-road road-three" />
-          <div className="landing-map-pin pin-main"><span><Flame size={17} /></span><div><strong>Bar do Centro</strong><small>Bombando</small></div></div>
-          <div className="landing-map-pin pin-rooftop"><span><UsersRound size={16} /></span><div><strong>Rooftop 360</strong><small>82 pessoas</small></div></div>
-          <div className="landing-map-pin pin-music"><span><Music2 size={16} /></span><div><strong>Boteco 21</strong><small>Música ao vivo</small></div></div>
-          <div className="landing-map-pin pin-pizza"><span><UtensilsCrossed size={16} /></span><div><strong>Casa Pizza</strong><small>Mesas disponíveis</small></div></div>
-          <div className="landing-map-you"><span /> Você está aqui</div>
-        </div>
-      </section>
-
       <section className="landing-types landing-section">
         <div className="landing-types-heading">
           <p className="landing-eyebrow">Do seu jeito</p>
           <h2>Qual é o rolê<br /><em>de hoje?</em></h2>
         </div>
         <div className="landing-types-grid">
-          {nightTypes.map(({ label, icon: Icon, image }, index) => (
-            <button className={`landing-type-card type-${index + 1}`} type="button" key={label} onClick={onExplore}>
+          {nightTypes.map(({ vibe, label, icon: Icon, image }, index) => (
+            <button
+              className={`landing-type-card type-${index + 1}`}
+              type="button"
+              key={label}
+              onClick={() => {
+                window.location.hash = `clima/${vibe}`;
+                window.scrollTo({ top: 0 });
+              }}
+            >
               <LandingMedia image={image} alt="" />
               <span className="landing-type-shade" />
               <Icon size={20} aria-hidden="true" />
@@ -336,23 +305,8 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
         <div className="landing-how-heading"><p className="landing-eyebrow">Sem complicação</p><h2>Descubra. Combine.<br /><em>Bora.</em></h2></div>
         <div className="landing-steps">
           <article><span>01</span><MapPin size={28} /><h3>Descubra</h3><p>Encontre lugares próximos que combinam com você.</p></article>
-          <article><span>02</span><Flame size={28} /><h3>Veja o movimento</h3><p>Descubra quais lugares estão tranquilos e quais estão bombando.</p></article>
+          <article><span>02</span><Clock3 size={28} /><h3>Confira antes de sair</h3><p>Veja se está aberto, o cardápio, os preços e as promoções do dia.</p></article>
           <article><span>03</span><UsersRound size={28} /><h3>Chama a galera</h3><p>Compartilhe o lugar e transforme o plano em rolê.</p></article>
-        </div>
-      </section>
-
-      <section className="landing-stories landing-section">
-        <div className="landing-stories-heading"><p className="landing-eyebrow">Experiências reais</p><h2>Encontre o clima<br /><em>que você procura.</em></h2><p>Um gostinho da noite, do jeito que ela é.</p></div>
-        <div className="landing-stories-row">
-          {stories.map(({ label, icon: Icon, title, image }, index) => (
-            <article className={`landing-story story-${index + 1}`} key={label}>
-              <LandingMedia image={image} alt="" />
-              <span className="landing-story-glow" />
-              <div className="landing-story-top"><span><Icon size={15} aria-hidden="true" /> {label}</span><button type="button" aria-label="Reproduzir experiência"><Play size={15} fill="currentColor" /></button></div>
-              <h3>{title}</h3>
-              <p>Experiência Bora Bar</p>
-            </article>
-          ))}
         </div>
       </section>
 

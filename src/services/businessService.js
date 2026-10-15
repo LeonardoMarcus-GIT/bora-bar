@@ -61,7 +61,10 @@ function mapManagedBar(bar) {
     hours: bar.hours,
     phone: bar.phone,
     description: bar.description,
-    legacyMenu: bar.menu ?? {}
+    legacyMenu: bar.menu ?? {},
+    // "Clima do lugar". vibesSupported = a coluna existe no banco.
+    vibes: Array.isArray(bar.vibes) ? bar.vibes : [],
+    vibesSupported: Array.isArray(bar.vibes)
   };
 }
 
@@ -261,6 +264,7 @@ export async function updateManagedBar(barId, bar) {
       hours: bar.hours.trim(),
       phone: bar.phone.trim(),
       description: bar.description.trim(),
+      ...(bar.vibesSupported ? { vibes: bar.vibes ?? [] } : {}),
       updated_at: new Date().toISOString()
     })
     .eq("id", barId)

@@ -27,6 +27,7 @@ import { geocodeAddress } from "../services/addressService.js";
 import { fetchBarMetrics } from "../services/analyticsService.js";
 import { uploadBusinessCoverImage } from "../services/businessImageService.js";
 import { getOpenStatus, parseOpeningDays } from "../utils/openingHours.js";
+import { VIBES } from "../utils/vibes.js";
 import {
   createBarClaim,
   fetchBusinessAccess,
@@ -908,6 +909,37 @@ export default function BusinessDashboard({
                   value={managedData.bar.hours}
                   onChange={(hours) => updateBar({ hours })}
                 />
+
+                {managedData.bar.vibesSupported && (
+                  <div className="vibes-editor">
+                    <span>
+                      Clima do lugar: em quais buscas da página inicial ele aparece
+                    </span>
+                    <div className="vibes-editor-options" role="group" aria-label="Clima do lugar">
+                      {VIBES.map((vibe) => {
+                        const isActive = managedData.bar.vibes.includes(vibe.id);
+
+                        return (
+                          <button
+                            className={isActive ? "is-active" : ""}
+                            type="button"
+                            key={vibe.id}
+                            aria-pressed={isActive}
+                            onClick={() =>
+                              updateBar({
+                                vibes: isActive
+                                  ? managedData.bar.vibes.filter((id) => id !== vibe.id)
+                                  : [...managedData.bar.vibes, vibe.id]
+                              })
+                            }
+                          >
+                            {vibe.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <BusinessCoverImagePicker
                   image={managedData.bar.image}
