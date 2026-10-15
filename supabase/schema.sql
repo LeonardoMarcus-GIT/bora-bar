@@ -11,6 +11,7 @@ create table if not exists public.bars (
   latitude numeric(10, 7),
   longitude numeric(10, 7),
   is_active boolean not null default true,
+  is_listed boolean not null default true,
   is_open boolean not null default false,
   price_level text not null default '$$',
   promotion text not null default '',
@@ -167,6 +168,9 @@ add column if not exists longitude numeric(10, 7);
 
 alter table public.bars
 add column if not exists is_active boolean not null default true;
+
+alter table public.bars
+add column if not exists is_listed boolean not null default true;
 
 alter table public.bars
 add column if not exists postal_code text;
@@ -839,6 +843,9 @@ on public.bars (city, neighborhood);
 
 create index if not exists bars_coordinates_idx
 on public.bars (latitude, longitude);
+
+create index if not exists bars_is_listed_idx
+on public.bars (is_listed);
 
 create index if not exists bars_postal_code_idx
 on public.bars (postal_code);

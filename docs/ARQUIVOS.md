@@ -27,7 +27,7 @@ Supabase (tabelas + RLS)
 | `package.json` | Nome `bora-bar`, versão 0.1.0, módulos ES. Scripts `dev`, `build`, `preview`, `serve:dist`. Dependências: React 19, Vite 7, `@supabase/supabase-js`, `lucide-react`, `ogl`. |
 | `package-lock.json` | Versões travadas das dependências (gerado pelo npm). |
 | `index.html` | HTML base em pt-BR com `<div id="root">` e meta description. Carrega `src/main.jsx`. Não tem tags Open Graph (prévia de link). |
-| `vite.config.js` | Config do Vite com plugin React e `base: "./"` (caminhos relativos no build). |
+| `vite.config.js` | Config do Vite com plugin React e `base: "/"` (caminhos absolutos — necessário para a página `/r/<id>` achar os arquivos). |
 | `netlify.toml` | **Deploy ativo (https://bora-bar.netlify.app).** Build `npm run build`, saída `dist`, funções em `netlify/functions`; redireciona `/api/geocode-profile` para a função e todo o resto para `index.html`. |
 | `vercel.json` | Config da publicação antiga na Vercel (parada). Mantido só por histórico. |
 | `.env.example` | Modelo das duas variáveis: `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. |
@@ -57,13 +57,14 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `supabase/seed-mock-bars.sql` | Insere os 6 bares fictícios de Volta Redonda (mesmos de `mockBars.js`). Rodar depois do schema. |
 | `supabase/business-address-migration.sql` | Migração para bancos antigos: adiciona CEP, rua, número, complemento, estado e UF na tabela `bars` e libera a edição dessas colunas para os donos. |
 | `supabase/engagement-metrics-migration.sql` | Migração para bancos antigos: cria `bar_engagement_events`, policies e a função `get_bar_metrics`. |
+| `supabase/listing-visibility-migration.sql` | Migração da coluna `bars.is_listed` (aparece no guia ou só página avulsa). Já aplicada em 15/10/2026. |
 | `supabase/bar-images-storage.sql` | Migração para bancos antigos: cria o bucket público `bar-images` (até 8 MB, JPG/PNG/WebP) e as policies para cada dono enviar fotos só na pasta do próprio bar. |
 
 ## `src/` — entrada
 
 | Arquivo | O que é |
 | --- | --- |
-| `src/main.jsx` | Ponto de entrada. Renderiza o efeito `SideRays` (luz amarela no canto) e o `App` dentro do `AuthProvider`. Importa `styles.css`. |
+| `src/main.jsx` | Ponto de entrada. **Se o endereço for `/r/<id>`, renderiza só a `StandalonePage`** (página avulsa, sem marca, sem login, sem o efeito de luz); senão, o app normal. Renderiza o efeito `SideRays` (luz amarela no canto) e o `App` dentro do `AuthProvider`. Importa `styles.css`. |
 | `src/App.jsx` | Componente raiz (≈780 linhas). Faz o **roteamento por hash** (`getRoute`), carrega os bares, calcula a distância de cada um até o usuário (GPS ou endereço do perfil verificado), limita a descoberta a **20 km**, monta as sugestões de busca (bar, bairro, cidade), aplica filtros (aberto, promoção, mais barato, mais próximo, favoritos), guarda favoritos no `localStorage` e decide qual tela mostrar. Tem um relógio interno (`now`, atualizado a cada minuto) que recalcula o aberto/fechado de cada bar com `getOpenStatus` e adiciona `openStatusDetail` ao bar. O card "Seu estabelecimento no Bora Bar" no fim da lista é um botão inteiro (ícone, texto e seta levam a `#for-business`). Na lista mostra três estados: carregando, erro com botão "Tentar de novo" (`barsLoadError` / `retryLoadBars`) e "Nenhum bar por aqui ainda". |
 | `src/styles.css` | Todo o CSS do app (≈2.800 linhas): landing, lista, detalhes, painel, formulários, navegação inferior, responsivo. |
 
@@ -84,7 +85,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | Arquivo | O que é |
 | --- | --- |
 | `src/services/supabaseClient.js` | Cria o cliente Supabase a partir das variáveis `VITE_*`. Exporta `supabase` (ou `null`) e `isSupabaseConfigured`. |
-| `src/services/barsService.js` | `fetchBars()`: busca bares com categorias, itens, promoções e eventos numa consulta só; filtra promoções vigentes e eventos futuros; converte para o formato do front. Tem limite de 15 s. **Se o banco falhar, lança erro** (nunca devolve bares de exemplo em produção); banco sem bares ativos devolve lista vazia. `mockBars` só é usado rodando localmente (`npm run dev`) sem as variáveis do Supabase. |
+| `src/services/barsService.js` | `fetchBars()` (só estabelecimentos com `is_listed = true`) e `fetchBarById(id)` (um estabelecimento, listado ou não — para a página avulsa). `fetchBars()`: busca bares com categorias, itens, promoções e eventos numa consulta só; filtra promoções vigentes e eventos futuros; converte para o formato do front. Tem limite de 15 s. **Se o banco falhar, lança erro** (nunca devolve bares de exemplo em produção); banco sem bares ativos devolve lista vazia. `mockBars` só é usado rodando localmente (`npm run dev`) sem as variáveis do Supabase. |
 | `src/services/businessService.js` | Tudo do painel do dono: `fetchBusinessAccess` (vínculos e pedidos de acesso do usuário), `createBarClaim` (pedir acesso a um bar), `fetchManagedBarData`, `updateManagedBar` (perfil e endereço), `replaceManagedMenu`, `replaceManagedPromotions`, `replaceManagedEvents` (via funções RPC). Converte endereço antigo em texto para campos estruturados. |
 | `src/services/businessImageService.js` | `uploadBusinessCoverImage(barId, file)`: valida tipo (JPG/PNG/WebP) e tamanho (8 MB), envia para o bucket `bar-images/<barId>/<uuid>.<ext>` e devolve a URL pública. |
 | `src/services/analyticsService.js` | Métricas anônimas. `recordBarEvent` grava `view`, `whatsapp`, `phone`, `route_google`, `route_waze` ou `favorite` com um id de sessão aleatório; `recordBarViewOnce` conta uma visualização por bar por sessão; `fetchBarMetrics` chama `get_bar_metrics` (últimos 30 dias). |
@@ -125,7 +126,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `AuthPage.jsx` | Login, cadastro e "esqueci a senha" (`#login`). No cadastro coleta nome e endereço opcional, calcula coordenadas e salva nos metadados do usuário. Traduz erros do Supabase para português. |
 | `PasswordResetPage.jsx` | Tela para definir nova senha ao voltar do link de recuperação enviado por e-mail. |
 | `ProfilePage.jsx` | Perfil do usuário (`#profile`): nome e endereço (para calcular distância sem GPS), sair da conta, e atalhos para a área do estabelecimento. |
-| `BusinessDashboard.jsx` | **Painel do dono** (`#business`, ≈1.470 linhas). Sem vínculo: formulário para pedir acesso a um bar (nome, telefone, CNPJ opcional, mensagem) e status dos pedidos. Com vínculo: seletor de bar e 5 abas — **Visão geral** (percentual do perfil completo, métricas de 30 dias, atalhos), **Perfil público** (nome, foto por upload ou URL, endereço por CEP, editor de dias/horário com minutos, telefone, descrição, faixa de preço e o status aberto/fechado — automático pelo horário; a chave manual só aparece quando o horário não pode ser lido. O editor de horário edita só o primeiro trecho: horários com vários trechos ("Seg a qui… \| Sex e sab…") viram um só se o dono mexer), **Cardápio** (categorias e itens com preço e disponibilidade), **Promoções** e **Eventos** (com início, fim, preço e ativo). Cada aba salva com um botão. |
+| `BusinessDashboard.jsx` | **Painel do dono** (`#business`, ≈1.470 linhas). Sem vínculo: formulário para pedir acesso a um bar (nome, telefone, CNPJ opcional, mensagem) e status dos pedidos. Com vínculo: seletor de bar e 5 abas — **Visão geral** (percentual do perfil completo, métricas de 30 dias, atalhos; "Ver minha página" abre `/r/<id>` em nova aba), **Perfil público** (nome, foto por upload ou URL, endereço por CEP, editor de dias/horário com minutos, telefone, descrição, faixa de preço e o status aberto/fechado — automático pelo horário; a chave manual só aparece quando o horário não pode ser lido. O editor de horário edita só o primeiro trecho: horários com vários trechos ("Seg a qui… \| Sex e sab…") viram um só se o dono mexer), **Cardápio** (categorias e itens com preço e disponibilidade), **Promoções** e **Eventos** (com início, fim, preço e ativo). Cada aba salva com um botão. |
 | `ForBusinessPage.jsx` | Página de vendas para donos (`#for-business`): benefícios, "como entrar" em 3 passos e o **Programa Parceiro Fundador** (30 dias grátis, 10 primeiros bares de Volta Redonda, sem preço publicado). Os botões "Quero ser parceiro"/"Quero minha vaga" abrem o WhatsApp comercial (constante `SALES_WHATSAPP`, hoje 24 99219-6584) com mensagem pronta. No fim, atalho para quem já é parceiro entrar no painel. |
 
 ## `src/components/` — peças do app
@@ -136,8 +137,9 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `FilterBar.jsx` | Quatro filtros: Aberto agora, Mais barato, Mais próximo, Com promoção. |
 | `BarList.jsx` | Grade de `BarCard`; mostra estado vazio próprio para favoritos ou busca sem resultado. |
 | `BarCard.jsx` | Card do bar: foto, aberto/fechado, faixa de preço, bairro, distância, "a partir de R$", promoção e botão de favoritar. |
+| `StandalonePage.jsx` | **Página avulsa do estabelecimento (`/r/<id>`)** — o "site" do restaurante/bar para QR Code e link no Instagram, sem a marca Bora Bar. Carrega um estabelecimento com `fetchBarById` (aparece no guia ou não). Mostra foto, nome, aberto/fechado automático, faixa **Hoje** (promoções vigentes + eventos do dia, ex.: prato do dia), botões WhatsApp/Ligar/Como chegar, cardápio com descrições, próximos eventos, descrição, horário e endereço. Registra métricas (visualização, WhatsApp, ligação, rota). Estados: carregando, erro com "Tentar de novo" e "Página não encontrada". |
 | `BarDetails.jsx` | Página do bar (`#bar/<id>`): foto, status, ações rápidas (WhatsApp, ligar, Google Maps, Waze — cada clique é registrado como métrica), sobre, endereço, horário, promoções, resumo, cardápio, próximos eventos e avaliações. Registra uma visualização por sessão. |
-| `MenuCategory.jsx` | Uma categoria do cardápio com itens e preços; traduz as chaves antigas (`cervejas`, `drinks`, `porcoes`, `combos`). |
+| `MenuCategory.jsx` | Uma categoria do cardápio com itens, descrição (se houver) e preços; traduz as chaves antigas (`cervejas`, `drinks`, `porcoes`, `combos`). |
 | `Reviews.jsx` | Lista de avaliações com nota de 1 a 5, formulário para quem está logado e botão de apagar a própria avaliação. |
 | `StatusBadge.jsx` | Selo "Aberto"/"Fechado", com detalhe opcional ("· Fecha às 02h"). |
 | `BottomNav.jsx` | Barra inferior: Início, Buscar, Promoções (ou Cardápio na página do bar), Favoritos, Perfil. |

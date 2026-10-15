@@ -14,7 +14,12 @@ export default function MenuCategory({ name, items }) {
       <div className="menu-items">
         {items.map((item) => (
           <div className="menu-item" key={item.name}>
-            <span>{item.name}</span>
+            <span>
+              {item.name}
+              {item.description && (
+                <small className="menu-item-description">{item.description}</small>
+              )}
+            </span>
             <strong>{formatCurrency(item.price)}</strong>
           </div>
         ))}

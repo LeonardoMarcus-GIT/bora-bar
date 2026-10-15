@@ -25,7 +25,7 @@ real ainda.
 
 | Tabela | Para que serve | Quem lê | Quem escreve |
 | --- | --- | --- | --- |
-| `bars` | O estabelecimento: nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
+| `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
 | `menu_categories` | Categorias do cardápio por bar, com ordem e ativo. | Todos (ativas); dono vê todas | Dono/gerente |
 | `menu_items` | Itens com descrição, preço (≥ 0), disponível e ordem. | Todos (disponíveis); dono vê todos | Dono/gerente |
 | `promotions` | Promoções com início/fim opcionais e ativo. | Todos (só as vigentes); dono vê todas | Dono/gerente |
@@ -63,6 +63,13 @@ Storage: bucket público **`bar-images`** (8 MB, JPG/PNG/WebP). Arquivos em
 2. Conferir nome, telefone, documento e mensagem.
 3. Mudar `status` para `approved` (ou `rejected` + motivo em `review_notes`).
 4. O dono recarrega o app e o painel aparece.
+
+## Página avulsa e "aparece no guia"
+
+Todo estabelecimento tem a página `https://bora-bar.netlify.app/r/<id>` (sem a
+marca Bora Bar), para QR Code e link no Instagram. Com `is_listed = false` ele
+tem SÓ essa página e não aparece no app. Para entrar no guia:
+`update public.bars set is_listed = true where id = '<id>';`
 
 ## Como cadastrar um bar novo hoje
 

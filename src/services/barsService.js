@@ -87,6 +87,7 @@ function mapBarFromDatabase(bar) {
     latitude: getCoordinate(bar.latitude),
     longitude: getCoordinate(bar.longitude),
     isActive: bar.is_active ?? true,
+    isListed: bar.is_listed ?? true,
     isOpen: Boolean(bar.is_open),
     priceLevel: bar.price_level,
     promotion: promotions[0]?.title ?? bar.promotion ?? "",
@@ -102,37 +103,8 @@ function mapBarFromDatabase(bar) {
 
 const FETCH_TIMEOUT_MS = 15000;
 
-function createTimeoutSignal(milliseconds) {
-  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
-    return AbortSignal.timeout(milliseconds);
-  }
-
-  // Navegadores antigos: mesmo efeito com AbortController.
-  const controller = new AbortController();
-  setTimeout(() => controller.abort(), milliseconds);
-  return controller.signal;
-}
-
-/**
- * Carrega os bares do Supabase.
- * - Em produção, NUNCA devolve os bares de exemplo: se o banco falhar ou
- *   demorar mais de 15 s, lança erro (o App mostra "tentar de novo").
- * - Banco sem bares ativos devolve lista vazia.
- * - Os bares de exemplo (mockBars) só aparecem rodando localmente
- *   (`npm run dev`) sem as variáveis do Supabase configuradas.
- */
-export async function fetchBars() {
-  if (!isSupabaseConfigured) {
-    if (import.meta.env.DEV) {
-      return mockBars;
-    }
-
-    throw new Error("SUPABASE_NOT_CONFIGURED");
-  }
-
-  const { data, error } = await supabase
-    .from("bars")
-    .select(`
+// Bar + cardápio estruturado + promoções + eventos, numa consulta só.
+const BAR_SELECT = `
       *,
       menu_categories (
         id,
@@ -166,7 +138,41 @@ export async function fetchBars() {
         price,
         is_active
       )
-    `)
+    `;
+
+function createTimeoutSignal(milliseconds) {
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    return AbortSignal.timeout(milliseconds);
+  }
+
+  // Navegadores antigos: mesmo efeito com AbortController.
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), milliseconds);
+  return controller.signal;
+}
+
+/**
+ * Carrega os bares do Supabase.
+ * - Em produção, NUNCA devolve os bares de exemplo: se o banco falhar ou
+ *   demorar mais de 15 s, lança erro (o App mostra "tentar de novo").
+ * - Banco sem bares ativos devolve lista vazia.
+ * - Os bares de exemplo (mockBars) só aparecem rodando localmente
+ *   (`npm run dev`) sem as variáveis do Supabase configuradas.
+ */
+export async function fetchBars() {
+  if (!isSupabaseConfigured) {
+    if (import.meta.env.DEV) {
+      return mockBars;
+    }
+
+    throw new Error("SUPABASE_NOT_CONFIGURED");
+  }
+
+  const { data, error } = await supabase
+    .from("bars")
+    .select(BAR_SELECT)
+    // Só os estabelecimentos que aparecem no guia (os demais têm só a página /r/<id>).
+    .eq("is_listed", true)
     .order("name", { ascending: true })
     .abortSignal(createTimeoutSignal(FETCH_TIMEOUT_MS));
 
@@ -176,4 +182,38 @@ export async function fetchBars() {
   }
 
   return (data ?? []).map(mapBarFromDatabase).filter((bar) => bar.isActive);
+}
+
+/**
+ * Carrega UM estabelecimento pelo id, apareça ou não no guia.
+ * Usado pela página avulsa /r/<id> (link e QR Code do próprio estabelecimento).
+ * Devolve null se não existir ou estiver desativado; lança erro se o banco falhar.
+ */
+export async function fetchBarById(barId) {
+  if (!isSupabaseConfigured) {
+    if (import.meta.env.DEV) {
+      return mockBars.find((bar) => bar.id === barId) ?? null;
+    }
+
+    throw new Error("SUPABASE_NOT_CONFIGURED");
+  }
+
+  const { data, error } = await supabase
+    .from("bars")
+    .select(BAR_SELECT)
+    .eq("id", barId)
+    .abortSignal(createTimeoutSignal(FETCH_TIMEOUT_MS))
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Não foi possível carregar o estabelecimento.", error);
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const bar = mapBarFromDatabase(data);
+  return bar.isActive ? bar : null;
 }

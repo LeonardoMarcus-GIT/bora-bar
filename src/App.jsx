@@ -557,8 +557,8 @@ export default function App() {
   }
 
   function previewManagedBar(barId) {
-    window.location.hash = `bar/${barId}`;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Abre a página avulsa (/r/<id>), que funciona mesmo para quem não aparece no guia.
+    window.open(`/r/${encodeURIComponent(barId)}`, "_blank", "noopener");
   }
 
   function handleAuthenticated() {

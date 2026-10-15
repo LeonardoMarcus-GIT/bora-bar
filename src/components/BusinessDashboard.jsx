@@ -1242,7 +1242,7 @@ function BusinessOverview({ data, metrics, onEditProfile, onNewPromotion, onPrev
         <div className="business-quick-grid">
           <button type="button" onClick={onPreview}>
             <Eye size={19} aria-hidden="true" />
-            <span><strong>Ver perfil público</strong><small>Confira como o cliente vê seu bar</small></span>
+            <span><strong>Ver minha página</strong><small>A página do QR Code e do link no Instagram</small></span>
           </button>
           <button type="button" onClick={onEditProfile}>
             <Store size={19} aria-hidden="true" />

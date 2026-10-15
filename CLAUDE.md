@@ -72,6 +72,10 @@ e login/painel ficam indisponíveis.
 
 ## Como o código está organizado
 
+- **Página avulsa `/r/<id>`** (`src/components/StandalonePage.jsx`, escolhida em
+  `src/main.jsx`): o "site" de cada estabelecimento para QR Code e Instagram, sem
+  a marca Bora Bar. `bars.is_listed = false` = só essa página, fora do guia.
+  É o produto que se vende primeiro; depois liga `is_listed` e ele entra no app.
 - `src/App.jsx` concentra o estado global (lista de bares, filtros, busca,
   favoritos, localização) e o roteamento. **O roteamento é por hash**
   (`#app`, `#bar/<id>`, `#business`, `#profile`, `#login`, `#for-business`,

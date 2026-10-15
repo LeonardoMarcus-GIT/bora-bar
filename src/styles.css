@@ -3457,3 +3457,117 @@ a.secondary-action {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------
+   Página avulsa do estabelecimento (/r/<id>) — sem marca Bora Bar
+   --------------------------------------------------------------- */
+body.is-standalone {
+  background: #0f0f0c;
+}
+
+.standalone-page {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  width: min(760px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 16px 0 48px;
+}
+
+.standalone-page > .empty-state {
+  margin-top: 30vh;
+}
+
+.standalone-hero {
+  height: clamp(240px, 38vh, 340px);
+}
+
+.standalone-hero .status-badge {
+  min-height: 28px;
+}
+
+.standalone-today {
+  border: 1px solid rgba(255, 199, 68, 0.45);
+  border-radius: 8px;
+  background: rgba(43, 38, 22, 0.9);
+  padding: 14px 16px;
+}
+
+.standalone-today .section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.standalone-today ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.standalone-today li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ink);
+}
+
+.standalone-today li svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--gold);
+}
+
+.standalone-today li span {
+  display: grid;
+  gap: 2px;
+}
+
+.standalone-today small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.standalone-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.standalone-menu .menu-grid {
+  grid-template-columns: 1fr;
+}
+
+.standalone-info {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(24, 24, 20, 0.9);
+  padding: 4px 20px 12px;
+}
+
+.menu-item-description {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+@media (max-width: 560px) {
+  .standalone-page {
+    width: calc(100% - 24px);
+    padding-top: 12px;
+  }
+
+  .standalone-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .standalone-actions a.is-primary {
+    grid-column: 1 / -1;
+  }
+}
