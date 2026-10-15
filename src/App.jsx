@@ -17,6 +17,7 @@ import { recordBarEvent } from "./services/analyticsService.js";
 import { fetchProfile } from "./services/profilesService.js";
 import { fetchBars } from "./services/barsService.js";
 import { calculateDistanceKm } from "./utils/geo.js";
+import { getOpenStatus } from "./utils/openingHours.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
@@ -150,6 +151,8 @@ export default function App() {
   const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [profileLocation, setProfileLocation] = useState(null);
+  // Relógio do app: recalcula "aberto agora" a cada minuto sem recarregar a página.
+  const [now, setNow] = useState(() => new Date());
   const {
     coordinates: userLocation,
     hasLocation,
@@ -170,6 +173,11 @@ export default function App() {
     return () => {
       isMounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => window.clearInterval(timerId);
   }, []);
 
   useEffect(() => {
@@ -259,16 +267,19 @@ export default function App() {
         const calculatedDistanceKm = hasDistanceLocation
           ? calculateDistanceKm(activeLocation, bar)
           : null;
+        const openStatus = getOpenStatus(bar.hours, bar.isOpen, now);
 
         return {
           ...bar,
+          isOpen: openStatus.isOpen,
+          openStatusDetail: openStatus.detail,
           distanceKm: calculatedDistanceKm ?? bar.distanceKm,
           hasCoordinates:
             Number.isFinite(bar.latitude) && Number.isFinite(bar.longitude),
           hasRealDistance: Number.isFinite(calculatedDistanceKm)
         };
       }),
-    [activeLocation, bars, hasDistanceLocation]
+    [activeLocation, bars, hasDistanceLocation, now]
   );
 
   const selectedBar = useMemo(

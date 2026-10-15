@@ -25,6 +25,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
 import { fetchBarMetrics } from "../services/analyticsService.js";
 import { uploadBusinessCoverImage } from "../services/businessImageService.js";
+import { getOpenStatus, parseOpeningDays } from "../utils/openingHours.js";
 import {
   createBarClaim,
   fetchBusinessAccess,
@@ -155,20 +156,36 @@ const WEEK_DAYS = [
   { id: "sun", label: "Dom" }
 ];
 
+function toTimeInput(hours, minutes) {
+  return `${String(Number(hours)).padStart(2, "0")}:${String(Number(minutes ?? 0)).padStart(2, "0")}`;
+}
+
+function toHoursLabel(time, fallback) {
+  const [hours, minutes] = (time || fallback).split(":");
+  return minutes && minutes !== "00" ? `${hours}h${minutes}` : `${hours}h`;
+}
+
 function parseHours(hours) {
   const text = String(hours ?? "");
-  const match = text.match(/(\d{1,2})h\s*(?:as|a|-)\s*(\d{1,2})h/i);
-  const dayText = text.split(":")[0].toLowerCase();
-  const selectedDays = dayText.includes("todos")
-    ? WEEK_DAYS.map((day) => day.id)
-    : WEEK_DAYS.filter((day) => dayText.includes(day.label.toLowerCase())).map(
-        (day) => day.id
-      );
+  const match = text.match(
+    /(\d{1,2})(?:h|:)(\d{2})?h?\s*(?:às|as|a|-)\s*(\d{1,2})(?:h|:)(\d{2})?/i
+  );
+  // Só o primeiro trecho (antes de "|") é editável aqui; dias vêm do mesmo
+  // leitor usado para calcular "aberto agora".
+  const firstSegment = text.split("|")[0];
+  const firstDigit = firstSegment.search(/\d/);
+  const dayText =
+    firstDigit === -1 ? "" : firstSegment.slice(0, firstDigit).replace(/[:\s]+$/, "");
+  const dayIndexes = dayText.trim() ? parseOpeningDays(dayText) : [];
+  // WEEK_DAYS começa na segunda; Date.getDay() começa no domingo.
+  const selectedDays = WEEK_DAYS.filter((_, index) =>
+    dayIndexes.includes((index + 1) % 7)
+  ).map((day) => day.id);
 
   return {
     days: selectedDays.length ? selectedDays : WEEK_DAYS.map((day) => day.id),
-    opensAt: `${String(match ? Number(match[1]) : 16).padStart(2, "0")}:00`,
-    closesAt: `${String(match ? Number(match[2]) : 1).padStart(2, "0")}:00`
+    opensAt: match ? toTimeInput(match[1], match[2]) : "16:00",
+    closesAt: match ? toTimeInput(match[3], match[4]) : "01:00"
   };
 }
 
@@ -181,9 +198,7 @@ function formatBusinessHours({ days, opensAt, closesAt }) {
     (day) => day.label
   );
   const dayText = days.length === WEEK_DAYS.length ? "Todos os dias" : dayLabels.join(", ");
-  const openHour = opensAt?.slice(0, 2) || "16";
-  const closeHour = closesAt?.slice(0, 2) || "01";
-  return `${dayText}: ${openHour}h-${closeHour}h`;
+  return `${dayText}: ${toHoursLabel(opensAt, "16:00")}-${toHoursLabel(closesAt, "01:00")}`;
 }
 
 export default function BusinessDashboard({
@@ -603,6 +618,9 @@ export default function BusinessDashboard({
     }
   }
 
+  // Status calculado pelo horário que está sendo editado (atualiza na hora).
+  const openStatus = getOpenStatus(managedData?.bar?.hours, managedData?.bar?.isOpen);
+
   if (!isAuthReady || isLoading) {
     return (
       <main className="account-page business-page">
@@ -909,16 +927,33 @@ export default function BusinessDashboard({
                     </select>
                   </label>
 
-                  <label className="business-switch-row">
-                    <span>Aberto agora</span>
-                    <input
-                      type="checkbox"
-                      checked={managedData.bar.isOpen}
-                      onChange={(event) =>
-                        updateBar({ isOpen: event.target.checked })
-                      }
-                    />
-                  </label>
+                  {openStatus.isAutomatic ? (
+                    <div className="business-switch-row business-auto-status">
+                      <span>
+                        {openStatus.isOpen ? "Aberto agora" : "Fechado agora"}
+                        <small>
+                          {openStatus.detail}. Muda sozinho pelo horário acima.
+                        </small>
+                      </span>
+                    </div>
+                  ) : (
+                    <label className="business-switch-row">
+                      <span>
+                        Aberto agora
+                        <small>
+                          Não conseguimos ler o horário. Ajuste os dias e horas
+                          acima para o status mudar sozinho.
+                        </small>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={managedData.bar.isOpen}
+                        onChange={(event) =>
+                          updateBar({ isOpen: event.target.checked })
+                        }
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
             )}

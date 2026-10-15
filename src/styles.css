@@ -578,6 +578,20 @@ p {
   background: var(--closed);
 }
 
+.details-side dd small {
+  display: block;
+  font-size: 0.82em;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.status-badge-detail {
+  font-size: inherit;
+  font-weight: 700;
+  opacity: 0.92;
+  white-space: pre;
+}
+
 .price-level {
   color: var(--gold);
   font-weight: 950;
@@ -2111,6 +2125,18 @@ p {
 
 .business-switch-row > span {
   margin: 0;
+}
+
+.business-switch-row > span small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.business-auto-status {
+  padding-block: 8px;
 }
 
 .business-editor .business-switch-row > input,

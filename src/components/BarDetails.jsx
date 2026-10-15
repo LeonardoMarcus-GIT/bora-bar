@@ -88,7 +88,7 @@ export default function BarDetails({
       <section className="details-hero">
         <img src={bar.image} alt={`Ambiente do ${bar.name}`} />
         <div className="details-hero-overlay">
-          <StatusBadge isOpen={bar.isOpen} />
+          <StatusBadge isOpen={bar.isOpen} detail={bar.openStatusDetail} />
           <h1>{bar.name}</h1>
           <p>
             {bar.neighborhood}, {bar.city}
@@ -198,7 +198,10 @@ export default function BarDetails({
             </div>
             <div>
               <dt>Status</dt>
-              <dd>{bar.isOpen ? "Aberto agora" : "Fechado no momento"}</dd>
+              <dd>
+                {bar.isOpen ? "Aberto agora" : "Fechado no momento"}
+                {bar.openStatusDetail && <small>{bar.openStatusDetail}</small>}
+              </dd>
             </div>
             <div>
               <dt>Faixa de preço</dt>
