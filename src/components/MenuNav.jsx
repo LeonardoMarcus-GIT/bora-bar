@@ -3,7 +3,8 @@ import { getCategoryAnchor, getCategoryLabel } from "./MenuCategory.jsx";
 
 // Atalhos do cardápio: botões por categoria, grudados no topo enquanto a
 // pessoa está no cardápio. Tocar desliza suave até a categoria; a categoria
-// visível fica destacada. Quebra em linhas (sem rolagem lateral).
+// visível fica destacada. Uma linha só: no celular, desliza pro lado com o dedo,
+// e a fileira anda sozinha para mostrar a categoria atual.
 export default function MenuNav({ categories }) {
   const [activeAnchor, setActiveAnchor] = useState(
     categories.length ? getCategoryAnchor(categories[0]) : ""
@@ -12,6 +13,21 @@ export default function MenuNav({ categories }) {
   // Depois de um toque, a categoria tocada fica marcada enquanto a página
   // desliza até ela (senão o destaque "pula" durante a animação).
   const lockUntilRef = useRef(0);
+  const navRef = useRef(null);
+
+  // Mantém o botão ativo visível na fileira (rola só a fileira, não a página).
+  useEffect(() => {
+    const nav = navRef.current;
+    const button = nav?.querySelector(`[data-anchor="${activeAnchor}"]`);
+
+    if (!nav || !button) {
+      return;
+    }
+
+    const target = button.offsetLeft - (nav.clientWidth - button.offsetWidth) / 2;
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    nav.scrollTo({ left: Math.max(0, target), behavior: prefersReducedMotion ? "auto" : "smooth" });
+  }, [activeAnchor]);
 
   useEffect(() => {
     const anchors = categories.map((name) => getCategoryAnchor(name));
@@ -84,7 +100,7 @@ export default function MenuNav({ categories }) {
   }
 
   return (
-    <nav className="menu-nav" aria-label="Categorias do cardápio">
+    <nav className="menu-nav" aria-label="Categorias do cardápio" ref={navRef}>
       {categories.map((name) => {
         const anchor = getCategoryAnchor(name);
 
@@ -93,6 +109,7 @@ export default function MenuNav({ categories }) {
             className={activeAnchor === anchor ? "is-active" : ""}
             type="button"
             key={anchor}
+            data-anchor={anchor}
             onClick={() => goTo(anchor)}
             aria-current={activeAnchor === anchor ? "true" : undefined}
           >

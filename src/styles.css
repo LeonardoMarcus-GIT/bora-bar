@@ -3524,22 +3524,37 @@ a.secondary-action {
   }
 }
 
-/* Atalhos do cardápio (grudam no topo enquanto o cardápio está na tela) */
+/* Atalhos do cardápio: uma linha só, desliza pro lado com o dedo,
+   grudada no topo enquanto o cardápio está na tela */
 .menu-nav {
   position: sticky;
   top: 0;
   z-index: 5;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   margin: 14px -20px 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
   border-bottom: 1px solid var(--line);
   background: rgba(20, 20, 17, 0.94);
   padding: 10px 20px;
+  scroll-padding-inline: 20px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   backdrop-filter: blur(12px);
+  /* esmaece as pontas para indicar que dá para deslizar */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%);
+}
+
+.menu-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .menu-nav button {
+  flex: none;
   min-height: 34px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -3548,8 +3563,10 @@ a.secondary-action {
   font: inherit;
   font-size: 0.84rem;
   font-weight: 750;
+  white-space: nowrap;
   padding: 0 13px;
   cursor: pointer;
+  scroll-snap-align: start;
   transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
@@ -3564,7 +3581,7 @@ a.secondary-action {
 }
 
 .menu-category {
-  scroll-margin-top: 110px;
+  scroll-margin-top: 70px;
 }
 
 /* Foto opcional do item (miniatura à esquerda do nome) */
