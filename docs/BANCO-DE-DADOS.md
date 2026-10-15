@@ -27,7 +27,7 @@ real ainda.
 | --- | --- | --- | --- |
 | `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), `gallery` (**sem uso** — sobra dos "Pratos do dia", descartados em 15/10/2026; pode ser apagada), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
 | `menu_categories` | Categorias do cardápio por bar, com ordem e ativo. | Todos (ativas); dono vê todas | Dono/gerente |
-| `menu_items` | Itens com descrição, preço (≥ 0), disponível, ordem e `image_url` (foto opcional — **pendente**: a coluna ainda precisa ser criada com `supabase/menu-item-photos-migration.sql`). | Todos (disponíveis); dono vê todos | Dono/gerente |
+| `menu_items` | Itens com descrição, preço (≥ 0), disponível e ordem. | Todos (disponíveis); dono vê todos | Dono/gerente |
 | `promotions` | Promoções com início/fim opcionais e ativo. | Todos (só as vigentes); dono vê todas | Dono/gerente |
 | `bar_events` | Eventos (samba, show) com início, fim, preço da entrada e ativo. | Todos (só futuros/ativos); dono vê todos | Dono/gerente |
 | `reviews` | Avaliações 1–5 com comentário. O `author` e o `user_id` são preenchidos pelo trigger. | Todos | Usuário logado cria e apaga as próprias |

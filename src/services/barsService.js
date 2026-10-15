@@ -33,8 +33,7 @@ function mapStructuredMenu(categories, fallbackMenu) {
         .map((item) => ({
           name: item.name,
           description: item.description ?? "",
-          price: Number(item.price ?? 0),
-          imageUrl: item.image_url ?? ""
+          price: Number(item.price ?? 0)
         }))
     ])
   );

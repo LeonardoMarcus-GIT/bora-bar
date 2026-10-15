@@ -68,3 +68,9 @@ em Volta Redonda, o guia da cidade já nasce cheio.
 - [ ] Corrigir os pontos 1 a 3
 - [ ] Montar a página avulsa do bar com link próprio, faixa "Hoje" e QR Code
 - [ ] Preparar a demonstração com o nome do bar
+
+## Ideias deixadas para depois
+
+- Foto por item do cardápio: descartada por enquanto (15/10/2026); fazer só se um
+  cliente pedir. Exige coluna `menu_items.image_url` e gravar a foto em
+  `replace_bar_menu` (senão salvar o cardápio apaga as fotos).

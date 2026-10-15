@@ -65,8 +65,7 @@ function emptyMenuItem() {
     name: "",
     description: "",
     price: "",
-    isAvailable: true,
-    imageUrl: ""
+    isAvailable: true
   };
 }
 
@@ -219,7 +218,6 @@ export default function BusinessDashboard({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [uploadingItemId, setUploadingItemId] = useState("");
   const [feedback, setFeedback] = useState("");
   const [setupError, setSetupError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -445,35 +443,6 @@ export default function BusinessDashboard({
       ...currentData,
       bar: { ...currentData.bar, ...patch }
     }));
-  }
-
-  // Foto opcional de um item do cardápio (aparece como miniatura no cardápio).
-  async function handleMenuItemPhoto(categoryId, itemId, event) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-
-    if (!file || !selectedBarId) {
-      return;
-    }
-
-    setUploadingItemId(itemId);
-    setFeedback("");
-
-    try {
-      const imageUrl = await uploadBusinessCoverImage(selectedBarId, file);
-      updateMenuItem(categoryId, itemId, { imageUrl });
-      setFeedback("Foto do item pronta. Salve o cardápio para publicar.");
-    } catch (error) {
-      if (error?.message === "INVALID_IMAGE_TYPE") {
-        setFeedback("Escolha uma imagem JPG, PNG ou WebP.");
-      } else if (error?.message === "IMAGE_TOO_LARGE") {
-        setFeedback("A imagem deve ter no máximo 8 MB.");
-      } else {
-        setFeedback("Não foi possível enviar a foto agora. Tente novamente.");
-      }
-    } finally {
-      setUploadingItemId("");
-    }
   }
 
   async function handleCoverImageSelected(event) {
@@ -1053,42 +1022,6 @@ export default function BusinessDashboard({
                             >
                               <Trash2 size={17} aria-hidden="true" />
                             </button>
-                          </div>
-
-                          <div className="menu-item-photo-field">
-                            {item.imageUrl ? (
-                              <img src={item.imageUrl} alt="" />
-                            ) : (
-                              <span className="menu-item-photo-empty" aria-hidden="true">
-                                <Image size={18} />
-                              </span>
-                            )}
-                            <label className="menu-item-photo-button">
-                              {uploadingItemId === item.id
-                                ? "Enviando..."
-                                : item.imageUrl
-                                  ? "Trocar foto"
-                                  : "Adicionar foto (opcional)"}
-                              <input
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp"
-                                disabled={Boolean(uploadingItemId)}
-                                onChange={(event) =>
-                                  handleMenuItemPhoto(category.id, item.id, event)
-                                }
-                              />
-                            </label>
-                            {item.imageUrl && (
-                              <button
-                                className="menu-item-photo-remove"
-                                type="button"
-                                onClick={() =>
-                                  updateMenuItem(category.id, item.id, { imageUrl: "" })
-                                }
-                              >
-                                Remover foto
-                              </button>
-                            )}
                           </div>
 
                           <div className="menu-item-details">

@@ -79,8 +79,7 @@ function mapCategory(category) {
         description: item.description ?? "",
         price: Number(item.price ?? 0),
         isAvailable: item.is_available,
-        sortOrder: item.sort_order,
-        imageUrl: item.image_url ?? ""
+        sortOrder: item.sort_order
       }))
       .sort((a, b) => a.sortOrder - b.sortOrder)
   };
@@ -290,8 +289,7 @@ export async function replaceManagedMenu(barId, categories) {
         description: item.description.trim(),
         price: Number(item.price || 0),
         isAvailable: item.isAvailable,
-        sortOrder: itemIndex,
-        imageUrl: item.imageUrl || ""
+        sortOrder: itemIndex
       }))
     }))
   });

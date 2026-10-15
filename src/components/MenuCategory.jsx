@@ -27,7 +27,7 @@ export default function MenuCategory({ name, items }) {
       <h3>{getCategoryLabel(name)}</h3>
       <div className="menu-items">
         {items.map((item) => (
-          <div className={`menu-item ${item.imageUrl ? "has-photo" : ""}`} key={item.name}>
+          <div className="menu-item" key={item.name}>
             <span>
               {item.name}
               {item.description && (
@@ -35,16 +35,6 @@ export default function MenuCategory({ name, items }) {
               )}
             </span>
             <strong>{formatCurrency(item.price)}</strong>
-            {item.imageUrl && (
-              <img
-                className="menu-item-photo"
-                src={item.imageUrl}
-                alt={item.name}
-                loading="lazy"
-                width="72"
-                height="72"
-              />
-            )}
           </div>
         ))}
       </div>
