@@ -84,8 +84,8 @@ e login/painel ficam indisponíveis.
   function `netlify/edge-functions/link-preview.js`.
 - `src/App.jsx` concentra o estado global (lista de bares, filtros, busca,
   favoritos, localização) e o roteamento. **O roteamento é por hash**
-  (`#app`, `#bar/<id>`, `#business`, `#profile`, `#login`, `#for-business`,
-  `#promotions`); a página inicial sem hash é a landing.
+  (`#app`, `#bar/<id>`, `#clima/<id>`, `#business`, `#profile`, `#login`,
+  `#for-business`, `#promotions`); a página inicial sem hash é a landing.
 - `src/components/` — telas e peças de interface. Componentes recebem dados e
   callbacks por props; não chamam o Supabase diretamente, com exceção das telas
   que usam os services (Auth, Profile, Reviews, BusinessDashboard).
@@ -124,7 +124,8 @@ e login/painel ficam indisponíveis.
    "Tentar de novo"; `mockBars` só aparece em `npm run dev` sem Supabase.
    A landing ainda usa fotos/nomes de `mockBars` como ilustração.
 3. Rotas com `#` impedem prévia de link no WhatsApp/Instagram e indexação no Google.
-4. A landing promete "ver o movimento / lugares bombando", que não existe.
+4. A landing ainda fala em "bombando"/"onde a galera está indo" na prévia do
+   app (dados ilustrativos); o mapa e o passo "Veja o movimento" foram tirados.
 5. Imagens da landing em PNG de 0,8–1,4 MB; bundle JS de ~580 KB sem divisão.
 6. Aprovação de dono é manual no Table Editor (`bar_claims.status`).
 7. ~~Planos "Em breve"~~ — substituídos em 15/10/2026 pelo Programa Parceiro
