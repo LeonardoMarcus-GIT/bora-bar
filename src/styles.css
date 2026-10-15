@@ -3459,86 +3459,9 @@ a.secondary-action {
 }
 
 /* ---------------------------------------------------------------
-   Página avulsa do estabelecimento (/r/<id>) — sem marca Bora Bar
-   Celular primeiro: uma coluna; a partir de 720px, pratos em 2 colunas.
+   Página avulsa (/r/<id>): usa o mesmo layout da página do bar
+   (BarDetails); aqui só o que é exclusivo dela.
    --------------------------------------------------------------- */
-body.is-standalone {
-  background: #0f0f0c;
-}
-
-.standalone-page {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 14px;
-  width: min(880px, 100% - 32px);
-  margin: 0 auto;
-  padding: 16px 0 56px;
-}
-
-.standalone-page > .empty-state {
-  margin-top: 30vh;
-}
-
-.standalone-hero {
-  height: clamp(240px, 38vh, 360px);
-}
-
-.standalone-hero .status-badge {
-  min-height: 28px;
-}
-
-/* Hoje */
-.standalone-today {
-  border: 1px solid rgba(255, 199, 68, 0.45);
-  border-radius: 8px;
-  background: rgba(43, 38, 22, 0.9);
-  padding: 14px 16px;
-}
-
-.standalone-today .section-kicker {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 10px;
-}
-
-.standalone-today ul {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.standalone-today li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  color: var(--ink);
-}
-
-.standalone-today li svg {
-  flex: none;
-  margin-top: 2px;
-  color: var(--gold);
-}
-
-.standalone-today li span {
-  display: grid;
-  gap: 2px;
-}
-
-.standalone-today small {
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-/* Botões de contato: mesmos do app (WhatsApp, Ligar, Google Maps, Waze) */
-.standalone-actions {
-  margin-top: 0;
-}
-
 .details-quick-actions .is-unavailable {
   display: flex;
   align-items: center;
@@ -3558,84 +3481,22 @@ body.is-standalone {
   color: var(--muted);
 }
 
-/* Pratos do dia */
-.standalone-dishes .section-heading {
-  margin-bottom: 12px;
-}
-
-.standalone-dishes-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-.dish-card {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(24, 24, 20, 0.92);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
-}
-
-.dish-card-photo {
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: #2a2a22;
-}
-
-.dish-card-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.04);
-  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.dish-card.is-revealed .dish-card-photo img {
-  transform: scale(1);
-}
-
-.dish-card-body {
-  padding: 14px 16px 16px;
-}
-
-.dish-card-title {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.dish-card-title h3 {
-  margin: 0;
-  color: var(--ink);
-  font-size: 1.05rem;
-  line-height: 1.25;
-}
-
-.dish-card-title strong {
-  flex: none;
+.distance-request {
+  border: 0;
+  background: none;
   color: var(--gold);
-  font-size: 1.02rem;
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
-.dish-card-body p {
-  margin: 6px 0 0;
+.distance-request:disabled {
   color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.45;
-}
-
-.standalone-menu .menu-grid {
-  grid-template-columns: 1fr;
-}
-
-.standalone-info {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(24, 24, 20, 0.9);
-  padding: 4px 20px 12px;
+  text-decoration: none;
+  cursor: default;
 }
 
 .menu-item-description {
@@ -3647,55 +3508,7 @@ body.is-standalone {
   line-height: 1.35;
 }
 
-/* Aparição suave ao rolar (desligada para quem prefere menos movimento) */
-.standalone-page [data-reveal] {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 650ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
-    transform 650ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
-}
-
-.standalone-page [data-reveal].is-revealed {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .standalone-page [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .dish-card-photo img {
-    transform: none;
-    transition: none;
-  }
-}
-
-html:has(body.is-standalone) {
-  scroll-behavior: smooth;
-}
-
-@media (min-width: 720px) {
-  .standalone-dishes-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .standalone-menu .menu-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 620px) {
-  .standalone-page {
-    width: calc(100% - 24px);
-    gap: 12px;
-    padding-top: 12px;
-  }
-
   .details-quick-actions .is-unavailable {
     min-height: 58px;
     padding: 9px 10px;
@@ -3704,174 +3517,4 @@ html:has(body.is-standalone) {
   .details-quick-actions .is-unavailable small {
     display: none;
   }
-
-  .dish-card-body {
-    padding: 12px 14px 14px;
-  }
-
-  .standalone-info {
-    padding: 2px 16px 10px;
-  }
-}
-
-/* Painel: aba Pratos do dia */
-.dishes-editor {
-  display: grid;
-  gap: 14px;
-}
-
-.dishes-editor > .business-muted {
-  margin: 0;
-}
-
-.dishes-empty {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  border: 1px dashed var(--line);
-  border-radius: 8px;
-  color: var(--muted);
-  padding: 24px 16px;
-  text-align: center;
-}
-
-.dishes-empty svg {
-  color: var(--gold);
-}
-
-.dishes-empty p {
-  margin: 0;
-}
-
-.dishes-list {
-  display: grid;
-  gap: 12px;
-}
-
-.dish-editor-card {
-  display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 12px;
-}
-
-.dish-editor-photo {
-  position: relative;
-  overflow: hidden;
-  border-radius: 7px;
-  background: #2a2a22;
-  aspect-ratio: 4 / 3;
-}
-
-.dish-editor-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.dish-photo-button {
-  position: absolute;
-  inset: auto 6px 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 32px;
-  border-radius: 999px;
-  background: rgba(15, 15, 12, 0.78);
-  color: var(--ink);
-  font-size: 0.78rem;
-  font-weight: 800;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-}
-
-.dish-photo-button input,
-.dish-add-button input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  opacity: 0;
-}
-
-.dish-add-button {
-  position: relative;
-  cursor: pointer;
-}
-
-.dish-editor-fields {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-width: 0;
-}
-
-.dish-editor-fields > label:not(.menu-price-field) {
-  display: grid;
-  gap: 4px;
-}
-
-.dish-editor-fields > label > span:not(.sr-only) {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.dish-price-field {
-  max-width: 220px;
-}
-
-.dish-editor-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.dish-editor-actions button {
-  display: grid;
-  place-items: center;
-  min-width: 36px;
-  height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--ink);
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.dish-editor-actions button:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-@media (max-width: 620px) {
-  .dish-editor-card {
-    grid-template-columns: 1fr;
-  }
-
-  .dish-price-field {
-    max-width: none;
-  }
-}
-
-.dishes-editor .dish-photo-button,
-.dishes-editor .dish-add-button {
-  display: inline-flex !important;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 7px !important;
-  margin: 0;
-}
-
-.dishes-editor .dish-add-button {
-  min-height: 44px;
-  padding: 0 16px;
 }

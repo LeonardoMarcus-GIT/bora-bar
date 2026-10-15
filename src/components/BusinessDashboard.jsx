@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import BarAddressFields from "./BarAddressFields.jsx";
-import DishesEditor from "./DishesEditor.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
 import { fetchBarMetrics } from "../services/analyticsService.js";
@@ -31,7 +30,6 @@ import {
   createBarClaim,
   fetchBusinessAccess,
   fetchManagedBarData,
-  replaceManagedDishes,
   replaceManagedEvents,
   replaceManagedMenu,
   replaceManagedPromotions,
@@ -42,7 +40,6 @@ const tabs = [
   { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
   { id: "overview", label: "Perfil público", icon: Store },
   { id: "menu", label: "Cardápio", icon: UtensilsCrossed },
-  { id: "dishes", label: "Pratos do dia", icon: Image },
   { id: "promotions", label: "Promoções", icon: Tag },
   { id: "events", label: "Eventos", icon: CalendarDays }
 ];
@@ -590,18 +587,6 @@ export default function BusinessDashboard({
         await replaceManagedMenu(selectedBarId, managedData.categories);
       }
 
-      if (activeTab === "dishes") {
-        const incomplete = managedData.dishes.find((dish) => !dish.name.trim());
-
-        if (incomplete) {
-          setFeedback("Escreva o nome de todos os pratos antes de salvar.");
-          return;
-        }
-
-        await replaceManagedDishes(selectedBarId, managedData.dishes);
-        successMessage = "Pratos do dia salvos e publicados na sua página.";
-      }
-
       if (activeTab === "promotions") {
         await replaceManagedPromotions(
           selectedBarId,
@@ -1106,17 +1091,6 @@ export default function BusinessDashboard({
                   Nova categoria
                 </button>
               </div>
-            )}
-
-            {activeTab === "dishes" && (
-              <DishesEditor
-                barId={selectedBarId}
-                dishes={managedData.dishes ?? []}
-                onChange={(dishes) =>
-                  setManagedData((currentData) => ({ ...currentData, dishes }))
-                }
-                onFeedback={setFeedback}
-              />
             )}
 
             {activeTab === "promotions" && (

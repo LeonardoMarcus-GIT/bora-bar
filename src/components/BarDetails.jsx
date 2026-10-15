@@ -48,13 +48,25 @@ function getRouteLinks(bar) {
   };
 }
 
+// Página de detalhes do estabelecimento.
+// Usada no app (#bar/<id>) e, com isStandalone, na página avulsa /r/<id>
+// (mesmo design; sem "Voltar", "Favoritar" e avaliações, que dependem do app).
 export default function BarDetails({
   bar,
   isFavorite,
+  isStandalone = false,
+  locationStatus,
   onBack,
+  onRequestLocation,
   onToggleFavorite
 }) {
   const phoneDigits = getPhoneDigits(bar.phone);
+  const hasPhone = phoneDigits.length >= 12;
+  const canAskDistance =
+    isStandalone && !bar.hasRealDistance && bar.hasCoordinates && onRequestLocation;
+  const distanceLabel = bar.hasCoordinates && (!isStandalone || bar.hasRealDistance)
+    ? formatDistanceKm(bar.distanceKm)
+    : null;
   const routeLinks = getRouteLinks(bar);
 
   useEffect(() => {
@@ -66,7 +78,8 @@ export default function BarDetails({
   }
 
   return (
-    <main className="details-page">
+    <main className={`details-page ${isStandalone ? "is-standalone-details" : ""}`}>
+      {!isStandalone && (
       <div className="details-actions">
         <button className="back-button" type="button" onClick={onBack}>
           <ArrowLeft size={18} aria-hidden="true" />
@@ -84,6 +97,7 @@ export default function BarDetails({
           {isFavorite ? "Favorito" : "Favoritar"}
         </button>
       </div>
+      )}
 
       <section className="details-hero">
         <img src={bar.image} alt={`Ambiente do ${bar.name}`} />
@@ -95,30 +109,44 @@ export default function BarDetails({
           </p>
           <div className="details-hero-facts">
             <span>{bar.priceLevel}</span>
-            <span>
-              {bar.hasCoordinates
-                ? formatDistanceKm(bar.distanceKm)
-                : "Distância indisponível"}
-            </span>
+            {distanceLabel ? (
+              <span>{distanceLabel}</span>
+            ) : !isStandalone ? (
+              <span>Distância indisponível</span>
+            ) : null}
           </div>
         </div>
       </section>
 
       <section className="details-quick-actions" aria-label="Ações do estabelecimento">
-        <a
-          className="is-primary"
-          href={`https://wa.me/${phoneDigits}`}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => track("whatsapp")}
-        >
-          <MessageCircle size={20} aria-hidden="true" />
-          <span><strong>WhatsApp</strong><small>Falar com o bar</small></span>
-        </a>
-        <a href={`tel:${phoneDigits}`} onClick={() => track("phone")}>
-          <Phone size={20} aria-hidden="true" />
-          <span><strong>Ligar</strong><small>{bar.phone}</small></span>
-        </a>
+        {hasPhone ? (
+          <a
+            className="is-primary"
+            href={`https://wa.me/${phoneDigits}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => track("whatsapp")}
+          >
+            <MessageCircle size={20} aria-hidden="true" />
+            <span><strong>WhatsApp</strong><small>Falar com o estabelecimento</small></span>
+          </a>
+        ) : (
+          <span className="is-primary is-unavailable" aria-disabled="true">
+            <MessageCircle size={20} aria-hidden="true" />
+            <span><strong>WhatsApp</strong><small>Em breve</small></span>
+          </span>
+        )}
+        {hasPhone ? (
+          <a href={`tel:+${phoneDigits}`} onClick={() => track("phone")}>
+            <Phone size={20} aria-hidden="true" />
+            <span><strong>Ligar</strong><small>{bar.phone}</small></span>
+          </a>
+        ) : (
+          <span className="is-unavailable" aria-disabled="true">
+            <Phone size={20} aria-hidden="true" />
+            <span><strong>Ligar</strong><small>Em breve</small></span>
+          </span>
+        )}
         <a
           href={routeLinks.google}
           target="_blank"
@@ -158,7 +186,7 @@ export default function BarDetails({
             </p>
             <p>
               <Phone size={18} aria-hidden="true" />
-              <span><strong>Contato</strong><small>{bar.phone}</small></span>
+              <span><strong>Contato</strong><small>{bar.phone || "Em breve"}</small></span>
             </p>
           </div>
 
@@ -191,9 +219,23 @@ export default function BarDetails({
             <div>
               <dt>Distância</dt>
               <dd>
-                {bar.hasCoordinates
-                  ? formatDistanceKm(bar.distanceKm)
-                  : "Indisponível"}
+                {distanceLabel ??
+                  (canAskDistance ? (
+                    <button
+                      className="distance-request"
+                      type="button"
+                      onClick={onRequestLocation}
+                      disabled={locationStatus === "loading"}
+                    >
+                      {locationStatus === "loading"
+                        ? "Calculando..."
+                        : locationStatus === "denied"
+                          ? "Localização bloqueada"
+                          : "Ver distância"}
+                    </button>
+                  ) : (
+                    "Indisponível"
+                  ))}
               </dd>
             </div>
             <div>
@@ -250,7 +292,7 @@ export default function BarDetails({
         </section>
       )}
 
-      <Reviews barId={bar.id} />
+      {!isStandalone && <Reviews barId={bar.id} />}
     </main>
   );
 }

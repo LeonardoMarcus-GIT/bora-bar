@@ -16,6 +16,3 @@ comment on column public.bars.is_listed is
 
 create index if not exists bars_is_listed_idx on public.bars (is_listed);
 
--- Galeria de fotos (lista de {url, caption}) exibida na página avulsa.
-alter table public.bars
-add column if not exists gallery jsonb not null default '[]'::jsonb;

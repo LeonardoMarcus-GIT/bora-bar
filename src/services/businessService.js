@@ -65,21 +65,6 @@ function mapManagedBar(bar) {
   };
 }
 
-let dishIdCounter = 0;
-
-// Pratos do dia vindos do banco, com id local só para a edição na tela.
-function mapDishes(gallery) {
-  return (Array.isArray(gallery) ? gallery : [])
-    .filter((dish) => dish?.url)
-    .map((dish) => ({
-      id: `dish-${Date.now()}-${(dishIdCounter += 1)}`,
-      url: dish.url,
-      name: dish.name ?? dish.caption ?? "",
-      description: dish.description ?? "",
-      price: dish.price === null || dish.price === undefined ? "" : Number(dish.price)
-    }));
-}
-
 function mapCategory(category) {
   return {
     id: category.id,
@@ -245,8 +230,7 @@ export async function fetchManagedBarData(barId) {
     bar: mapManagedBar(barResult.data),
     categories: categoriesResult.data.map(mapCategory),
     promotions: promotionsResult.data.map(mapPromotion),
-    events: eventsResult.data.map(mapEvent),
-    dishes: mapDishes(barResult.data.gallery)
+    events: eventsResult.data.map(mapEvent)
   };
 }
 
@@ -346,25 +330,6 @@ export async function replaceManagedEvents(barId, events) {
       endsAt: event.endsAt || "",
       price: event.price === "" ? "" : Number(event.price),
       isActive: event.isActive
-    }))
-  });
-
-  if (error) {
-    throw error;
-  }
-}
-
-// Salva a lista inteira de pratos do dia (padrão replace_bar_*).
-export async function replaceManagedDishes(barId, dishes) {
-  ensureSupabase();
-
-  const { error } = await supabase.rpc("replace_bar_gallery", {
-    target_bar_id: barId,
-    dish_list: dishes.map((dish) => ({
-      url: dish.url,
-      name: dish.name.trim(),
-      description: dish.description.trim(),
-      price: dish.price === "" || dish.price === null ? "" : Number(dish.price)
     }))
   });
 

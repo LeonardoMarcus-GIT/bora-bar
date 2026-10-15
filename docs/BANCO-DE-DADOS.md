@@ -25,7 +25,7 @@ real ainda.
 
 | Tabela | Para que serve | Quem lê | Quem escreve |
 | --- | --- | --- | --- |
-| `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), **`gallery`** (**Pratos do dia**: lista de `{url, name, price, description}`, mostrada na página avulsa; o dono edita pela aba "Pratos do dia" via `replace_bar_gallery`), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
+| `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), `gallery` (**sem uso** — sobra dos "Pratos do dia", descartados em 15/10/2026; pode ser apagada), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
 | `menu_categories` | Categorias do cardápio por bar, com ordem e ativo. | Todos (ativas); dono vê todas | Dono/gerente |
 | `menu_items` | Itens com descrição, preço (≥ 0), disponível e ordem. | Todos (disponíveis); dono vê todos | Dono/gerente |
 | `promotions` | Promoções com início/fim opcionais e ativo. | Todos (só as vigentes); dono vê todas | Dono/gerente |
@@ -48,7 +48,7 @@ Storage: bucket público **`bar-images`** (8 MB, JPG/PNG/WebP). Arquivos em
 | `replace_bar_menu(bar_id, categories jsonb)` | Apaga e regrava todas as categorias e itens do bar. |
 | `replace_bar_promotions(bar_id, list jsonb)` | Apaga e regrava todas as promoções do bar. |
 | `replace_bar_events(bar_id, list jsonb)` | Apaga e regrava todos os eventos do bar. |
-| `replace_bar_gallery(bar_id, dish_list jsonb)` | Regrava os **Pratos do dia** (`bars.gallery`). Foto e nome obrigatórios, até 12 pratos, preço ≥ 0. Só dono/gerente. |
+| `replace_bar_gallery(bar_id, dish_list jsonb)` | **Sem uso** (sobra dos "Pratos do dia", descartados). Pode ser apagada junto com `bars.gallery`: `drop function public.replace_bar_gallery(text, jsonb); alter table public.bars drop column gallery;` |
 
 ## Triggers
 
@@ -76,7 +76,7 @@ tem SÓ essa página e não aparece no app. Para entrar no guia:
 
 | id | Nome | Situação |
 | --- | --- | --- |
-| `cantinho-portugues` | Restaurante Cantinho Português (Siderópolis, VR) | Restaurante real de um amigo, cadastrado em 15/10/2026 como primeiro piloto. `is_listed = false` (só a página `/r/cantinho-portugues`). Cardápio e preços são **sugestões** para o dono ajustar. Fotos reais em `public/estabelecimentos/cantinho-portugues/` (capa + 4 pratos do dia). Ainda sem telefone/WhatsApp e sem dono vinculado. |
+| `cantinho-portugues` | Restaurante Cantinho Português (Siderópolis, VR) | Restaurante real de um amigo, cadastrado em 15/10/2026 como primeiro piloto. `is_listed = false` (só a página `/r/cantinho-portugues`). Cardápio e preços são **sugestões** para o dono ajustar. Foto de capa em `public/estabelecimentos/cantinho-portugues/`. Ainda sem telefone/WhatsApp e sem dono vinculado. |
 | os outros 6 | Bares de Volta Redonda | Fictícios, de teste. |
 
 ## Como cadastrar um bar novo hoje
@@ -85,6 +85,6 @@ Não há tela para isso. Inserir uma linha em `bars` pelo SQL ou Table Editor
 (campos obrigatórios: `id`, `name`, `neighborhood`, `city`, `image_url`,
 `address`, `hours`, `phone`, `description`), com `is_listed = false` enquanto
 for só a página avulsa. Fotos: colocar em `public/estabelecimentos/<id>/`
-(JPG até ~1200 px) e apontar `image_url`/`gallery` para `/estabelecimentos/<id>/...`.
+(JPG até ~1200 px) e apontar `image_url` para `/estabelecimentos/<id>/...`.
 Coordenadas: `POST /api/geocode-profile` com o endereço e `saveProfile: false`.
 O Cantinho Português foi cadastrado assim e serve de modelo.
