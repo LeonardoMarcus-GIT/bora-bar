@@ -79,7 +79,8 @@ function mapCategory(category) {
         description: item.description ?? "",
         price: Number(item.price ?? 0),
         isAvailable: item.is_available,
-        sortOrder: item.sort_order
+        sortOrder: item.sort_order,
+        imageUrl: item.image_url ?? ""
       }))
       .sort((a, b) => a.sortOrder - b.sortOrder)
   };
@@ -200,7 +201,7 @@ export async function fetchManagedBarData(barId) {
       supabase
         .from("menu_categories")
         .select(
-          "id, name, slug, sort_order, is_active, menu_items(id, name, description, price, is_available, sort_order)"
+          "id, name, slug, sort_order, is_active, menu_items(*)"
         )
         .eq("bar_id", barId)
         .order("sort_order", { ascending: true }),
@@ -289,7 +290,8 @@ export async function replaceManagedMenu(barId, categories) {
         description: item.description.trim(),
         price: Number(item.price || 0),
         isAvailable: item.isAvailable,
-        sortOrder: itemIndex
+        sortOrder: itemIndex,
+        imageUrl: item.imageUrl || ""
       }))
     }))
   });

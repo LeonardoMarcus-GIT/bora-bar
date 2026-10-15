@@ -70,6 +70,7 @@ export default function StandalonePage({ barId }) {
       ...bar,
       isOpen: openStatus.isOpen,
       openStatusDetail: openStatus.detail,
+      isClosingSoon: openStatus.isClosingSoon,
       hasCoordinates: Number.isFinite(bar.latitude) && Number.isFinite(bar.longitude),
       hasRealDistance: Number.isFinite(distanceKm),
       distanceKm: Number.isFinite(distanceKm) ? distanceKm : bar.distanceKm

@@ -289,6 +289,7 @@ export default function App() {
           ...bar,
           isOpen: openStatus.isOpen,
           openStatusDetail: openStatus.detail,
+          isClosingSoon: openStatus.isClosingSoon,
           distanceKm: calculatedDistanceKm ?? bar.distanceKm,
           hasCoordinates:
             Number.isFinite(bar.latitude) && Number.isFinite(bar.longitude),

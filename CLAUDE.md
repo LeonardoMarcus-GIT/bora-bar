@@ -79,6 +79,9 @@ e login/painel ficam indisponíveis.
   `src/main.jsx`): o "site" de cada estabelecimento para QR Code e Instagram, sem
   a marca Bora Bar. `bars.is_listed = false` = só essa página, fora do guia.
   É o produto que se vende primeiro; depois liga `is_listed` e ele entra no app.
+  Usa a MESMA `BarDetails` do app (design idêntico). `/r/<id>/qr` = cartão de
+  QR Code para imprimir. A prévia do link (Open Graph) é feita pela edge
+  function `netlify/edge-functions/link-preview.js`.
 - `src/App.jsx` concentra o estado global (lista de bares, filtros, busca,
   favoritos, localização) e o roteamento. **O roteamento é por hash**
   (`#app`, `#bar/<id>`, `#business`, `#profile`, `#login`, `#for-business`,

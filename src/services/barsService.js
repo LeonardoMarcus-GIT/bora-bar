@@ -33,7 +33,8 @@ function mapStructuredMenu(categories, fallbackMenu) {
         .map((item) => ({
           name: item.name,
           description: item.description ?? "",
-          price: Number(item.price ?? 0)
+          price: Number(item.price ?? 0),
+          imageUrl: item.image_url ?? ""
         }))
     ])
   );
@@ -112,14 +113,7 @@ const BAR_SELECT = `
         slug,
         sort_order,
         is_active,
-        menu_items (
-          id,
-          name,
-          description,
-          price,
-          is_available,
-          sort_order
-        )
+        menu_items (*)
       ),
       promotions (
         id,

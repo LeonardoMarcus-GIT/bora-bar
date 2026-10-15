@@ -27,7 +27,11 @@ export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite })
         </div>
         <div className="bar-card-body">
           <div className="bar-card-topline">
-            <StatusBadge isOpen={bar.isOpen} detail={bar.openStatusDetail} />
+            <StatusBadge
+              isOpen={bar.isOpen}
+              isClosingSoon={bar.isClosingSoon}
+              detail={bar.openStatusDetail}
+            />
             <span className="price-level">{bar.priceLevel}</span>
           </div>
 

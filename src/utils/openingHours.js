@@ -5,6 +5,8 @@
 const TIME_ZONE = "America/Sao_Paulo";
 const MINUTES_PER_DAY = 24 * 60;
 const MINUTES_PER_WEEK = 7 * MINUTES_PER_DAY;
+// A partir de quantos minutos antes de fechar o selo vira "Fecha em X min".
+export const CLOSING_SOON_MINUTES = 30;
 
 // Índices iguais ao Date.getDay(): 0 = domingo.
 const DAY_INDEX = { dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sab: 6 };
@@ -196,6 +198,7 @@ export function getOpenStatus(hoursText, manualIsOpen = false, now = new Date())
     return {
       isOpen: Boolean(manualIsOpen),
       isAutomatic: false,
+      isClosingSoon: false,
       detail: ""
     };
   }
@@ -225,16 +228,23 @@ export function getOpenStatus(hoursText, manualIsOpen = false, now = new Date())
   });
 
   if (closingAt !== null) {
+    const minutesLeft = closingAt - nowMinute;
+    const isClosingSoon = minutesLeft <= CLOSING_SOON_MINUTES;
+
     return {
       isOpen: true,
       isAutomatic: true,
-      detail: `Fecha às ${formatClock(closingAt)}`
+      isClosingSoon,
+      detail: isClosingSoon
+        ? `Fecha em ${Math.max(1, minutesLeft)} min`
+        : `Fecha às ${formatClock(closingAt)}`
     };
   }
 
   return {
     isOpen: false,
     isAutomatic: true,
+    isClosingSoon: false,
     detail: describeOpening(nextOpeningAt, nowMinute)
   };
 }

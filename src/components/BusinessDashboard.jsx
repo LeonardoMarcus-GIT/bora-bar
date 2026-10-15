@@ -12,6 +12,7 @@ import {
   Phone,
   PhoneCall,
   Plus,
+  QrCode,
   Save,
   Store,
   Tag,
@@ -64,7 +65,8 @@ function emptyMenuItem() {
     name: "",
     description: "",
     price: "",
-    isAvailable: true
+    isAvailable: true,
+    imageUrl: ""
   };
 }
 
@@ -217,6 +219,7 @@ export default function BusinessDashboard({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadingItemId, setUploadingItemId] = useState("");
   const [feedback, setFeedback] = useState("");
   const [setupError, setSetupError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -442,6 +445,35 @@ export default function BusinessDashboard({
       ...currentData,
       bar: { ...currentData.bar, ...patch }
     }));
+  }
+
+  // Foto opcional de um item do cardápio (aparece como miniatura no cardápio).
+  async function handleMenuItemPhoto(categoryId, itemId, event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || !selectedBarId) {
+      return;
+    }
+
+    setUploadingItemId(itemId);
+    setFeedback("");
+
+    try {
+      const imageUrl = await uploadBusinessCoverImage(selectedBarId, file);
+      updateMenuItem(categoryId, itemId, { imageUrl });
+      setFeedback("Foto do item pronta. Salve o cardápio para publicar.");
+    } catch (error) {
+      if (error?.message === "INVALID_IMAGE_TYPE") {
+        setFeedback("Escolha uma imagem JPG, PNG ou WebP.");
+      } else if (error?.message === "IMAGE_TOO_LARGE") {
+        setFeedback("A imagem deve ter no máximo 8 MB.");
+      } else {
+        setFeedback("Não foi possível enviar a foto agora. Tente novamente.");
+      }
+    } finally {
+      setUploadingItemId("");
+    }
   }
 
   async function handleCoverImageSelected(event) {
@@ -869,6 +901,9 @@ export default function BusinessDashboard({
                 onEditProfile={() => setActiveTab("overview")}
                 onNewPromotion={openNewPromotion}
                 onPreview={() => onPreviewBar?.(selectedBarId)}
+                onOpenQrCode={() =>
+                  window.open(`/r/${encodeURIComponent(selectedBarId)}/qr`, "_blank", "noopener")
+                }
               />
             )}
 
@@ -1020,6 +1055,42 @@ export default function BusinessDashboard({
                             </button>
                           </div>
 
+                          <div className="menu-item-photo-field">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt="" />
+                            ) : (
+                              <span className="menu-item-photo-empty" aria-hidden="true">
+                                <Image size={18} />
+                              </span>
+                            )}
+                            <label className="menu-item-photo-button">
+                              {uploadingItemId === item.id
+                                ? "Enviando..."
+                                : item.imageUrl
+                                  ? "Trocar foto"
+                                  : "Adicionar foto (opcional)"}
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                disabled={Boolean(uploadingItemId)}
+                                onChange={(event) =>
+                                  handleMenuItemPhoto(category.id, item.id, event)
+                                }
+                              />
+                            </label>
+                            {item.imageUrl && (
+                              <button
+                                className="menu-item-photo-remove"
+                                type="button"
+                                onClick={() =>
+                                  updateMenuItem(category.id, item.id, { imageUrl: "" })
+                                }
+                              >
+                                Remover foto
+                              </button>
+                            )}
+                          </div>
+
                           <div className="menu-item-details">
                             <input
                               aria-label="Descrição do item"
@@ -1153,7 +1224,14 @@ export default function BusinessDashboard({
   );
 }
 
-function BusinessOverview({ data, metrics, onEditProfile, onNewPromotion, onPreview }) {
+function BusinessOverview({
+  data,
+  metrics,
+  onEditProfile,
+  onNewPromotion,
+  onOpenQrCode,
+  onPreview
+}) {
   const checks = [
     { label: "Foto e descrição", done: Boolean(data.bar.image && data.bar.description) },
     { label: "Endereço e contato", done: Boolean(data.bar.address && data.bar.phone) },
@@ -1243,6 +1321,10 @@ function BusinessOverview({ data, metrics, onEditProfile, onNewPromotion, onPrev
           <button type="button" onClick={onPreview}>
             <Eye size={19} aria-hidden="true" />
             <span><strong>Ver minha página</strong><small>A página do QR Code e do link no Instagram</small></span>
+          </button>
+          <button type="button" onClick={onOpenQrCode}>
+            <QrCode size={19} aria-hidden="true" />
+            <span><strong>QR Code para imprimir</strong><small>Para mesa, balcão e vitrine</small></span>
           </button>
           <button type="button" onClick={onEditProfile}>
             <Store size={19} aria-hidden="true" />

@@ -27,7 +27,7 @@ real ainda.
 | --- | --- | --- | --- |
 | `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), `gallery` (**sem uso** — sobra dos "Pratos do dia", descartados em 15/10/2026; pode ser apagada), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
 | `menu_categories` | Categorias do cardápio por bar, com ordem e ativo. | Todos (ativas); dono vê todas | Dono/gerente |
-| `menu_items` | Itens com descrição, preço (≥ 0), disponível e ordem. | Todos (disponíveis); dono vê todos | Dono/gerente |
+| `menu_items` | Itens com descrição, preço (≥ 0), disponível, ordem e `image_url` (foto opcional — **pendente**: a coluna ainda precisa ser criada com `supabase/menu-item-photos-migration.sql`). | Todos (disponíveis); dono vê todos | Dono/gerente |
 | `promotions` | Promoções com início/fim opcionais e ativo. | Todos (só as vigentes); dono vê todas | Dono/gerente |
 | `bar_events` | Eventos (samba, show) com início, fim, preço da entrada e ativo. | Todos (só futuros/ativos); dono vê todos | Dono/gerente |
 | `reviews` | Avaliações 1–5 com comentário. O `author` e o `user_id` são preenchidos pelo trigger. | Todos | Usuário logado cria e apaga as próprias |
@@ -76,7 +76,7 @@ tem SÓ essa página e não aparece no app. Para entrar no guia:
 
 | id | Nome | Situação |
 | --- | --- | --- |
-| `cantinho-portugues` | Restaurante Cantinho Português (Siderópolis, VR) | Restaurante real de um amigo, cadastrado em 15/10/2026 como primeiro piloto. `is_listed = false` (só a página `/r/cantinho-portugues`). Cardápio e preços são **sugestões** para o dono ajustar. Foto de capa em `public/estabelecimentos/cantinho-portugues/`. Ainda sem telefone/WhatsApp e sem dono vinculado. |
+| `cantinho-portugues` | Restaurante Cantinho Português (Siderópolis, VR) | Restaurante real de um amigo, cadastrado em 15/10/2026 como primeiro piloto. `is_listed = false` (só a página `/r/cantinho-portugues`). Cardápio e preços são **sugestões** para o dono ajustar. Foto de capa em `public/estabelecimentos/cantinho-portugues/`. WhatsApp (24) 99217-4436. Ainda sem dono vinculado. QR Code: `/r/cantinho-portugues/qr`. |
 | os outros 6 | Bares de Volta Redonda | Fictícios, de teste. |
 
 ## Como cadastrar um bar novo hoje

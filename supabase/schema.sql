@@ -101,6 +101,7 @@ create table if not exists public.menu_items (
   price numeric(10, 2) not null default 0 check (price >= 0),
   is_available boolean not null default true,
   sort_order integer not null default 0,
+  image_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -189,6 +190,9 @@ add column if not exists state text;
 
 alter table public.bars
 add column if not exists state_code text;
+
+alter table public.menu_items
+add column if not exists image_url text;
 
 alter table public.profiles
 add column if not exists state text;
@@ -718,7 +722,8 @@ begin
         description,
         price,
         is_available,
-        sort_order
+        sort_order,
+        image_url
       )
       values (
         target_bar_id,
@@ -727,7 +732,8 @@ begin
         nullif(trim(item_data ->> 'description'), ''),
         greatest(coalesce((item_data ->> 'price')::numeric, 0), 0),
         coalesce((item_data ->> 'isAvailable')::boolean, true),
-        coalesce((item_data ->> 'sortOrder')::integer, 0)
+        coalesce((item_data ->> 'sortOrder')::integer, 0),
+        left(nullif(trim(item_data ->> 'imageUrl'), ''), 500)
       );
     end loop;
   end loop;

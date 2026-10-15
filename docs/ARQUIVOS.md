@@ -24,7 +24,7 @@ Supabase (tabelas + RLS)
 | Arquivo | O que é |
 | --- | --- |
 | `CLAUDE.md` | Instruções para o Claude trabalhar no projeto: stack, comandos, regras, problemas conhecidos. |
-| `package.json` | Nome `bora-bar`, versão 0.1.0, módulos ES. Scripts `dev`, `build`, `preview`, `serve:dist`. Dependências: React 19, Vite 7, `@supabase/supabase-js`, `lucide-react`, `ogl`. |
+| `package.json` | Nome `bora-bar`, versão 0.1.0, módulos ES. Scripts `dev`, `build`, `preview`, `serve:dist`. Dependências: React 19, Vite 7, `@supabase/supabase-js`, `lucide-react`, `ogl`, `qrcode`. |
 | `package-lock.json` | Versões travadas das dependências (gerado pelo npm). |
 | `index.html` | HTML base em pt-BR com `<div id="root">` e meta description. Carrega `src/main.jsx`. Não tem tags Open Graph (prévia de link). |
 | `vite.config.js` | Config do Vite com plugin React e `base: "/"` (caminhos absolutos — necessário para a página `/r/<id>` achar os arquivos). |
@@ -37,6 +37,7 @@ Supabase (tabelas + RLS)
 
 | Arquivo | O que é |
 | --- | --- |
+| `netlify/edge-functions/link-preview.js` | **Prévia do link** de `/r/<id>` no WhatsApp/Instagram/Facebook: antes de entregar o `index.html`, busca o estabelecimento no Supabase (REST, chave pública das variáveis `VITE_SUPABASE_*` da Netlify) e coloca título, descrição e foto nas tags Open Graph. Se falhar, entrega o HTML sem mudança. Não atua em `/r/<id>/qr`. |
 | `netlify/functions/geocode-profile.mjs` | Adaptador da Netlify: converte o `Request` da Web para o formato request/response que `api/geocode-profile.js` espera e devolve um `Response`. Exposto em `/api/geocode-profile` pelo redirect do `netlify.toml`. |
 | `api/geocode-profile.js` | Lógica da `POST /api/geocode-profile` (escrita no formato da Vercel; na Netlify roda pelo adaptador acima). Recebe um endereço (CEP, rua, número, bairro, cidade, UF), monta várias buscas e consulta o **Nominatim** (OpenStreetMap) para achar latitude/longitude. Confere se o resultado é mesmo da cidade/UF informada, respeita limite de 1 requisição/segundo e guarda cache em memória por 30 dias. Se vier o token do usuário (`Authorization: Bearer`) e `saveProfile` não for `false`, grava a localização no perfil dele no Supabase. Usa `process.env.VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. |
 
@@ -64,13 +65,13 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 
 | Arquivo | O que é |
 | --- | --- |
-| `public/estabelecimentos/<id>/*.jpg` | Fotos dos estabelecimentos (capa e galeria), servidas em `/estabelecimentos/<id>/...`. Hoje: `cantinho-portugues/capa-bacalhau.jpg` (até 1200 px). |
+| `public/estabelecimentos/<id>/*.jpg` | Fotos dos estabelecimentos (capa e galeria), servidas em `/estabelecimentos/<id>/...`. Hoje: `cantinho-portugues/capa-bacalhau.jpg` (capa, até 1200 px) e `item-*.jpg` (miniaturas 320 px para itens do cardápio: bacalhau-legumes, risoto-camarao, bife-acebolado, espaguete-bacon, feijoada). |
 
 ## `src/` — entrada
 
 | Arquivo | O que é |
 | --- | --- |
-| `src/main.jsx` | Ponto de entrada. Sempre desenha o efeito de luz `SideRays`. **Se o endereço for `/r/<id>`, renderiza só a `StandalonePage`** (página avulsa, sem login nem navegação do app); senão, o app normal. Renderiza o efeito `SideRays` (luz amarela no canto) e o `App` dentro do `AuthProvider`. Importa `styles.css`. |
+| `src/main.jsx` | Ponto de entrada. Escolhe a tela pelo endereço: **`/r/<id>/qr`** → `QrCodePage` (sem efeito de luz); **`/r/<id>`** → `StandalonePage` (página avulsa, com o efeito de luz `SideRays`); qualquer outro → o app normal. Renderiza o efeito `SideRays` (luz amarela no canto) e o `App` dentro do `AuthProvider`. Importa `styles.css`. |
 | `src/App.jsx` | Componente raiz (≈780 linhas). Faz o **roteamento por hash** (`getRoute`), carrega os bares, calcula a distância de cada um até o usuário (GPS ou endereço do perfil verificado), limita a descoberta a **20 km**, monta as sugestões de busca (bar, bairro, cidade), aplica filtros (aberto, promoção, mais barato, mais próximo, favoritos), guarda favoritos no `localStorage` e decide qual tela mostrar. Tem um relógio interno (`now`, atualizado a cada minuto) que recalcula o aberto/fechado de cada bar com `getOpenStatus` e adiciona `openStatusDetail` ao bar. O card "Seu estabelecimento no Bora Bar" no fim da lista é um botão inteiro (ícone, texto e seta levam a `#for-business`). Na lista mostra três estados: carregando, erro com botão "Tentar de novo" (`barsLoadError` / `retryLoadBars`) e "Nenhum bar por aqui ainda". |
 | `src/styles.css` | Todo o CSS do app (≈2.800 linhas): landing, lista, detalhes, painel, formulários, navegação inferior, responsivo. |
 
@@ -105,7 +106,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | Arquivo | O que é |
 | --- | --- |
 | `src/utils/format.js` | `formatCurrency` (R$), `getStartingPrice` (menor preço do cardápio), `normalizeText` (minúsculas sem acento, para busca). |
-| `src/utils/openingHours.js` | **Aberto/fechado automático.** `getOpenStatus(textoDoHorario, abertoManual, agora)` lê o horário em texto ("Seg a qui: 17h-00h \| Sex e sab: 17h-02h", "Ter a dom: 15h-01h", "Seg, Qua e Sex: 18h30-02h", "Todos os dias: 16h-01h", vários horários no mesmo dia com "e"), sempre no fuso de Brasília, entende fechamento depois da meia-noite e devolve `{ isOpen, isAutomatic, detail }` — `detail` é "Fecha às 02h", "Abre hoje às 18h", "Abre amanhã às 15h" ou "Abre seg às 11h". Se o texto não puder ser lido, usa o valor manual (`is_open`). Também exporta `parseOpeningHours`, `parseOpeningDays` e `formatClock`. |
+| `src/utils/openingHours.js` | **Aberto/fechado automático** (com `isClosingSoon` nos últimos `CLOSING_SOON_MINUTES` = 30 min). `getOpenStatus(textoDoHorario, abertoManual, agora)` lê o horário em texto ("Seg a qui: 17h-00h \| Sex e sab: 17h-02h", "Ter a dom: 15h-01h", "Seg, Qua e Sex: 18h30-02h", "Todos os dias: 16h-01h", vários horários no mesmo dia com "e"), sempre no fuso de Brasília, entende fechamento depois da meia-noite e devolve `{ isOpen, isAutomatic, detail }` — `detail` é "Fecha às 02h", "Abre hoje às 18h", "Abre amanhã às 15h" ou "Abre seg às 11h". Se o texto não puder ser lido, usa o valor manual (`is_open`). Também exporta `parseOpeningHours`, `parseOpeningDays` e `formatClock`. |
 | `src/utils/geo.js` | `calculateDistanceKm` (fórmula de Haversine), `formatDistanceKm` ("850 m" / "1,9 km"), `isValidCoordinate`. |
 
 ## `src/data/`
@@ -132,7 +133,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `AuthPage.jsx` | Login, cadastro e "esqueci a senha" (`#login`). No cadastro coleta nome e endereço opcional, calcula coordenadas e salva nos metadados do usuário. Traduz erros do Supabase para português. |
 | `PasswordResetPage.jsx` | Tela para definir nova senha ao voltar do link de recuperação enviado por e-mail. |
 | `ProfilePage.jsx` | Perfil do usuário (`#profile`): nome e endereço (para calcular distância sem GPS), sair da conta, e atalhos para a área do estabelecimento. |
-| `BusinessDashboard.jsx` | **Painel do dono** (`#business`, ≈1.470 linhas). Sem vínculo: formulário para pedir acesso a um bar (nome, telefone, CNPJ opcional, mensagem) e status dos pedidos. Com vínculo: seletor de bar e 5 abas — **Visão geral** (percentual do perfil completo, métricas de 30 dias, atalhos; "Ver minha página" abre `/r/<id>` em nova aba), **Perfil público** (nome, foto por upload ou URL, endereço por CEP, editor de dias/horário com minutos, telefone, descrição, faixa de preço e o status aberto/fechado — automático pelo horário; a chave manual só aparece quando o horário não pode ser lido. O editor de horário edita só o primeiro trecho: horários com vários trechos ("Seg a qui… \| Sex e sab…") viram um só se o dono mexer), **Cardápio** (categorias e itens com preço e disponibilidade), **Promoções** e **Eventos** (com início, fim, preço e ativo). Cada aba salva com um botão. |
+| `BusinessDashboard.jsx` | **Painel do dono** (`#business`, ≈1.470 linhas). Sem vínculo: formulário para pedir acesso a um bar (nome, telefone, CNPJ opcional, mensagem) e status dos pedidos. Com vínculo: seletor de bar e 5 abas — **Visão geral** (percentual do perfil completo, métricas de 30 dias, atalhos; "Ver minha página" abre `/r/<id>` e "QR Code para imprimir" abre `/r/<id>/qr` em nova aba), **Perfil público** (nome, foto por upload ou URL, endereço por CEP, editor de dias/horário com minutos, telefone, descrição, faixa de preço e o status aberto/fechado — automático pelo horário; a chave manual só aparece quando o horário não pode ser lido. O editor de horário edita só o primeiro trecho: horários com vários trechos ("Seg a qui… \| Sex e sab…") viram um só se o dono mexer), **Cardápio** (categorias e itens com preço, disponibilidade e foto opcional por item), **Promoções** e **Eventos** (com início, fim, preço e ativo). Cada aba salva com um botão. |
 | `ForBusinessPage.jsx` | Página de vendas para donos (`#for-business`): benefícios, "como entrar" em 3 passos e o **Programa Parceiro Fundador** (30 dias grátis, 10 primeiros bares de Volta Redonda, sem preço publicado). Os botões "Quero ser parceiro"/"Quero minha vaga" abrem o WhatsApp comercial (constante `SALES_WHATSAPP`, hoje 24 99219-6584) com mensagem pronta. No fim, atalho para quem já é parceiro entrar no painel. |
 
 ## `src/components/` — peças do app
@@ -144,10 +145,12 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `BarList.jsx` | Grade de `BarCard`; mostra estado vazio próprio para favoritos ou busca sem resultado. |
 | `BarCard.jsx` | Card do bar: foto, aberto/fechado, faixa de preço, bairro, distância, "a partir de R$", promoção e botão de favoritar. |
 | `StandalonePage.jsx` | **Página avulsa do estabelecimento (`/r/<id>`)** — o "site" do restaurante/bar para QR Code e link no Instagram. Carrega um estabelecimento com `fetchBarById` (aparece no guia ou não), calcula aberto/fechado (a cada minuto) e distância (GPS do visitante, se ele tocar em "Ver distância") e renderiza **a mesma `BarDetails` do app** com `isStandalone` — design idêntico ao dos outros bares. Estados próprios: carregando, erro com "Tentar de novo" e "Página não encontrada". |
-| `BarDetails.jsx` | Página do bar (`#bar/<id>`): foto, status, ações rápidas (WhatsApp, ligar, Google Maps, Waze — cada clique é registrado como métrica), sobre, endereço, horário, promoções, resumo, cardápio, próximos eventos e avaliações. Registra uma visualização por sessão. Com `isStandalone` (página `/r/<id>`): sem "Voltar", "Favoritar" e avaliações; distância só com GPS do visitante (botão "Ver distância"). Sem telefone cadastrado, WhatsApp e Ligar aparecem desativados ("Em breve"). |
-| `MenuCategory.jsx` | Uma categoria do cardápio com itens, descrição (se houver) e preços; traduz as chaves antigas (`cervejas`, `drinks`, `porcoes`, `combos`). |
+| `BarDetails.jsx` | Página do bar (`#bar/<id>`): foto, status, ações rápidas (WhatsApp, ligar, Google Maps, Waze — cada clique é registrado como métrica), sobre, endereço, horário, promoções, resumo, cardápio, próximos eventos e avaliações. Registra uma visualização por sessão. Mostra os atalhos do cardápio (`MenuNav`). Com `isStandalone` (página `/r/<id>`): sem "Voltar", "Favoritar" e avaliações; botão fixo verde "Pedir ou perguntar no WhatsApp" no rodapé do celular, que aparece quando os botões do topo saem da tela; distância só com GPS do visitante (botão "Ver distância"). Sem telefone cadastrado, WhatsApp e Ligar aparecem desativados ("Em breve"). |
+| `MenuCategory.jsx` | Uma categoria do cardápio com itens, descrição (se houver), preços e **foto opcional** do item (miniatura à esquerda, `imageUrl`); cada categoria tem id `menu-<nome>` para os atalhos; traduz as chaves antigas (`cervejas`, `drinks`, `porcoes`, `combos`). |
 | `Reviews.jsx` | Lista de avaliações com nota de 1 a 5, formulário para quem está logado e botão de apagar a própria avaliação. |
-| `StatusBadge.jsx` | Selo "Aberto"/"Fechado", com detalhe opcional ("· Fecha às 02h"). |
+| `StatusBadge.jsx` | Selo "Aberto"/"Fechado", com detalhe opcional ("· Fecha às 02h"). Fica **amarelo** nos últimos 30 min (`isClosingSoon`, "Fecha em 25 min"). |
+| `MenuNav.jsx` | **Atalhos do cardápio**: um botão por categoria (aparece com 3+ categorias), grudado no topo enquanto o cardápio está na tela; toque desliza suave até a categoria; a categoria visível fica destacada. Quebra em linhas, sem rolagem lateral. |
+| `QrCodePage.jsx` | **Cartão de QR Code para imprimir** (`/r/<id>/qr`): nome do estabelecimento, QR para `/r/<id>`, "Aponte a câmera…", botões Imprimir e Baixar imagem (PNG 1200 px). Sem marca Bora Bar; estilo próprio para impressão. Usa a biblioteca `qrcode`. |
 | `BottomNav.jsx` | Barra inferior: Início, Buscar, Promoções (ou Cardápio na página do bar), Favoritos, Perfil. |
 | `AddressFields.jsx` | Campos de endereço do perfil do usuário: CEP com busca automática, UF e cidade por listas do IBGE, bairro. |
 | `BarAddressFields.jsx` | Campos de endereço do estabelecimento no painel: CEP com busca, rua, número, complemento, bairro, cidade, estado. |

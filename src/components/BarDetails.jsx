@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   BadgePercent,
@@ -12,6 +12,7 @@ import {
   Route
 } from "lucide-react";
 import MenuCategory from "./MenuCategory.jsx";
+import MenuNav from "./MenuNav.jsx";
 import Reviews from "./Reviews.jsx";
 import StatusBadge from "./StatusBadge.jsx";
 import {
@@ -68,6 +69,29 @@ export default function BarDetails({
     ? formatDistanceKm(bar.distanceKm)
     : null;
   const routeLinks = getRouteLinks(bar);
+  const quickActionsRef = useRef(null);
+  const [showFloatingWhatsApp, setShowFloatingWhatsApp] = useState(false);
+  const hasFloatingWhatsApp = isStandalone && hasPhone;
+
+  // Página avulsa: o botão fixo de WhatsApp aparece quando os botões do topo
+  // saem da tela (assim nunca aparecem os dois ao mesmo tempo).
+  useEffect(() => {
+    const target = quickActionsRef.current;
+
+    if (!hasFloatingWhatsApp || !target || !("IntersectionObserver" in window)) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setShowFloatingWhatsApp(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasFloatingWhatsApp]);
+  const menuCategories = Object.entries(bar.menu ?? {})
+    .filter(([, items]) => items.length > 0)
+    .map(([category]) => category);
 
   useEffect(() => {
     void recordBarViewOnce(bar.id);
@@ -102,7 +126,11 @@ export default function BarDetails({
       <section className="details-hero">
         <img src={bar.image} alt={`Ambiente do ${bar.name}`} />
         <div className="details-hero-overlay">
-          <StatusBadge isOpen={bar.isOpen} detail={bar.openStatusDetail} />
+          <StatusBadge
+            isOpen={bar.isOpen}
+            isClosingSoon={bar.isClosingSoon}
+            detail={bar.openStatusDetail}
+          />
           <h1>{bar.name}</h1>
           <p>
             {bar.neighborhood}, {bar.city}
@@ -118,7 +146,11 @@ export default function BarDetails({
         </div>
       </section>
 
-      <section className="details-quick-actions" aria-label="Ações do estabelecimento">
+      <section
+        className="details-quick-actions"
+        aria-label="Ações do estabelecimento"
+        ref={quickActionsRef}
+      >
         {hasPhone ? (
           <a
             className="is-primary"
@@ -241,7 +273,11 @@ export default function BarDetails({
             <div>
               <dt>Status</dt>
               <dd>
-                {bar.isOpen ? "Aberto agora" : "Fechado no momento"}
+                {bar.isOpen
+                  ? bar.isClosingSoon
+                    ? "Fechando em breve"
+                    : "Aberto agora"
+                  : "Fechado no momento"}
                 {bar.openStatusDetail && <small>{bar.openStatusDetail}</small>}
               </dd>
             </div>
@@ -261,10 +297,13 @@ export default function BarDetails({
           </div>
           <span>{Object.values(bar.menu).flat().length} itens</span>
         </div>
+        {menuCategories.length >= 3 && <MenuNav categories={menuCategories} />}
         <div className="menu-grid">
-          {Object.entries(bar.menu).map(([category, items]) => (
-            <MenuCategory key={category} name={category} items={items} />
-          ))}
+          {Object.entries(bar.menu)
+            .filter(([, items]) => items.length > 0)
+            .map(([category, items]) => (
+              <MenuCategory key={category} name={category} items={items} />
+            ))}
         </div>
       </section>
 
@@ -293,6 +332,21 @@ export default function BarDetails({
       )}
 
       {!isStandalone && <Reviews barId={bar.id} />}
+
+      {hasFloatingWhatsApp && (
+        <a
+          className={`floating-whatsapp ${showFloatingWhatsApp ? "is-visible" : ""}`}
+          href={`https://wa.me/${phoneDigits}`}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => track("whatsapp")}
+          aria-hidden={!showFloatingWhatsApp}
+          tabIndex={showFloatingWhatsApp ? 0 : -1}
+        >
+          <MessageCircle size={20} aria-hidden="true" />
+          Pedir ou perguntar no WhatsApp
+        </a>
+      )}
     </main>
   );
 }
