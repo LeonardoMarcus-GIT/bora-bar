@@ -88,6 +88,11 @@ function mapBarFromDatabase(bar) {
     longitude: getCoordinate(bar.longitude),
     isActive: bar.is_active ?? true,
     isListed: bar.is_listed ?? true,
+    gallery: Array.isArray(bar.gallery)
+      ? bar.gallery
+          .filter((photo) => photo?.url)
+          .map((photo) => ({ url: photo.url, caption: photo.caption ?? "" }))
+      : [],
     isOpen: Boolean(bar.is_open),
     priceLevel: bar.price_level,
     promotion: promotions[0]?.title ?? bar.promotion ?? "",

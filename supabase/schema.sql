@@ -26,6 +26,7 @@ create table if not exists public.bars (
   phone text not null,
   description text not null,
   menu jsonb not null default '{}'::jsonb,
+  gallery jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -171,6 +172,9 @@ add column if not exists is_active boolean not null default true;
 
 alter table public.bars
 add column if not exists is_listed boolean not null default true;
+
+alter table public.bars
+add column if not exists gallery jsonb not null default '[]'::jsonb;
 
 alter table public.bars
 add column if not exists postal_code text;

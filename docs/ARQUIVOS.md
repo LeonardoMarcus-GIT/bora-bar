@@ -60,6 +60,12 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `supabase/listing-visibility-migration.sql` | Migração da coluna `bars.is_listed` (aparece no guia ou só página avulsa). Já aplicada em 15/10/2026. |
 | `supabase/bar-images-storage.sql` | Migração para bancos antigos: cria o bucket público `bar-images` (até 8 MB, JPG/PNG/WebP) e as policies para cada dono enviar fotos só na pasta do próprio bar. |
 
+## `public/` — arquivos servidos como estão
+
+| Arquivo | O que é |
+| --- | --- |
+| `public/estabelecimentos/<id>/*.jpg` | Fotos dos estabelecimentos (capa e galeria), servidas em `/estabelecimentos/<id>/...`. Hoje: `cantinho-portugues/` (capa-bacalhau, risoto-camarao, salpicao-bife-acebolado, espaguete-bife-acebolado, feijoada), redimensionadas para até 1200 px. |
+
 ## `src/` — entrada
 
 | Arquivo | O que é |
@@ -85,7 +91,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | Arquivo | O que é |
 | --- | --- |
 | `src/services/supabaseClient.js` | Cria o cliente Supabase a partir das variáveis `VITE_*`. Exporta `supabase` (ou `null`) e `isSupabaseConfigured`. |
-| `src/services/barsService.js` | `fetchBars()` (só estabelecimentos com `is_listed = true`) e `fetchBarById(id)` (um estabelecimento, listado ou não — para a página avulsa). `fetchBars()`: busca bares com categorias, itens, promoções e eventos numa consulta só; filtra promoções vigentes e eventos futuros; converte para o formato do front. Tem limite de 15 s. **Se o banco falhar, lança erro** (nunca devolve bares de exemplo em produção); banco sem bares ativos devolve lista vazia. `mockBars` só é usado rodando localmente (`npm run dev`) sem as variáveis do Supabase. |
+| `src/services/barsService.js` | Mapeia também `gallery` (fotos). `fetchBars()` (só estabelecimentos com `is_listed = true`) e `fetchBarById(id)` (um estabelecimento, listado ou não — para a página avulsa). `fetchBars()`: busca bares com categorias, itens, promoções e eventos numa consulta só; filtra promoções vigentes e eventos futuros; converte para o formato do front. Tem limite de 15 s. **Se o banco falhar, lança erro** (nunca devolve bares de exemplo em produção); banco sem bares ativos devolve lista vazia. `mockBars` só é usado rodando localmente (`npm run dev`) sem as variáveis do Supabase. |
 | `src/services/businessService.js` | Tudo do painel do dono: `fetchBusinessAccess` (vínculos e pedidos de acesso do usuário), `createBarClaim` (pedir acesso a um bar), `fetchManagedBarData`, `updateManagedBar` (perfil e endereço), `replaceManagedMenu`, `replaceManagedPromotions`, `replaceManagedEvents` (via funções RPC). Converte endereço antigo em texto para campos estruturados. |
 | `src/services/businessImageService.js` | `uploadBusinessCoverImage(barId, file)`: valida tipo (JPG/PNG/WebP) e tamanho (8 MB), envia para o bucket `bar-images/<barId>/<uuid>.<ext>` e devolve a URL pública. |
 | `src/services/analyticsService.js` | Métricas anônimas. `recordBarEvent` grava `view`, `whatsapp`, `phone`, `route_google`, `route_waze` ou `favorite` com um id de sessão aleatório; `recordBarViewOnce` conta uma visualização por bar por sessão; `fetchBarMetrics` chama `get_bar_metrics` (últimos 30 dias). |
@@ -137,7 +143,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `FilterBar.jsx` | Quatro filtros: Aberto agora, Mais barato, Mais próximo, Com promoção. |
 | `BarList.jsx` | Grade de `BarCard`; mostra estado vazio próprio para favoritos ou busca sem resultado. |
 | `BarCard.jsx` | Card do bar: foto, aberto/fechado, faixa de preço, bairro, distância, "a partir de R$", promoção e botão de favoritar. |
-| `StandalonePage.jsx` | **Página avulsa do estabelecimento (`/r/<id>`)** — o "site" do restaurante/bar para QR Code e link no Instagram, sem a marca Bora Bar. Carrega um estabelecimento com `fetchBarById` (aparece no guia ou não). Mostra foto, nome, aberto/fechado automático, faixa **Hoje** (promoções vigentes + eventos do dia, ex.: prato do dia), botões WhatsApp/Ligar/Como chegar, cardápio com descrições, próximos eventos, descrição, horário e endereço. Registra métricas (visualização, WhatsApp, ligação, rota). Estados: carregando, erro com "Tentar de novo" e "Página não encontrada". |
+| `StandalonePage.jsx` | **Página avulsa do estabelecimento (`/r/<id>`)** — o "site" do restaurante/bar para QR Code e link no Instagram, sem a marca Bora Bar. Carrega um estabelecimento com `fetchBarById` (aparece no guia ou não). Mostra foto, nome, aberto/fechado automático, faixa **Hoje** (promoções vigentes + eventos do dia, ex.: prato do dia), botões WhatsApp/Ligar/Como chegar (somem se não houver telefone), galeria de fotos rolável (`bar.gallery`), cardápio com descrições, próximos eventos, descrição, horário e endereço. Registra métricas (visualização, WhatsApp, ligação, rota). Estados: carregando, erro com "Tentar de novo" e "Página não encontrada". |
 | `BarDetails.jsx` | Página do bar (`#bar/<id>`): foto, status, ações rápidas (WhatsApp, ligar, Google Maps, Waze — cada clique é registrado como métrica), sobre, endereço, horário, promoções, resumo, cardápio, próximos eventos e avaliações. Registra uma visualização por sessão. |
 | `MenuCategory.jsx` | Uma categoria do cardápio com itens, descrição (se houver) e preços; traduz as chaves antigas (`cervejas`, `drinks`, `porcoes`, `combos`). |
 | `Reviews.jsx` | Lista de avaliações com nota de 1 a 5, formulário para quem está logado e botão de apagar a própria avaliação. |

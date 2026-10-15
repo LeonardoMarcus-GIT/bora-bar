@@ -13,6 +13,9 @@ nasce cheio. Detalhes em `docs/PLANO.md`.
 banco — os 6 bares, fotos, cardápios, donos vinculados, avaliações e cliques —
 é dado de teste, fictício. O produto ainda não foi colocado à prova no mercado.
 Pode apagar ou reescrever esses dados quando necessário (avisando antes).
+Exceção: **Restaurante Cantinho Português** (`cantinho-portugues`) é real (de um
+amigo do dono do projeto) e é o primeiro piloto — página em
+https://bora-bar.netlify.app/r/cantinho-portugues, fora do guia. Não apagar.
 
 **WhatsApp comercial (quem vende o Bora Bar):** 24 99219-6584, em
 `SALES_WHATSAPP` de `src/components/ForBusinessPage.jsx`. Não confundir com o

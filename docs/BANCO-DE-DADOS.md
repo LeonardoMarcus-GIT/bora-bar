@@ -25,7 +25,7 @@ real ainda.
 
 | Tabela | Para que serve | Quem lê | Quem escreve |
 | --- | --- | --- | --- |
-| `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
+| `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), **`gallery`** (fotos: lista de `{url, caption}`, mostrada na página avulsa; só o admin edita), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (`is_active`, `is_listed`, `promotion`, `menu`, `distance_km` não). Criar bar: só você, via SQL. |
 | `menu_categories` | Categorias do cardápio por bar, com ordem e ativo. | Todos (ativas); dono vê todas | Dono/gerente |
 | `menu_items` | Itens com descrição, preço (≥ 0), disponível e ordem. | Todos (disponíveis); dono vê todos | Dono/gerente |
 | `promotions` | Promoções com início/fim opcionais e ativo. | Todos (só as vigentes); dono vê todas | Dono/gerente |
@@ -71,8 +71,19 @@ marca Bora Bar), para QR Code e link no Instagram. Com `is_listed = false` ele
 tem SÓ essa página e não aparece no app. Para entrar no guia:
 `update public.bars set is_listed = true where id = '<id>';`
 
+## Estabelecimentos cadastrados
+
+| id | Nome | Situação |
+| --- | --- | --- |
+| `cantinho-portugues` | Restaurante Cantinho Português (Siderópolis, VR) | Restaurante real de um amigo, cadastrado em 15/10/2026 como primeiro piloto. `is_listed = false` (só a página `/r/cantinho-portugues`). Cardápio e preços são **sugestões** para o dono ajustar. Fotos reais em `public/estabelecimentos/cantinho-portugues/`. Ainda sem telefone/WhatsApp e sem dono vinculado. |
+| os outros 6 | Bares de Volta Redonda | Fictícios, de teste. |
+
 ## Como cadastrar um bar novo hoje
 
 Não há tela para isso. Inserir uma linha em `bars` pelo SQL ou Table Editor
 (campos obrigatórios: `id`, `name`, `neighborhood`, `city`, `image_url`,
-`address`, `hours`, `phone`, `description`). Depois o dono pede acesso pelo app.
+`address`, `hours`, `phone`, `description`), com `is_listed = false` enquanto
+for só a página avulsa. Fotos: colocar em `public/estabelecimentos/<id>/`
+(JPG até ~1200 px) e apontar `image_url`/`gallery` para `/estabelecimentos/<id>/...`.
+Coordenadas: `POST /api/geocode-profile` com o endereço e `saveProfile: false`.
+O Cantinho Português foi cadastrado assim e serve de modelo.

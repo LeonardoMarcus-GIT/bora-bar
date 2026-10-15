@@ -15,3 +15,7 @@ comment on column public.bars.is_listed is
   'true = aparece no guia Bora Bar; false = só a página avulsa /r/<id> (link/QR do próprio estabelecimento). Só o admin altera.';
 
 create index if not exists bars_is_listed_idx on public.bars (is_listed);
+
+-- Galeria de fotos (lista de {url, caption}) exibida na página avulsa.
+alter table public.bars
+add column if not exists gallery jsonb not null default '[]'::jsonb;

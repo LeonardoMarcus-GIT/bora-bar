@@ -253,6 +253,19 @@ export default function StandalonePage({ barId }) {
         </a>
       </section>
 
+      {bar.gallery?.length > 0 && (
+        <section className="standalone-gallery" aria-label="Fotos">
+          <div className="standalone-gallery-track">
+            {bar.gallery.map((photo) => (
+              <figure key={photo.url}>
+                <img src={photo.url} alt={photo.caption || bar.name} loading="lazy" />
+                {photo.caption && <figcaption>{photo.caption}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="menu-section standalone-menu">
         <div className="section-heading">
           <h2>Cardápio</h2>
