@@ -126,17 +126,17 @@ export default function BarDetails({
       <section className="details-hero">
         <img src={bar.image} alt={`Ambiente do ${bar.name}`} />
         <div className="details-hero-overlay">
-          <StatusBadge
-            isOpen={bar.isOpen}
-            isClosingSoon={bar.isClosingSoon}
-            detail={bar.openStatusDetail}
-          />
           <h1>{bar.name}</h1>
           <p>
             {bar.neighborhood}, {bar.city}
           </p>
+          {/* Faixa de preço fica em "Sobre o lugar"; aqui, o status de agora. */}
           <div className="details-hero-facts">
-            <span>{bar.priceLevel}</span>
+            <StatusBadge
+              isOpen={bar.isOpen}
+              isClosingSoon={bar.isClosingSoon}
+              detail={bar.openStatusDetail}
+            />
             {distanceLabel ? (
               <span>{distanceLabel}</span>
             ) : !isStandalone ? (

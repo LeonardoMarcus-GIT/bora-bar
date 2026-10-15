@@ -3857,3 +3857,26 @@ body.is-qr-page {
     break-inside: avoid;
   }
 }
+
+/* Status no lugar da faixa de preço, abaixo do nome e do bairro */
+.details-hero-facts {
+  align-items: center;
+}
+
+.details-hero-facts .status-badge {
+  border: 0;
+  padding: 0 10px;
+  backdrop-filter: none;
+}
+
+.details-hero-facts .status-badge.open {
+  color: #fff;
+}
+
+.details-hero-facts .status-badge.closing-soon {
+  color: #1a1408;
+}
+
+.details-hero-overlay h1 {
+  margin-top: 0;
+}
