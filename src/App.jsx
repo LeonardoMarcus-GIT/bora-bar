@@ -805,18 +805,24 @@ export default function App() {
             onToggleFavorite={toggleFavorite}
           />
         )}
-        <section className="home-business-invite">
+        {/* O card inteiro é clicável (ícone, texto e seta). */}
+        <button
+          className="home-business-invite"
+          type="button"
+          onClick={openForBusiness}
+          aria-label="Conhecer o Bora Bar para estabelecimentos"
+        >
           <span className="home-business-icon">
             <Store size={20} aria-hidden="true" />
           </span>
-          <div>
+          <span className="home-business-copy">
             <strong>Seu estabelecimento no Bora Bar</strong>
-            <p>Atualize cardápio, promoções e eventos pelo celular.</p>
-          </div>
-          <button type="button" onClick={openForBusiness} aria-label="Conhecer o Bora Bar para estabelecimentos">
+            <span>Atualize cardápio, promoções e eventos pelo celular.</span>
+          </span>
+          <span className="home-business-arrow">
             <ChevronRight size={20} aria-hidden="true" />
-          </button>
-        </section>
+          </span>
+        </button>
       </main>
       <BottomNav
         mode={

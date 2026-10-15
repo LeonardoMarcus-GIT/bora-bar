@@ -1343,20 +1343,56 @@ p {
   grid-template-columns: 42px minmax(0, 1fr) 40px;
   align-items: center;
   gap: 12px;
+  width: 100%;
   margin-top: 18px;
   border: 1px solid rgba(255, 199, 68, 0.22);
   border-radius: 8px;
   background: rgba(24, 24, 20, 0.78);
   padding: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   backdrop-filter: blur(16px);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.home-business-invite:hover,
+.home-business-invite:focus-visible {
+  border-color: rgba(255, 199, 68, 0.55);
+  background: rgba(43, 38, 22, 0.84);
+}
+
+.home-business-invite:active {
+  transform: scale(0.99);
 }
 
 .home-business-icon,
-.home-business-invite button {
+.home-business-arrow {
   display: grid;
   place-items: center;
   width: 40px;
   height: 40px;
+}
+
+.home-business-copy {
+  display: block;
+  min-width: 0;
+}
+
+.home-business-copy strong {
+  display: block;
+}
+
+.home-business-copy > span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.home-business-arrow {
+  color: var(--gold);
 }
 
 .home-business-icon {
@@ -1370,18 +1406,6 @@ p {
   color: var(--ink);
 }
 
-.home-business-invite p {
-  margin: 3px 0 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-.home-business-invite button {
-  border: 0;
-  background: transparent;
-  color: var(--gold);
-  cursor: pointer;
-}
 
 .account-links {
   display: flex;
