@@ -6,53 +6,50 @@ import {
   Check,
   ChevronRight,
   Megaphone,
+  MessageCircle,
   Store,
   UtensilsCrossed
 } from "lucide-react";
+
+// Contato comercial do Bora Bar (quem vende). Não confundir com o WhatsApp de
+// cada bar, que o próprio dono cadastra no painel.
+const SALES_WHATSAPP = "5524992196584";
+const SALES_MESSAGE =
+  "Olá! Tenho um bar e quero saber mais sobre o programa Parceiro Fundador do Bora Bar.";
+const SALES_WHATSAPP_URL = `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent(SALES_MESSAGE)}`;
+
+const FOUNDER_SPOTS = 10;
+const FOUNDER_CITY = "Volta Redonda";
 
 const benefits = [
   {
     icon: UtensilsCrossed,
     title: "Cardápio sempre atualizado",
-    description: "Altere itens, preços e disponibilidade sem depender de suporte."
+    description: "Altere itens, preços e disponibilidade pelo celular, na hora que precisar."
   },
   {
     icon: Megaphone,
     title: "Promoções e eventos",
-    description: "Publique motivos reais para o cliente escolher seu bar hoje."
+    description: "Publique o samba de hoje e o chopp em dobro: motivos reais para o cliente escolher seu bar."
   },
   {
     icon: BarChart3,
     title: "Interesse dos clientes",
-    description: "Acompanhe visitas, rotas, ligações, WhatsApp e favoritos."
+    description: "Veja quantas pessoas abriram sua página, chamaram no WhatsApp, ligaram e pediram rota."
   }
 ];
 
-const plans = [
-  {
-    name: "Presença",
-    price: "Grátis",
-    description: "Para manter as informações essenciais corretas.",
-    features: ["Perfil público", "Cardápio e preços", "Horários e contato"]
-  },
-  {
-    name: "Destaque",
-    price: "Em breve",
-    description: "Para aparecer mais nas buscas da sua região.",
-    featured: true,
-    features: ["Tudo do Presença", "Posição de destaque", "Promoções impulsionadas"]
-  },
-  {
-    name: "Parceiro",
-    price: "Em breve",
-    description: "Para transformar atenção em visitas recorrentes.",
-    features: ["Tudo do Destaque", "Métricas ampliadas", "Campanhas e suporte prioritário"]
-  }
+const founderPerks = [
+  "Sem cartão e sem contrato",
+  "A gente cadastra seu bar: cardápio, fotos e horários",
+  "Aberto/fechado automático pelo seu horário",
+  "Condição especial garantida para os primeiros parceiros",
+  "Cancele quando quiser"
 ];
 
 export default function ForBusinessPage({ onBack, onGetStarted }) {
-  function scrollToPlans() {
-    document.querySelector("#business-plans")?.scrollIntoView({ behavior: "smooth" });
+  function scrollToOffer() {
+    document.querySelector("#founder-offer")?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
@@ -77,12 +74,17 @@ export default function ForBusinessPage({ onBack, onGetStarted }) {
             cliente decidir antes de sair de casa.
           </p>
           <div className="for-business-actions">
-            <button className="primary-action" type="button" onClick={onGetStarted}>
-              Cadastrar ou administrar meu bar
-              <ChevronRight size={18} aria-hidden="true" />
-            </button>
-            <button className="secondary-action" type="button" onClick={scrollToPlans}>
-              Conhecer os planos
+            <a
+              className="primary-action"
+              href={SALES_WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MessageCircle size={18} aria-hidden="true" />
+              Quero ser parceiro
+            </a>
+            <button className="secondary-action" type="button" onClick={scrollToOffer}>
+              Ver a condição de lançamento
             </button>
           </div>
         </div>
@@ -113,46 +115,55 @@ export default function ForBusinessPage({ onBack, onGetStarted }) {
       <section className="for-business-section business-steps-section">
         <div className="for-business-section-heading">
           <p className="section-kicker">Como entrar</p>
-          <h2>Do pedido ao perfil publicado</h2>
+          <h2>Do primeiro contato ao bar no ar</h2>
         </div>
         <ol className="business-steps">
-          <li><span>1</span><div><strong>Crie sua conta</strong><p>Use o email do responsável pelo estabelecimento.</p></div></li>
-          <li><span>2</span><div><strong>Solicite o acesso</strong><p>Selecione o bar e informe um contato para confirmação.</p></div></li>
-          <li><span>3</span><div><strong>Comece a publicar</strong><p>Após a aprovação, o painel fica liberado para sua equipe.</p></div></li>
+          <li><span>1</span><div><strong>Chame no WhatsApp</strong><p>Conte qual é o seu bar. A conversa é direta com a gente.</p></div></li>
+          <li><span>2</span><div><strong>A gente monta sua página</strong><p>Cadastramos cardápio, fotos, endereço e horários para você.</p></div></li>
+          <li><span>3</span><div><strong>Você atualiza pelo celular</strong><p>Com seu acesso ao painel, muda preços, promoções e eventos quando quiser.</p></div></li>
         </ol>
       </section>
 
-      <section className="for-business-section" id="business-plans">
+      <section className="for-business-section" id="founder-offer">
         <div className="for-business-section-heading">
-          <p className="section-kicker">Planos</p>
-          <h2>Comece sem custo e cresça quando fizer sentido</h2>
+          <p className="section-kicker">Condição de lançamento</p>
+          <h2>Programa Parceiro Fundador</h2>
         </div>
-        <div className="business-plan-grid">
-          {plans.map((plan) => (
-            <article
-              className={`business-plan ${plan.featured ? "is-featured" : ""}`}
-              key={plan.name}
+        <article className="business-plan is-featured founder-offer">
+          <div>
+            <span className="plan-badge">
+              Vagas para os {FOUNDER_SPOTS} primeiros bares de {FOUNDER_CITY}
+            </span>
+            <strong className="plan-price">30 dias grátis</strong>
+            <p>
+              Entre agora, use tudo por um mês sem pagar nada e decida depois.
+              Quem entra como fundador garante uma condição especial enquanto
+              continuar com a gente.
+            </p>
+            <a
+              className="primary-action"
+              href={SALES_WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
             >
-              {plan.featured && <span className="plan-badge">Mais visibilidade</span>}
-              <h3>{plan.name}</h3>
-              <strong className="plan-price">{plan.price}</strong>
-              <p>{plan.description}</p>
-              <ul>
-                {plan.features.map((feature) => (
-                  <li key={feature}><Check size={16} aria-hidden="true" />{feature}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
+              <MessageCircle size={18} aria-hidden="true" />
+              Quero minha vaga
+            </a>
+          </div>
+          <ul>
+            {founderPerks.map((perk) => (
+              <li key={perk}><Check size={16} aria-hidden="true" />{perk}</li>
+            ))}
+          </ul>
+        </article>
       </section>
 
       <section className="for-business-final">
         <div>
-          <p className="section-kicker">Pronto para começar?</p>
-          <h2>Coloque seu bar no caminho de quem já está procurando.</h2>
+          <p className="section-kicker">Já é parceiro?</p>
+          <h2>Entre no painel e atualize seu bar.</h2>
         </div>
-        <button className="primary-action" type="button" onClick={onGetStarted}>
+        <button className="secondary-action" type="button" onClick={onGetStarted}>
           Entrar na área do estabelecimento
           <ChevronRight size={18} aria-hidden="true" />
         </button>

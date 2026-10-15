@@ -14,6 +14,10 @@ banco — os 6 bares, fotos, cardápios, donos vinculados, avaliações e clique
 é dado de teste, fictício. O produto ainda não foi colocado à prova no mercado.
 Pode apagar ou reescrever esses dados quando necessário (avisando antes).
 
+**WhatsApp comercial (quem vende o Bora Bar):** 24 99219-6584, em
+`SALES_WHATSAPP` de `src/components/ForBusinessPage.jsx`. Não confundir com o
+WhatsApp de cada bar (campo `phone`), que o próprio dono cadastra no painel.
+
 ## Leia antes de mexer
 
 - `docs/ARQUIVOS.md` — o que faz cada arquivo do projeto
@@ -113,6 +117,8 @@ e login/painel ficam indisponíveis.
 4. A landing promete "ver o movimento / lugares bombando", que não existe.
 5. Imagens da landing em PNG de 0,8–1,4 MB; bundle JS de ~580 KB sem divisão.
 6. Aprovação de dono é manual no Table Editor (`bar_claims.status`).
-7. Planos pagos aparecem como "Em breve"; não há cobrança.
+7. ~~Planos "Em breve"~~ — substituídos em 15/10/2026 pelo Programa Parceiro
+   Fundador (30 dias grátis, contato pelo WhatsApp comercial). Ainda não há
+   cobrança no sistema: mensalidade por Pix, combinada na conversa.
 8. `src/data/barCoordinates.js` não é importado por nenhum arquivo (código morto).
 9. Telefones dos bares de exemplo usam DDD 11, mas os bares são de Volta Redonda (DDD 24).

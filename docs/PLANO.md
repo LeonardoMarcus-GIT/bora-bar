@@ -52,7 +52,11 @@ sozinha, como site do bar:
 - **QR Code pronto para imprimir** e colar na mesa
 - O painel que já existe, simplificado para o celular
 
-**Preço:** R$ 99 a R$ 149 por mês. Argumento: "cardápio digital + site + agenda
+**Oferta atual na página (15/10/2026):** Programa Parceiro Fundador — 30 dias
+grátis, vagas para os 10 primeiros bares de Volta Redonda, contato pelo WhatsApp
+comercial, sem preço publicado. Validar o valor conversando com os primeiros donos.
+
+**Preço em estudo:** R$ 79 a R$ 149 por mês, preço travado para fundadores. Argumento: "cardápio digital + site + agenda
 de eventos, e você mesmo atualiza pelo celular", com as métricas como prova.
 
 **Estratégia:** cada bar vendido entra no mesmo banco. Com 15 a 20 bares pagando

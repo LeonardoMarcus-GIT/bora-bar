@@ -1758,6 +1758,44 @@ p {
   color: var(--leaf);
 }
 
+a.primary-action,
+a.secondary-action {
+  text-decoration: none;
+}
+
+.founder-offer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  padding: 26px;
+}
+
+.founder-offer .plan-badge {
+  margin-bottom: 14px;
+}
+
+.founder-offer .plan-price {
+  font-size: 1.9rem;
+}
+
+.founder-offer .primary-action {
+  margin-top: 20px;
+  padding: 0 22px;
+}
+
+.founder-offer ul {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .founder-offer {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+}
+
 .for-business-final {
   display: flex;
   align-items: center;
