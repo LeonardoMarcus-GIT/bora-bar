@@ -3460,6 +3460,7 @@ a.secondary-action {
 
 /* ---------------------------------------------------------------
    Página avulsa do estabelecimento (/r/<id>) — sem marca Bora Bar
+   Celular primeiro: uma coluna; a partir de 720px, pratos em 2 colunas.
    --------------------------------------------------------------- */
 body.is-standalone {
   background: #0f0f0c;
@@ -3469,10 +3470,10 @@ body.is-standalone {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 12px;
-  width: min(760px, calc(100% - 32px));
+  gap: 14px;
+  width: min(880px, 100% - 32px);
   margin: 0 auto;
-  padding: 16px 0 48px;
+  padding: 16px 0 56px;
 }
 
 .standalone-page > .empty-state {
@@ -3480,13 +3481,14 @@ body.is-standalone {
 }
 
 .standalone-hero {
-  height: clamp(240px, 38vh, 340px);
+  height: clamp(240px, 38vh, 360px);
 }
 
 .standalone-hero .status-badge {
   min-height: 28px;
 }
 
+/* Hoje */
 .standalone-today {
   border: 1px solid rgba(255, 199, 68, 0.45);
   border-radius: 8px;
@@ -3532,10 +3534,97 @@ body.is-standalone {
   font-size: 0.82rem;
 }
 
+/* Botões de contato: mesmos do app (WhatsApp, Ligar, Google Maps, Waze) */
 .standalone-actions {
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  grid-auto-flow: column;
   margin-top: 0;
+}
+
+.details-quick-actions .is-unavailable {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  min-height: 64px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: rgba(24, 24, 20, 0.6);
+  color: var(--muted);
+  padding: 10px 12px;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.details-quick-actions .is-unavailable strong {
+  color: var(--muted);
+}
+
+/* Pratos do dia */
+.standalone-dishes .section-heading {
+  margin-bottom: 12px;
+}
+
+.standalone-dishes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.dish-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(24, 24, 20, 0.92);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+}
+
+.dish-card-photo {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #2a2a22;
+}
+
+.dish-card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dish-card.is-revealed .dish-card-photo img {
+  transform: scale(1);
+}
+
+.dish-card-body {
+  padding: 14px 16px 16px;
+}
+
+.dish-card-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dish-card-title h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.dish-card-title strong {
+  flex: none;
+  color: var(--gold);
+  font-size: 1.02rem;
+}
+
+.dish-card-body p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .standalone-menu .menu-grid {
@@ -3558,69 +3647,69 @@ body.is-standalone {
   line-height: 1.35;
 }
 
-@media (max-width: 560px) {
+/* Aparição suave ao rolar (desligada para quem prefere menos movimento) */
+.standalone-page [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 650ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+    transform 650ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.standalone-page [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .standalone-page [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .dish-card-photo img {
+    transform: none;
+    transition: none;
+  }
+}
+
+html:has(body.is-standalone) {
+  scroll-behavior: smooth;
+}
+
+@media (min-width: 720px) {
+  .standalone-dishes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .standalone-menu .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
   .standalone-page {
     width: calc(100% - 24px);
+    gap: 12px;
     padding-top: 12px;
   }
 
-  .standalone-actions {
-    grid-template-columns: 1fr 1fr;
-    grid-auto-flow: row;
+  .details-quick-actions .is-unavailable {
+    min-height: 58px;
+    padding: 9px 10px;
   }
 
-  .standalone-actions a.is-primary,
-  .standalone-actions a:only-child {
-    grid-column: 1 / -1;
+  .details-quick-actions .is-unavailable small {
+    display: none;
   }
-}
 
-.standalone-gallery {
-  margin: 0 -2px;
-}
+  .dish-card-body {
+    padding: 12px 14px 14px;
+  }
 
-.standalone-gallery-track {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(220px, 42%);
-  gap: 10px;
-  overflow-x: auto;
-  padding: 2px 2px 8px;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-}
-
-.standalone-gallery figure {
-  position: relative;
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #2a2a22;
-  aspect-ratio: 4 / 5;
-  scroll-snap-align: start;
-}
-
-.standalone-gallery img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.standalone-gallery figcaption {
-  position: absolute;
-  inset: auto 0 0;
-  padding: 26px 10px 9px;
-  background: linear-gradient(180deg, transparent, rgba(12, 12, 10, 0.88));
-  color: var(--ink);
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-@media (max-width: 560px) {
-  .standalone-gallery-track {
-    grid-auto-columns: 68%;
+  .standalone-info {
+    padding: 2px 16px 10px;
   }
 }

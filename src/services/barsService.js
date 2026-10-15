@@ -88,10 +88,18 @@ function mapBarFromDatabase(bar) {
     longitude: getCoordinate(bar.longitude),
     isActive: bar.is_active ?? true,
     isListed: bar.is_listed ?? true,
+    // Pratos do dia: {url, name, price, description}. Aceita o formato antigo {caption}.
     gallery: Array.isArray(bar.gallery)
       ? bar.gallery
-          .filter((photo) => photo?.url)
-          .map((photo) => ({ url: photo.url, caption: photo.caption ?? "" }))
+          .filter((dish) => dish?.url)
+          .map((dish) => ({
+            url: dish.url,
+            name: dish.name ?? dish.caption ?? "",
+            description: dish.description ?? "",
+            price: Number.isFinite(Number(dish.price)) && dish.price !== null && dish.price !== ""
+              ? Number(dish.price)
+              : null
+          }))
       : [],
     isOpen: Boolean(bar.is_open),
     priceLevel: bar.price_level,

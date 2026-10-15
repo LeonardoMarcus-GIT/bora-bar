@@ -7,6 +7,7 @@ import {
   MessageCircle,
   Navigation,
   Phone,
+  Route,
   Sparkles
 } from "lucide-react";
 import MenuCategory from "./MenuCategory.jsx";
@@ -30,14 +31,46 @@ function getPhoneDigits(phone) {
   return digits.length === 10 || digits.length === 11 ? `55${digits}` : digits;
 }
 
-function getRouteUrl(bar) {
+function getRouteLinks(bar) {
   const hasCoordinates =
     Number.isFinite(bar.latitude) && Number.isFinite(bar.longitude);
   const destination = hasCoordinates
     ? `${bar.latitude},${bar.longitude}`
     : `${bar.address}, ${bar.city}`;
 
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
+  return {
+    google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`,
+    waze: hasCoordinates
+      ? `https://www.waze.com/ul?ll=${encodeURIComponent(destination)}&navigate=yes`
+      : `https://www.waze.com/ul?q=${encodeURIComponent(destination)}&navigate=yes`
+  };
+}
+
+// Aparição suave dos blocos conforme a pessoa rola a página.
+function useRevealOnScroll(dependency) {
+  useEffect(() => {
+    const elements = document.querySelectorAll("[data-reveal]:not(.is-revealed)");
+
+    if (!("IntersectionObserver" in window)) {
+      elements.forEach((element) => element.classList.add("is-revealed"));
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-revealed");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [dependency]);
 }
 
 function dayKey(date) {
@@ -105,6 +138,8 @@ export default function StandalonePage({ barId }) {
     }
   }, [bar]);
 
+  useRevealOnScroll(bar);
+
   const openStatus = useMemo(
     () => (bar ? getOpenStatus(bar.hours, bar.isOpen, now) : null),
     [bar, now]
@@ -159,6 +194,7 @@ export default function StandalonePage({ barId }) {
   }
 
   const phoneDigits = getPhoneDigits(bar.phone);
+  const routeLinks = getRouteLinks(bar);
   const menuEntries = Object.entries(bar.menu ?? {}).filter(
     ([, items]) => items.length > 0
   );
@@ -185,7 +221,7 @@ export default function StandalonePage({ barId }) {
       </section>
 
       {hasToday && (
-        <section className="standalone-today" aria-label="Hoje">
+        <section className="standalone-today" aria-label="Hoje" data-reveal>
           <p className="section-kicker">
             <Sparkles size={15} aria-hidden="true" /> Hoje
           </p>
@@ -224,7 +260,7 @@ export default function StandalonePage({ barId }) {
       )}
 
       <section className="details-quick-actions standalone-actions" aria-label="Contato">
-        {phoneDigits && (
+        {phoneDigits ? (
           <a
             className="is-primary"
             href={`https://wa.me/${phoneDigits}`}
@@ -233,40 +269,75 @@ export default function StandalonePage({ barId }) {
             onClick={() => track("whatsapp")}
           >
             <MessageCircle size={20} aria-hidden="true" />
-            <span><strong>WhatsApp</strong><small>Fazer pedido ou tirar dúvida</small></span>
+            <span><strong>WhatsApp</strong><small>Falar com o restaurante</small></span>
           </a>
+        ) : (
+          <span className="is-primary is-unavailable" aria-disabled="true">
+            <MessageCircle size={20} aria-hidden="true" />
+            <span><strong>WhatsApp</strong><small>Em breve</small></span>
+          </span>
         )}
-        {phoneDigits && (
+        {phoneDigits ? (
           <a href={`tel:+${phoneDigits}`} onClick={() => track("phone")}>
             <Phone size={20} aria-hidden="true" />
             <span><strong>Ligar</strong><small>{bar.phone}</small></span>
           </a>
+        ) : (
+          <span className="is-unavailable" aria-disabled="true">
+            <Phone size={20} aria-hidden="true" />
+            <span><strong>Ligar</strong><small>Em breve</small></span>
+          </span>
         )}
         <a
-          href={getRouteUrl(bar)}
+          href={routeLinks.google}
           target="_blank"
           rel="noreferrer"
           onClick={() => track("route_google")}
         >
           <Navigation size={20} aria-hidden="true" />
-          <span><strong>Como chegar</strong><small>Abrir no mapa</small></span>
+          <span><strong>Como chegar</strong><small>Google Maps</small></span>
+        </a>
+        <a
+          href={routeLinks.waze}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => track("route_waze")}
+        >
+          <Route size={20} aria-hidden="true" />
+          <span><strong>Abrir no Waze</strong><small>Iniciar rota</small></span>
         </a>
       </section>
 
       {bar.gallery?.length > 0 && (
-        <section className="standalone-gallery" aria-label="Fotos">
-          <div className="standalone-gallery-track">
-            {bar.gallery.map((photo) => (
-              <figure key={photo.url}>
-                <img src={photo.url} alt={photo.caption || bar.name} loading="lazy" />
-                {photo.caption && <figcaption>{photo.caption}</figcaption>}
-              </figure>
+        <section className="standalone-dishes" aria-labelledby="pratos-do-dia">
+          <div className="section-heading" data-reveal>
+            <h2 id="pratos-do-dia">Pratos do dia</h2>
+          </div>
+          <div className="standalone-dishes-grid">
+            {bar.gallery.map((dish, index) => (
+              <article
+                className="dish-card"
+                key={`${dish.url}-${index}`}
+                data-reveal
+                style={{ "--reveal-delay": `${(index % 2) * 90}ms` }}
+              >
+                <div className="dish-card-photo">
+                  <img src={dish.url} alt={dish.name || bar.name} loading="lazy" />
+                </div>
+                <div className="dish-card-body">
+                  <div className="dish-card-title">
+                    <h3>{dish.name}</h3>
+                    {dish.price !== null && <strong>{formatCurrency(dish.price)}</strong>}
+                  </div>
+                  {dish.description && <p>{dish.description}</p>}
+                </div>
+              </article>
             ))}
           </div>
         </section>
       )}
 
-      <section className="menu-section standalone-menu">
+      <section className="menu-section standalone-menu" data-reveal>
         <div className="section-heading">
           <h2>Cardápio</h2>
         </div>
@@ -282,7 +353,7 @@ export default function StandalonePage({ barId }) {
       </section>
 
       {upcomingEvents.length > 0 && (
-        <section className="events-section">
+        <section className="events-section" data-reveal>
           <div className="section-heading">
             <h2>Próximos eventos</h2>
           </div>
@@ -306,7 +377,7 @@ export default function StandalonePage({ barId }) {
         </section>
       )}
 
-      <section className="standalone-info">
+      <section className="standalone-info" data-reveal>
         {bar.description && <p className="description">{bar.description}</p>}
         <div className="info-list">
           <p>
