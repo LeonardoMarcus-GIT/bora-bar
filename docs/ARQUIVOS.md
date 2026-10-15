@@ -154,4 +154,4 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `BottomNav.jsx` | Barra inferior: Início, Buscar, Promoções (ou Cardápio na página do bar), Favoritos, Perfil. |
 | `AddressFields.jsx` | Campos de endereço do perfil do usuário: CEP com busca automática, UF e cidade por listas do IBGE, bairro. |
 | `BarAddressFields.jsx` | Campos de endereço do estabelecimento no painel: CEP com busca, rua, número, complemento, bairro, cidade, estado. |
-| `SideRays.jsx` | Efeito visual de raios de luz em WebGL (biblioteca `ogl`) desenhado atrás do app. |
+| `SideRays.jsx` | Efeito visual de raios de luz em WebGL (biblioteca `ogl`) desenhado atrás do app. Para não piscar no celular: o fundo tem altura fixa (`100lvh`, a maior tela possível), o canvas só é redimensionado quando a largura muda ou a altura muda mais de 160 px, e redesenha na hora após redimensionar; no celular, sem `mix-blend-mode`. |

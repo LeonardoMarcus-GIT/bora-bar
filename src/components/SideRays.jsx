@@ -162,11 +162,32 @@ export default function SideRays({
       program: new Program(gl, { vertex, fragment, uniforms })
     });
 
+    let lastWidth = 0;
+    let lastHeight = 0;
+
     const resize = () => {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      // Mudar o tamanho do canvas apaga o desenho (fica preto até o próximo
+      // quadro). Só redimensiona quando muda de verdade: no celular, ignorar
+      // pequenas variações de altura (barra de endereço aparecendo/sumindo).
+      const sameWidth = width === lastWidth;
+      const smallHeightChange = Math.abs(height - lastHeight) < 160;
+
+      if (lastWidth && sameWidth && (height === lastHeight || smallHeightChange)) {
+        return;
+      }
+
+      lastWidth = width;
+      lastHeight = height;
+
       const dpr = window.innerWidth <= 620 ? 1 : Math.min(window.devicePixelRatio, 2);
       renderer.dpr = dpr;
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      uniforms.iResolution.value = [container.clientWidth * dpr, container.clientHeight * dpr];
+      renderer.setSize(width, height);
+      uniforms.iResolution.value = [width * dpr, height * dpr];
+      // Redesenha na hora para não sobrar um quadro vazio.
+      renderer.render({ scene: mesh });
     };
 
     const render = (time) => {

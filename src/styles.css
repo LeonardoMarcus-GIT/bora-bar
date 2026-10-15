@@ -55,8 +55,15 @@ body {
 .side-rays-container {
   position: fixed;
   z-index: 0;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Altura fixa da MAIOR tela possível: no celular, a barra de endereço some e
+     aparece ao rolar; se o fundo acompanhasse, seria redesenhado e piscaria. */
+  height: 100vh;
+  height: 100lvh;
   overflow: hidden;
+  transform: translateZ(0);
   pointer-events: none;
   isolation: isolate;
   background:
@@ -76,7 +83,9 @@ body {
 }
 
 @media (max-width: 620px) {
+  /* No celular, sem mistura de camadas: evita recomposição a cada rolagem. */
   .bora-side-rays {
+    mix-blend-mode: normal;
     opacity: 0.34;
   }
 }
