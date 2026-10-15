@@ -159,7 +159,7 @@ async function fetchNominatimLocation(address) {
     const response = await fetch(url, {
       headers: {
         Accept: "application/json",
-        "User-Agent": "BoraBar/1.0 (https://bora-bar-three.vercel.app)"
+        "User-Agent": "BoraBar/1.0 (https://bora-bar.netlify.app)"
       }
     });
 

@@ -5,7 +5,7 @@
 ## O que já foi construído
 
 O Bora Bar já é um produto funcionando, não um protótipo: compila sem erro, está
-publicado na Vercel e tem login e segurança bem feitos.
+publicado na Netlify (https://bora-bar.netlify.app) e tem login e segurança bem feitos.
 
 Ainda não há clientes reais: os 6 bares, fotos, donos, avaliações e cliques no
 banco são todos de teste. O produto ainda não foi colocado à prova no mercado.

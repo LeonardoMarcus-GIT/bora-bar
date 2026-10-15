@@ -2,6 +2,17 @@
   command = "npm run build"
   publish = "dist"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# A API de localização precisa vir antes da regra geral do app.
+[[redirects]]
+  from = "/api/geocode-profile"
+  to = "/.netlify/functions/geocode-profile"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

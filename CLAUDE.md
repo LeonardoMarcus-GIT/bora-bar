@@ -25,7 +25,7 @@ Pode apagar ou reescrever esses dados quando necessário (avisando antes).
 - React 19 + Vite 7, JavaScript puro (sem TypeScript), CSS único em `src/styles.css`
 - Ícones: `lucide-react`. Efeito de luz do fundo: `ogl` (WebGL)
 - Backend: Supabase (Postgres + Auth + Storage), acessado direto do navegador com a chave pública; a segurança está nas policies RLS
-- Uma função serverless na Vercel: `api/geocode-profile.js` (CEP/endereço → latitude/longitude via Nominatim)
+- Uma função serverless: `api/geocode-profile.js` (CEP/endereço → latitude/longitude via Nominatim), servida na Netlify pelo adaptador `netlify/functions/geocode-profile.mjs`
 - APIs públicas usadas no navegador: ViaCEP (endereço por CEP) e IBGE (estados e cidades)
 
 ## Comandos
@@ -56,8 +56,15 @@ e login/painel ficam indisponíveis.
 ## Infraestrutura
 
 - Supabase: projeto **Projeto-Bora-Bar** (ref `ovwhjngjismvlwhoqtmr`, região us-west-2)
-- Vercel: projeto **bora-bar** (URL antiga documentada: `bora-bar-three.vercel.app`)
-- Há também `netlify.toml`, mas o deploy ativo é a Vercel
+- **Site no ar: Netlify — https://bora-bar.netlify.app**, ligado ao GitHub
+  `LeonardoMarcus-GIT/bora-bar`. Cada push na `main` publica sozinho em ~1 min.
+  Para o usuário ver uma mudança: commit + push na `main` e recarregar o site.
+  Não é preciso rodar `npm run dev`.
+- Vercel (`bora-bar-three.vercel.app`, projeto **bora-bar**) é uma publicação
+  antiga e parada, sem ligação com o GitHub. `vercel.json` ficou só por histórico.
+- Supabase Auth: confirmar que *Site URL* e *Redirect URLs* apontam para
+  `https://bora-bar.netlify.app` (o `supabase/README.md` ainda cita a Vercel);
+  senão os e-mails de confirmação e de nova senha levam para o site antigo.
 
 ## Como o código está organizado
 

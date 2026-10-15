@@ -25,21 +25,22 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sua-chave-publica
 
 Reinicie o servidor local depois de criar ou alterar esse arquivo.
 
-## 4. Publicar na Vercel
+## 4. Publicar na Netlify
 
-No painel da Vercel, adicione as mesmas variaveis em:
+O site fica em https://bora-bar.netlify.app e publica sozinho a cada push na
+branch `main` do GitHub. No painel da Netlify, as mesmas variaveis ficam em:
 
-Project Settings > Environment Variables
+Site configuration > Environment variables (escopos: Builds e Functions)
 
-Depois disso, faca um novo deploy.
+Depois de mudar variaveis, faca um novo deploy.
 
 ## 5. Configurar Auth
 
 No painel do Supabase, abra Authentication > URL Configuration:
 
-- Site URL: `https://bora-bar-three.vercel.app`
+- Site URL: `https://bora-bar.netlify.app`
 - Redirect URLs:
-  - `https://bora-bar-three.vercel.app/*`
+  - `https://bora-bar.netlify.app/*`
   - `http://localhost:5173/*`
 
 Em Authentication > Providers > Email, deixe email/senha habilitado. Para o fluxo

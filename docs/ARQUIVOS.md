@@ -14,7 +14,7 @@ Supabase (tabelas + RLS)
    ├── services/profilesService.js + authService.js ──► AuthPage / ProfilePage / AuthContext
    └── services/analyticsService.js ◄── BarDetails (registra cliques) ──► BusinessDashboard (mostra métricas)
 
-api/geocode-profile.js (Vercel) ◄── addressService.geocodeAddress ◄── AuthPage / ProfilePage / painel
+/api/geocode-profile (função Netlify) ◄── addressService.geocodeAddress ◄── AuthPage / ProfilePage / painel
 ```
 
 ---
@@ -28,16 +28,17 @@ api/geocode-profile.js (Vercel) ◄── addressService.geocodeAddress ◄─�
 | `package-lock.json` | Versões travadas das dependências (gerado pelo npm). |
 | `index.html` | HTML base em pt-BR com `<div id="root">` e meta description. Carrega `src/main.jsx`. Não tem tags Open Graph (prévia de link). |
 | `vite.config.js` | Config do Vite com plugin React e `base: "./"` (caminhos relativos no build). |
-| `vercel.json` | Deploy na Vercel: build `npm run build`, saída `dist`, e reescreve toda rota que não seja `/api/*` para `index.html`. |
-| `netlify.toml` | Config equivalente para Netlify (build + redirect para `index.html`). Não é o deploy ativo. |
+| `netlify.toml` | **Deploy ativo (https://bora-bar.netlify.app).** Build `npm run build`, saída `dist`, funções em `netlify/functions`; redireciona `/api/geocode-profile` para a função e todo o resto para `index.html`. |
+| `vercel.json` | Config da publicação antiga na Vercel (parada). Mantido só por histórico. |
 | `.env.example` | Modelo das duas variáveis: `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. |
 | `.gitignore` | Ignora `node_modules`, `dist`, `.env*`, `.vercel`, `.netlify`, logs. |
 
-## `api/` — funções serverless (Vercel)
+## `api/` e `netlify/functions/` — função serverless
 
 | Arquivo | O que é |
 | --- | --- |
-| `api/geocode-profile.js` | `POST /api/geocode-profile`. Recebe um endereço (CEP, rua, número, bairro, cidade, UF), monta várias buscas e consulta o **Nominatim** (OpenStreetMap) para achar latitude/longitude. Confere se o resultado é mesmo da cidade/UF informada, respeita limite de 1 requisição/segundo e guarda cache em memória por 30 dias. Se vier o token do usuário (`Authorization: Bearer`) e `saveProfile` não for `false`, grava a localização no perfil dele no Supabase. Usa `process.env.VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. |
+| `netlify/functions/geocode-profile.mjs` | Adaptador da Netlify: converte o `Request` da Web para o formato request/response que `api/geocode-profile.js` espera e devolve um `Response`. Exposto em `/api/geocode-profile` pelo redirect do `netlify.toml`. |
+| `api/geocode-profile.js` | Lógica da `POST /api/geocode-profile` (escrita no formato da Vercel; na Netlify roda pelo adaptador acima). Recebe um endereço (CEP, rua, número, bairro, cidade, UF), monta várias buscas e consulta o **Nominatim** (OpenStreetMap) para achar latitude/longitude. Confere se o resultado é mesmo da cidade/UF informada, respeita limite de 1 requisição/segundo e guarda cache em memória por 30 dias. Se vier o token do usuário (`Authorization: Bearer`) e `saveProfile` não for `false`, grava a localização no perfil dele no Supabase. Usa `process.env.VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. |
 
 ## `scripts/`
 
