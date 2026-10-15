@@ -3713,3 +3713,165 @@ html:has(body.is-standalone) {
     padding: 2px 16px 10px;
   }
 }
+
+/* Painel: aba Pratos do dia */
+.dishes-editor {
+  display: grid;
+  gap: 14px;
+}
+
+.dishes-editor > .business-muted {
+  margin: 0;
+}
+
+.dishes-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.dishes-empty svg {
+  color: var(--gold);
+}
+
+.dishes-empty p {
+  margin: 0;
+}
+
+.dishes-list {
+  display: grid;
+  gap: 12px;
+}
+
+.dish-editor-card {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 12px;
+}
+
+.dish-editor-photo {
+  position: relative;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #2a2a22;
+  aspect-ratio: 4 / 3;
+}
+
+.dish-editor-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dish-photo-button {
+  position: absolute;
+  inset: auto 6px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  border-radius: 999px;
+  background: rgba(15, 15, 12, 0.78);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.dish-photo-button input,
+.dish-add-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  opacity: 0;
+}
+
+.dish-add-button {
+  position: relative;
+  cursor: pointer;
+}
+
+.dish-editor-fields {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dish-editor-fields > label:not(.menu-price-field) {
+  display: grid;
+  gap: 4px;
+}
+
+.dish-editor-fields > label > span:not(.sr-only) {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dish-price-field {
+  max-width: 220px;
+}
+
+.dish-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.dish-editor-actions button {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.dish-editor-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (max-width: 620px) {
+  .dish-editor-card {
+    grid-template-columns: 1fr;
+  }
+
+  .dish-price-field {
+    max-width: none;
+  }
+}
+
+.dishes-editor .dish-photo-button,
+.dishes-editor .dish-add-button {
+  display: inline-flex !important;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 7px !important;
+  margin: 0;
+}
+
+.dishes-editor .dish-add-button {
+  min-height: 44px;
+  padding: 0 16px;
+}
