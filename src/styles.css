@@ -3533,7 +3533,8 @@ body.is-standalone {
 }
 
 .standalone-actions {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
   margin-top: 0;
 }
 
@@ -3565,9 +3566,11 @@ body.is-standalone {
 
   .standalone-actions {
     grid-template-columns: 1fr 1fr;
+    grid-auto-flow: row;
   }
 
-  .standalone-actions a.is-primary {
+  .standalone-actions a.is-primary,
+  .standalone-actions a:only-child {
     grid-column: 1 / -1;
   }
 }
