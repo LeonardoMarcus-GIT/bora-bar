@@ -4,6 +4,12 @@ Guia de "onde ir hoje" para bares. O cliente final descobre bares perto dele
 (aberto agora, promoções, cardápio com preços, shows e eventos) e o dono de cada
 bar atualiza tudo sozinho por um painel no celular.
 
+**Posicionamento (decisão do dono, 19/10/2026): é uma VITRINE, não delivery.**
+O Bora Bar e as páginas avulsas mostram cardápio, preços, promoções, eventos,
+horário e contato, atualizados pelo dono. NÃO há pedido online, carrinho,
+pagamento nem entrega — e não construir isso sem ele pedir. Evitar textos que
+sugiram pedir pelo app.
+
 **Modelo de negócio:** quem paga é o estabelecimento (mensalidade). Estratégia
 atual: vender primeiro a página de UM bar como produto avulso (site + cardápio
 digital + agenda) e, com 15–20 bares pagantes na mesma cidade, o guia da cidade
