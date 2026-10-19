@@ -139,7 +139,7 @@ export default function BarDetails({
             <span>
               <strong>WhatsApp</strong>
               <small className="whatsapp-hint">
-                {isStandalone ? "Peça por aqui" : "Falar com o bar"}
+                {bar.takesWhatsappOrders ? "Peça por aqui" : "Tire suas dúvidas"}
               </small>
             </span>
           </a>

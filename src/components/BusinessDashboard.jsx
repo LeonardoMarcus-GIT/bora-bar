@@ -910,6 +910,26 @@ export default function BusinessDashboard({
                   onChange={(hours) => updateBar({ hours })}
                 />
 
+                {managedData.bar.whatsappOrdersSupported && (
+                  <label className="business-switch-row">
+                    <span>
+                      Aceito pedidos pelo WhatsApp
+                      <small>
+                        {managedData.bar.takesWhatsappOrders
+                          ? "O botão de WhatsApp mostra “Peça por aqui”. Os pedidos chegam no seu WhatsApp."
+                          : "O botão de WhatsApp mostra “Tire suas dúvidas”."}
+                      </small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={managedData.bar.takesWhatsappOrders}
+                      onChange={(event) =>
+                        updateBar({ takesWhatsappOrders: event.target.checked })
+                      }
+                    />
+                  </label>
+                )}
+
                 {managedData.bar.vibesSupported && (
                   <div className="vibes-editor">
                     <span>

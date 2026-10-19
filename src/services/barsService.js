@@ -89,6 +89,7 @@ function mapBarFromDatabase(bar) {
     isActive: bar.is_active ?? true,
     isListed: bar.is_listed ?? true,
     vibes: Array.isArray(bar.vibes) ? bar.vibes : [],
+    takesWhatsappOrders: Boolean(bar.takes_whatsapp_orders),
     isOpen: Boolean(bar.is_open),
     priceLevel: bar.price_level,
     promotion: promotions[0]?.title ?? bar.promotion ?? "",

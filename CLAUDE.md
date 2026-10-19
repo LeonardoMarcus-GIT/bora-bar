@@ -8,7 +8,10 @@ bar atualiza tudo sozinho por um painel no celular.
 O Bora Bar e as páginas avulsas mostram cardápio, preços, promoções, eventos,
 horário e contato, atualizados pelo dono. NÃO há pedido online, carrinho,
 pagamento nem entrega — e não construir isso sem ele pedir. Evitar textos que
-sugiram pedir pelo app.
+sugiram pedir pelo app. Exceção: se o próprio estabelecimento faz entrega e
+atende pelo WhatsApp, o dono liga "Aceito pedidos pelo WhatsApp"
+(`bars.takes_whatsapp_orders`) e o botão mostra "Peça por aqui"; senão,
+"Tire suas dúvidas".
 
 **Modelo de negócio:** quem paga é o estabelecimento (mensalidade). Estratégia
 atual: vender primeiro a página de UM bar como produto avulso (site + cardápio

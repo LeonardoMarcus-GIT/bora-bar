@@ -13,6 +13,7 @@ create table if not exists public.bars (
   is_active boolean not null default true,
   is_listed boolean not null default true,
   vibes text[] not null default '{}',
+  takes_whatsapp_orders boolean not null default false,
   is_open boolean not null default false,
   price_level text not null default '$$',
   promotion text not null default '',
@@ -175,6 +176,9 @@ add column if not exists is_listed boolean not null default true;
 
 alter table public.bars
 add column if not exists vibes text[] not null default '{}';
+
+alter table public.bars
+add column if not exists takes_whatsapp_orders boolean not null default false;
 
 alter table public.bars
 add column if not exists postal_code text;
@@ -502,6 +506,7 @@ grant update (
   phone,
   description,
   vibes,
+  takes_whatsapp_orders,
   updated_at
 ) on public.bars to authenticated;
 grant select on public.reviews to anon;

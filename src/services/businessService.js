@@ -64,7 +64,10 @@ function mapManagedBar(bar) {
     legacyMenu: bar.menu ?? {},
     // "Clima do lugar". vibesSupported = a coluna existe no banco.
     vibes: Array.isArray(bar.vibes) ? bar.vibes : [],
-    vibesSupported: Array.isArray(bar.vibes)
+    vibesSupported: Array.isArray(bar.vibes),
+    // Aceita pedidos pelo WhatsApp (o próprio estabelecimento atende).
+    takesWhatsappOrders: Boolean(bar.takes_whatsapp_orders),
+    whatsappOrdersSupported: typeof bar.takes_whatsapp_orders === "boolean"
   };
 }
 
@@ -265,6 +268,9 @@ export async function updateManagedBar(barId, bar) {
       phone: bar.phone.trim(),
       description: bar.description.trim(),
       ...(bar.vibesSupported ? { vibes: bar.vibes ?? [] } : {}),
+      ...(bar.whatsappOrdersSupported
+        ? { takes_whatsapp_orders: Boolean(bar.takesWhatsappOrders) }
+        : {}),
       updated_at: new Date().toISOString()
     })
     .eq("id", barId)
