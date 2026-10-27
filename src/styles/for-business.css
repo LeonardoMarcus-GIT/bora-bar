@@ -1,0 +1,272 @@
+/* Página "Para estabelecimentos". */
+.for-business-page {
+  padding-bottom: 110px;
+}
+
+.for-business-hero {
+  min-height: 460px;
+  display: grid;
+  align-content: space-between;
+  gap: 48px;
+  padding: 4px 0 44px;
+}
+
+.for-business-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.for-business-topbar .back-button {
+  margin-bottom: 0;
+}
+
+.for-business-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 248, 233, 0.82);
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.for-business-mark svg {
+  color: var(--coral);
+}
+
+.for-business-hero-copy {
+  max-width: 760px;
+}
+
+.for-business-hero h1 {
+  max-width: 720px;
+  margin: 0 0 18px;
+  color: var(--ink);
+  font-size: clamp(2.5rem, 7vw, 5.2rem);
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+.for-business-hero-copy > p:not(.section-kicker) {
+  max-width: 660px;
+  color: rgba(255, 248, 233, 0.76);
+  font-size: 1.08rem;
+  line-height: 1.55;
+}
+
+.for-business-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.for-business-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+.for-business-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.for-business-proof svg {
+  color: var(--coral);
+}
+
+.for-business-section {
+  border-top: 1px solid var(--line);
+  padding: 48px 0;
+}
+
+.for-business-section-heading {
+  max-width: 680px;
+  margin-bottom: 24px;
+}
+
+.for-business-section-heading h2,
+.for-business-final h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.business-benefit-grid,
+.business-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.business-benefit,
+.business-plan {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(34, 34, 34, 0.78);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+}
+
+.business-benefit svg {
+  color: var(--coral);
+}
+
+.business-benefit h3,
+.business-plan h3 {
+  margin: 18px 0 8px;
+  color: var(--ink);
+  font-size: 1.08rem;
+}
+
+.business-benefit p,
+.business-plan p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.business-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.business-steps li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.business-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 113, 91, 0.4);
+  border-radius: 50%;
+  background: rgba(255, 113, 91, 0.12);
+  color: var(--coral);
+  font-weight: 950;
+}
+
+.business-steps strong {
+  color: var(--ink);
+}
+
+.business-steps p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.business-plan {
+  position: relative;
+}
+
+.business-plan.is-featured {
+  border-color: rgba(255, 113, 91, 0.55);
+  background: rgba(34, 34, 34, 0.84);
+}
+
+.plan-badge {
+  display: inline-flex;
+  border-radius: 999px;
+  background: var(--coral);
+  color: #161616;
+  font-size: 0.72rem;
+  font-weight: 950;
+  padding: 5px 8px;
+}
+
+.plan-price {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--coral);
+  font-size: 1.45rem;
+}
+
+.business-plan ul {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.business-plan li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 248, 233, 0.84);
+  font-size: 0.88rem;
+}
+
+.business-plan li svg {
+  color: var(--leaf);
+}
+
+a.primary-action,
+a.secondary-action {
+  text-decoration: none;
+}
+
+.founder-offer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  padding: 26px;
+}
+
+.founder-offer .plan-badge {
+  margin-bottom: 14px;
+}
+
+.founder-offer .plan-price {
+  font-size: 1.9rem;
+}
+
+.founder-offer .primary-action {
+  margin-top: 20px;
+  padding: 0 22px;
+}
+
+.founder-offer ul {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .founder-offer {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+}
+
+.for-business-final {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid var(--line);
+  padding: 48px 0 20px;
+}
+
+.for-business-final > div {
+  max-width: 680px;
+}

@@ -27,7 +27,7 @@ amigo do dono do projeto) e é o primeiro piloto — página em
 https://bora-bar.netlify.app/r/cantinho-portugues, fora do guia. Não apagar.
 
 **WhatsApp comercial (quem vende o Bora Bar):** 24 99219-6584, em
-`SALES_WHATSAPP` de `src/components/ForBusinessPage.jsx`. Não confundir com o
+`SALES_WHATSAPP` de `src/texts/contact.js`. Não confundir com o
 WhatsApp de cada bar (campo `phone`), que o próprio dono cadastra no painel.
 
 ## Leia antes de mexer
@@ -38,8 +38,8 @@ WhatsApp de cada bar (campo `phone`), que o próprio dono cadastra no painel.
 
 ## Stack
 
-- React 19 + Vite 7, JavaScript puro (sem TypeScript), CSS único em `src/styles.css`
-- Ícones: `lucide-react`. Efeito de luz do fundo: `ogl` (WebGL)
+- React 19 + Vite 7, JavaScript puro (sem TypeScript), CSS dividido por área em `src/styles/` (`index.css` define a ordem)
+- Ícones: `lucide-react`. Fundo preto liso, sem efeito de luz (a biblioteca `ogl` ficou sem uso em `package.json`)
 - Backend: Supabase (Postgres + Auth + Storage), acessado direto do navegador com a chave pública; a segurança está nas policies RLS
 - Uma função serverless: `api/geocode-profile.js` (CEP/endereço → latitude/longitude via Nominatim), servida na Netlify pelo adaptador `netlify/functions/geocode-profile.mjs`
 - APIs públicas usadas no navegador: ViaCEP (endereço por CEP) e IBGE (estados e cidades)
@@ -84,7 +84,7 @@ e login/painel ficam indisponíveis.
 
 ## Como o código está organizado
 
-- **Página avulsa `/r/<id>`** (`src/components/StandalonePage.jsx`, escolhida em
+- **Página avulsa `/r/<id>`** (`src/pages/StandalonePage.jsx`, escolhida em
   `src/main.jsx`): o "site" de cada estabelecimento para QR Code e Instagram, sem
   a marca Bora Bar. `bars.is_listed = false` = só essa página, fora do guia.
   É o produto que se vende primeiro; depois liga `is_listed` e ele entra no app.
@@ -95,7 +95,8 @@ e login/painel ficam indisponíveis.
   favoritos, localização) e o roteamento. **O roteamento é por hash**
   (`#app`, `#bar/<id>`, `#clima/<id>`, `#business`, `#profile`, `#login`,
   `#for-business`, `#promotions`); a página inicial sem hash é a landing.
-- `src/components/` — telas e peças de interface. Componentes recebem dados e
+- `src/pages/` — telas inteiras; `src/components/` — peças reutilizadas; `src/texts/` — todos os textos da interface (uma frase para mudar? procure aqui; detalhes em `docs/ARQUIVOS.md`); `src/styles/` — CSS.
+  Páginas e componentes recebem dados e
   callbacks por props; não chamam o Supabase diretamente, com exceção das telas
   que usam os services (Auth, Profile, Reviews, BusinessDashboard).
 - `src/services/` — **todo acesso a dados passa por aqui.** Cada service converte
@@ -133,8 +134,10 @@ e login/painel ficam indisponíveis.
    "Tentar de novo"; `mockBars` só aparece em `npm run dev` sem Supabase.
    A landing ainda usa fotos/nomes de `mockBars` como ilustração.
 3. Rotas com `#` impedem prévia de link no WhatsApp/Instagram e indexação no Google.
-4. A landing ainda fala em "bombando"/"onde a galera está indo" na prévia do
-   app (dados ilustrativos); o mapa e o passo "Veja o movimento" foram tirados.
+4. ~~Landing com "bombando"/números de movimento~~ — resolvido em 26/10/2026:
+   a landing não tem mais "bombando", "38 lugares abertos", notas nem contagem
+   de pessoas; mostra só horário, promoção e show (exemplos ilustrativos, em
+   `src/texts/landing.js`).
 5. Imagens da landing em PNG de 0,8–1,4 MB; bundle JS de ~580 KB sem divisão.
 6. Aprovação de dono é manual no Table Editor (`bar_claims.status`).
 7. ~~Planos "Em breve"~~ — substituídos em 15/10/2026 pelo Programa Parceiro

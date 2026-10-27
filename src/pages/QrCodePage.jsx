@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Download, Printer } from "lucide-react";
 import { fetchBarById } from "../services/barsService.js";
+import { qr as t } from "../texts/misc.js";
 
 // /r/<id>/qr — cartão com QR Code para imprimir e colar na mesa, no balcão ou
 // na vitrine. Aponta para a página avulsa /r/<id>. Sem a marca Bora Bar.
@@ -36,7 +37,7 @@ export default function QrCodePage({ barId }) {
 
   useEffect(() => {
     if (bar) {
-      document.title = `QR Code — ${bar.name}`;
+      document.title = t.title(bar.name);
     }
   }, [bar]);
 
@@ -55,7 +56,7 @@ export default function QrCodePage({ barId }) {
   if (state === "loading") {
     return (
       <main className="qr-page">
-        <p className="qr-status">Gerando QR Code…</p>
+        <p className="qr-status">{t.generating}</p>
       </main>
     );
   }
@@ -64,9 +65,7 @@ export default function QrCodePage({ barId }) {
     return (
       <main className="qr-page">
         <p className="qr-status">
-          {state === "not-found"
-            ? "Estabelecimento não encontrado. Confira o link."
-            : "Não foi possível gerar o QR Code agora. Tente de novo."}
+          {state === "not-found" ? t.notFound : t.error}
         </p>
       </main>
     );
@@ -77,31 +76,28 @@ export default function QrCodePage({ barId }) {
       <div className="qr-toolbar">
         <button className="primary-action" type="button" onClick={() => window.print()}>
           <Printer size={18} aria-hidden="true" />
-          Imprimir
+          {t.print}
         </button>
         <button className="secondary-action" type="button" onClick={downloadPng}>
           <Download size={18} aria-hidden="true" />
-          Baixar imagem do QR Code
+          {t.download}
         </button>
       </div>
 
       <article className="qr-card">
-        <p className="qr-card-kicker">Cardápio digital</p>
+        <p className="qr-card-kicker">{t.kicker}</p>
         <h1>{bar.name}</h1>
         <div
           className="qr-code"
           role="img"
-          aria-label={`QR Code para ${shortUrl}`}
+          aria-label={t.qrAria(shortUrl)}
           dangerouslySetInnerHTML={{ __html: qrSvg }}
         />
-        <p className="qr-card-call">Aponte a câmera do celular para ver o cardápio, os preços e falar com a gente.</p>
+        <p className="qr-card-call">{t.call}</p>
         <p className="qr-card-url">{shortUrl}</p>
       </article>
 
-      <p className="qr-hint">
-        Dica: imprima em papel mais grosso ou plastifique. Teste com a câmera do
-        celular antes de colar.
-      </p>
+      <p className="qr-hint">{t.hint}</p>
     </main>
   );
 }

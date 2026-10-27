@@ -1,5 +1,6 @@
 import { LocateFixed, MapPin } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { address as t } from "../texts/misc.js";
 import {
   fetchAddressByCep,
   fetchCitiesByState,
@@ -30,7 +31,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
       })
       .catch(() => {
         if (isMounted) {
-          setFeedback("Não foi possível carregar estados agora.");
+          setFeedback(t.statesFailed);
         }
       })
       .finally(() => {
@@ -65,7 +66,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
       .catch(() => {
         if (isMounted) {
           setCities([]);
-          setFeedback("Não foi possível carregar cidades agora.");
+          setFeedback(t.citiesFailed);
         }
       })
       .finally(() => {
@@ -106,9 +107,9 @@ export default function AddressFields({ address, disabled = false, onChange }) {
           locationUpdatedAt: ""
         })
       );
-      setFeedback("Endereço encontrado.");
+      setFeedback(t.found);
     } catch {
-      setFeedback("Não encontramos esse CEP. Você pode preencher manualmente.");
+      setFeedback(t.cepNotFound);
     } finally {
       setIsLoadingCep(false);
     }
@@ -153,12 +154,12 @@ export default function AddressFields({ address, disabled = false, onChange }) {
 
   return (
     <fieldset className="address-fields" disabled={disabled}>
-      <legend>Endereço para sugestões próximas</legend>
-      <p>Opcional. Usaremos esse endereço apenas para melhorar sugestões próximas.</p>
+      <legend>{t.legend}</legend>
+      <p>{t.intro}</p>
 
       <div className="profile-grid">
         <label>
-          <span>CEP</span>
+          <span>{t.cep}</span>
           <div className="field-with-icon">
             <LocateFixed size={18} aria-hidden="true" />
             <input
@@ -171,7 +172,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
         </label>
 
         <label>
-          <span>Estado</span>
+          <span>{t.state}</span>
           <div className="field-with-icon">
             <MapPin size={18} aria-hidden="true" />
             <select
@@ -179,7 +180,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
               onChange={handleStateChange}
             >
               <option value="">
-                {isLoadingStates ? "Carregando..." : "Selecione"}
+                {isLoadingStates ? t.loading : t.select}
               </option>
               {states.map((state) => (
                 <option key={state.code} value={state.code}>
@@ -193,7 +194,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
 
       <div className="profile-grid">
         <label>
-          <span>Cidade</span>
+          <span>{t.city}</span>
           <div className="field-with-icon">
             <MapPin size={18} aria-hidden="true" />
             <select
@@ -202,7 +203,7 @@ export default function AddressFields({ address, disabled = false, onChange }) {
               disabled={!normalizedAddress.stateCode || isLoadingCities}
             >
               <option value="">
-                {isLoadingCities ? "Carregando..." : "Selecione"}
+                {isLoadingCities ? t.loading : t.select}
               </option>
               {cities.map((city) => (
                 <option key={city.id} value={city.id}>
@@ -214,19 +215,19 @@ export default function AddressFields({ address, disabled = false, onChange }) {
         </label>
 
         <label>
-          <span>Bairro</span>
+          <span>{t.neighborhood}</span>
           <div className="field-with-icon">
             <MapPin size={18} aria-hidden="true" />
             <input
               value={normalizedAddress.neighborhood}
               onChange={handleNeighborhoodChange}
-              placeholder="Centro"
+              placeholder={t.neighborhoodPlaceholder}
             />
           </div>
         </label>
       </div>
 
-      {isLoadingCep && <p className="form-hint">Buscando endereço...</p>}
+      {isLoadingCep && <p className="form-hint">{t.searching}</p>}
       {feedback && <p className="form-feedback">{feedback}</p>}
     </fieldset>
   );

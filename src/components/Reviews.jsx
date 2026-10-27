@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { fetchProfile } from "../services/profilesService.js";
 import { createReview, deleteReview, fetchReviews } from "../services/reviewsService.js";
+import { reviews as t } from "../texts/bar.js";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -24,7 +25,7 @@ export default function Reviews({ barId }) {
     profileName ||
     user?.user_metadata?.display_name ||
     user?.email?.split("@")[0] ||
-    "sua conta";
+    t.anonymous;
 
   useEffect(() => {
     let isMounted = true;
@@ -106,7 +107,7 @@ export default function Reviews({ barId }) {
       setComment("");
       setRating(5);
     } catch {
-      setFeedback("Não foi possível enviar agora. Tente novamente em instantes.");
+      setFeedback(t.sendFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +126,7 @@ export default function Reviews({ barId }) {
         currentReviews.filter((review) => review.id !== reviewId)
       );
     } catch {
-      setFeedback("Não foi possível remover agora. Tente novamente em instantes.");
+      setFeedback(t.removeFailed);
     }
   }
 
@@ -133,21 +134,21 @@ export default function Reviews({ barId }) {
     <section className="reviews-section">
       <div className="section-heading reviews-heading">
         <div>
-          <p className="section-kicker">Opiniao da galera</p>
-          <h2>Avaliações</h2>
+          <p className="section-kicker">{t.kicker}</p>
+          <h2>{t.title}</h2>
         </div>
-        <span>{averageRating ? `${averageRating} / 5` : "Sem notas"}</span>
+        <span>{averageRating ? `${averageRating} / 5` : t.noRatings}</span>
       </div>
 
       <div className="reviews-layout">
         {isAuthReady && user ? (
           <form className="review-form" onSubmit={handleSubmit}>
             <p className="review-author-note">
-              Avaliando como: <strong>{reviewerName}</strong>
+              {t.reviewingAs} <strong>{reviewerName}</strong>
             </p>
 
             <fieldset className="rating-field">
-              <legend>Nota</legend>
+              <legend>{t.rating}</legend>
               <div className="rating-buttons">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
@@ -155,9 +156,9 @@ export default function Reviews({ barId }) {
                     key={value}
                     type="button"
                     onClick={() => setRating(value)}
-                    aria-label={`${value} estrela${value > 1 ? "s" : ""}`}
+                    aria-label={t.stars(value)}
                     aria-pressed={value === rating}
-                    title={`${value} estrela${value > 1 ? "s" : ""}`}
+                    title={t.stars(value)}
                   >
                     <Star size={22} aria-hidden="true" />
                   </button>
@@ -166,13 +167,13 @@ export default function Reviews({ barId }) {
             </fieldset>
 
             <label>
-              <span>Comentário</span>
+              <span>{t.comment}</span>
               <div className="field-with-icon textarea-field">
                 <MessageSquare size={18} aria-hidden="true" />
                 <textarea
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
-                  placeholder="O que você achou do bar?"
+                  placeholder={t.commentPlaceholder}
                   required
                   rows={4}
                 />
@@ -185,7 +186,7 @@ export default function Reviews({ barId }) {
               disabled={isSubmitting}
             >
               <Send size={18} aria-hidden="true" />
-              {isSubmitting ? "Enviando..." : "Enviar avaliação"}
+              {isSubmitting ? t.sending : t.send}
             </button>
             {feedback && <p className="form-feedback">{feedback}</p>}
           </form>
@@ -195,11 +196,8 @@ export default function Reviews({ barId }) {
               <MessageSquare size={22} aria-hidden="true" />
             </div>
             <div>
-              <h3>Entre para deixar sua avaliação</h3>
-              <p>
-                As opiniões ficam visiveis para todo mundo, mas só quem tem conta
-                consegue comentar e dar nota.
-              </p>
+              <h3>{t.loginTitle}</h3>
+              <p>{t.loginCopy}</p>
             </div>
             <button
               className="submit-review"
@@ -209,7 +207,7 @@ export default function Reviews({ barId }) {
               }}
             >
               <LogIn size={18} aria-hidden="true" />
-              Entrar para avaliar
+              {t.loginButton}
             </button>
             {feedback && <p className="form-feedback">{feedback}</p>}
           </div>
@@ -229,14 +227,14 @@ export default function Reviews({ barId }) {
                       className="delete-review"
                       type="button"
                       onClick={() => handleDelete(review.id)}
-                      aria-label={`Remover avaliação de ${review.author}`}
-                      title="Remover avaliação"
+                      aria-label={t.removeReviewOf(review.author)}
+                      title={t.removeReview}
                     >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
                   )}
                 </div>
-                <div className="review-stars" aria-label={`${review.rating} de 5`}>
+                <div className="review-stars" aria-label={t.outOfFive(review.rating)}>
                   {[1, 2, 3, 4, 5].map((value) => (
                     <Star
                       className={value <= review.rating ? "is-filled" : ""}
@@ -252,7 +250,7 @@ export default function Reviews({ barId }) {
           ) : (
             <div className="review-empty">
               <MessageSquare size={22} aria-hidden="true" />
-              <p>Ainda não há avaliações para este bar.</p>
+              <p>{t.empty}</p>
             </div>
           )}
         </div>

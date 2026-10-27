@@ -1,15 +1,17 @@
 import { BadgePercent, Clock3, Route, WalletCards } from "lucide-react";
 
+import { filters as t } from "../texts/app.js";
+
 const filters = [
-  { id: "open", label: "Aberto agora", icon: Clock3 },
-  { id: "cheap", label: "Mais barato", icon: WalletCards },
-  { id: "near", label: "Mais próximo", icon: Route },
-  { id: "promo", label: "Com promoção", icon: BadgePercent }
+  { id: "open", label: t.open, icon: Clock3 },
+  { id: "cheap", label: t.cheap, icon: WalletCards },
+  { id: "near", label: t.near, icon: Route },
+  { id: "promo", label: t.promo, icon: BadgePercent }
 ];
 
 export default function FilterBar({ activeFilters, onToggleFilter }) {
   return (
-    <section className="filter-strip" aria-label="Filtros">
+    <section className="filter-strip" aria-label={t.ariaLabel}>
       {filters.map((filter) => {
         const Icon = filter.icon;
         const isActive = activeFilters.includes(filter.id);

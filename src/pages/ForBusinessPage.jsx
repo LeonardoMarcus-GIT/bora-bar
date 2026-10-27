@@ -11,41 +11,11 @@ import {
   UtensilsCrossed
 } from "lucide-react";
 
-// Contato comercial do Bora Bar (quem vende). Não confundir com o WhatsApp de
-// cada bar, que o próprio dono cadastra no painel.
-const SALES_WHATSAPP = "5524992196584";
-const SALES_MESSAGE =
-  "Olá! Tenho um bar e quero saber mais sobre o programa Parceiro Fundador do Bora Bar.";
-const SALES_WHATSAPP_URL = `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent(SALES_MESSAGE)}`;
+import { SALES_WHATSAPP_URL, FOUNDER_SPOTS, FOUNDER_CITY } from "../texts/contact.js";
+import { benefits, founderPerks, steps } from "../texts/forBusiness.js";
 
-const FOUNDER_SPOTS = 10;
-const FOUNDER_CITY = "Volta Redonda";
-
-const benefits = [
-  {
-    icon: UtensilsCrossed,
-    title: "Cardápio sempre atualizado",
-    description: "Altere itens, preços e disponibilidade pelo celular, na hora que precisar."
-  },
-  {
-    icon: Megaphone,
-    title: "Promoções e eventos",
-    description: "Publique o samba de hoje e o chopp em dobro: motivos reais para o cliente escolher seu bar."
-  },
-  {
-    icon: BarChart3,
-    title: "Interesse dos clientes",
-    description: "Veja quantas pessoas abriram sua página, chamaram no WhatsApp, ligaram e pediram rota."
-  }
-];
-
-const founderPerks = [
-  "Sem cartão e sem contrato",
-  "A gente cadastra seu bar: cardápio, fotos e horários",
-  "Aberto/fechado automático pelo seu horário",
-  "Condição especial garantida para os primeiros parceiros",
-  "Cancele quando quiser"
-];
+// Ícone de cada benefício, na mesma ordem de `benefits` em texts/forBusiness.js.
+const benefitIcons = [UtensilsCrossed, Megaphone, BarChart3];
 
 export default function ForBusinessPage({ onBack, onGetStarted }) {
   function scrollToOffer() {
@@ -102,13 +72,16 @@ export default function ForBusinessPage({ onBack, onGetStarted }) {
           <h2>Uma presença digital simples de cuidar</h2>
         </div>
         <div className="business-benefit-grid">
-          {benefits.map(({ icon: Icon, title, description }) => (
-            <article className="business-benefit" key={title}>
-              <Icon size={22} aria-hidden="true" />
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </article>
-          ))}
+          {benefits.map(({ title, description }, index) => {
+            const Icon = benefitIcons[index];
+            return (
+              <article className="business-benefit" key={title}>
+                <Icon size={22} aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -118,9 +91,12 @@ export default function ForBusinessPage({ onBack, onGetStarted }) {
           <h2>Do primeiro contato ao bar no ar</h2>
         </div>
         <ol className="business-steps">
-          <li><span>1</span><div><strong>Chame no WhatsApp</strong><p>Conte qual é o seu bar. A conversa é direta com a gente.</p></div></li>
-          <li><span>2</span><div><strong>A gente monta sua página</strong><p>Cadastramos cardápio, fotos, endereço e horários para você.</p></div></li>
-          <li><span>3</span><div><strong>Você atualiza pelo celular</strong><p>Com seu acesso ao painel, muda preços, promoções e eventos quando quiser.</p></div></li>
+          {steps.map(({ title, description }, index) => (
+            <li key={title}>
+              <span>{index + 1}</span>
+              <div><strong>{title}</strong><p>{description}</p></div>
+            </li>
+          ))}
         </ol>
       </section>
 

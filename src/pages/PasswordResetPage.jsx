@@ -2,24 +2,8 @@ import { LockKeyhole } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { updatePassword } from "../services/authService.js";
-
-function getPasswordResetError(error) {
-  const message = `${error?.message ?? ""} ${error?.name ?? ""}`.toLowerCase();
-
-  if (
-    message.includes("session") ||
-    message.includes("jwt") ||
-    message.includes("not authenticated")
-  ) {
-    return "Esse link expirou ou já foi usado. Peça um novo link de recuperação.";
-  }
-
-  if (message.includes("password")) {
-    return "Use uma senha com pelo menos 6 caracteres.";
-  }
-
-  return "Não foi possível atualizar a senha agora.";
-}
+import { getPasswordResetError } from "../texts/authErrors.js";
+import { passwordReset as t } from "../texts/account.js";
 
 export default function PasswordResetPage({ onBackToLogin, onDone }) {
   const { isAuthReady, user } = useAuth();
@@ -34,12 +18,12 @@ export default function PasswordResetPage({ onBackToLogin, onDone }) {
     setFeedback("");
 
     if (isAuthReady && !canUpdatePassword) {
-      setFeedback("Abra o link mais recente enviado por email para criar uma nova senha.");
+      setFeedback(t.openLatestLink);
       return;
     }
 
     if (password !== confirmPassword) {
-      setFeedback("As senhas precisam ser iguais.");
+      setFeedback(t.mismatch);
       return;
     }
 
@@ -52,7 +36,7 @@ export default function PasswordResetPage({ onBackToLogin, onDone }) {
         throw error;
       }
 
-      setFeedback("Senha atualizada.");
+      setFeedback(t.updated);
       setPassword("");
       setConfirmPassword("");
       onDone();
@@ -68,23 +52,23 @@ export default function PasswordResetPage({ onBackToLogin, onDone }) {
     <main className="account-page">
       <section className="account-panel">
         <div className="account-heading">
-          <p className="section-kicker">Seguranca</p>
-          <h1>Nova senha</h1>
-          <p>Crie uma nova senha para continuar usando sua conta.</p>
+          <p className="section-kicker">{t.kicker}</p>
+          <h1>{t.title}</h1>
+          <p>{t.copy}</p>
         </div>
 
         {isAuthReady && !canUpdatePassword && (
           <div className="auth-warning">
-            <p>O link de recuperação não está ativo nesta janela.</p>
+            <p>{t.linkInactive}</p>
             <button type="button" onClick={onBackToLogin}>
-              Pedir novo link
+              {t.requestNewLink}
             </button>
           </div>
         )}
 
         <form className="account-form" onSubmit={handleSubmit}>
           <label>
-            <span>Nova senha</span>
+            <span>{t.newPasswordLabel}</span>
             <div className="field-with-icon">
               <LockKeyhole size={18} aria-hidden="true" />
               <input
@@ -99,7 +83,7 @@ export default function PasswordResetPage({ onBackToLogin, onDone }) {
           </label>
 
           <label>
-            <span>Confirmar senha</span>
+            <span>{t.confirmPasswordLabel}</span>
             <div className="field-with-icon">
               <LockKeyhole size={18} aria-hidden="true" />
               <input
@@ -118,7 +102,7 @@ export default function PasswordResetPage({ onBackToLogin, onDone }) {
             type="submit"
             disabled={isSubmitting || !isAuthReady || !canUpdatePassword}
           >
-            {!isAuthReady ? "Verificando..." : isSubmitting ? "Salvando..." : "Atualizar senha"}
+            {!isAuthReady ? t.checking : isSubmitting ? t.saving : t.submit}
           </button>
           {feedback && <p className="form-feedback">{feedback}</p>}
         </form>

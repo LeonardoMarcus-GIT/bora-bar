@@ -1,0 +1,270 @@
+/* Avaliações e campos de formulário. */
+.section-kicker {
+  color: var(--coral);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 3px;
+}
+
+.reviews-heading {
+  align-items: flex-end;
+}
+
+.reviews-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.review-form {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.review-author-note {
+  margin: 0;
+  border: 1px solid rgba(255, 113, 91, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 113, 91, 0.1);
+  color: rgba(248, 241, 223, 0.82);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  padding: 11px 12px;
+}
+
+.review-author-note strong {
+  color: var(--ink);
+}
+
+.review-login-card {
+  display: grid;
+  align-content: start;
+  gap: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255, 113, 91, 0.12), rgba(255, 255, 255, 0.05)),
+    rgba(255, 255, 255, 0.06);
+  padding: 16px;
+}
+
+.review-login-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(255, 113, 91, 0.28);
+  border-radius: 14px;
+  background: rgba(255, 113, 91, 0.14);
+  color: var(--coral);
+}
+
+.review-login-card h3 {
+  margin: 0 0 5px;
+  color: var(--ink);
+  font-size: 1.12rem;
+}
+
+.review-login-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.review-form label,
+.rating-field {
+  display: grid;
+  gap: 8px;
+}
+
+.review-form label > span,
+.rating-field legend {
+  color: rgba(248, 241, 223, 0.88);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.rating-field {
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.field-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  padding: 0 12px;
+}
+
+.field-with-icon input,
+.field-with-icon select,
+.field-with-icon textarea {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.field-with-icon input {
+  min-height: 46px;
+}
+
+.field-with-icon select {
+  min-height: 46px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.field-with-icon select option {
+  background: #161616;
+  color: var(--ink);
+}
+
+.form-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: -2px 0 0;
+}
+
+.textarea-field {
+  align-items: flex-start;
+  padding-top: 12px;
+}
+
+.textarea-field textarea {
+  min-height: 104px;
+  padding: 0 0 12px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.rating-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.star-button {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 241, 223, 0.38);
+  cursor: pointer;
+}
+
+.star-button.is-selected {
+  border-color: rgba(255, 113, 91, 0.52);
+  background: rgba(255, 178, 75, 0.16);
+  color: var(--coral-soft);
+}
+
+.star-button.is-selected svg,
+.review-stars .is-filled {
+  fill: currentColor;
+}
+
+.submit-review {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  cursor: pointer;
+}
+
+.submit-review:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.form-feedback {
+  color: #ffb7aa;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: -4px 0 0;
+}
+
+.review-list {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.review-card,
+.review-empty {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 14px;
+}
+
+.review-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.review-card-header div {
+  display: grid;
+  gap: 3px;
+}
+
+.review-card-header span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.delete-review {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.delete-review:hover,
+.delete-review:focus-visible {
+  border-color: rgba(255, 113, 91, 0.5);
+  color: var(--coral);
+}
+
+.review-stars {
+  display: flex;
+  gap: 3px;
+  color: var(--coral-soft);
+  margin: 8px 0;
+}
+
+.review-card p,
+.review-empty p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.review-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}

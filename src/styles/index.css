@@ -1,0 +1,17 @@
+/* Fonte (precisa ser o primeiro @import). */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant:wght@600;700&family=Lobster&display=swap");
+
+/* A ordem importa: um arquivo pode sobrescrever o anterior. */
+@import "./base.css";
+@import "./header.css";
+@import "./bar-card.css";
+@import "./bar-details.css";
+@import "./account.css";
+@import "./menu-events.css";
+@import "./for-business.css";
+@import "./dashboard.css";
+@import "./reviews.css";
+@import "./bottom-nav.css";
+@import "./responsive.css";
+@import "./extras.css";
+@import "./motion.css";

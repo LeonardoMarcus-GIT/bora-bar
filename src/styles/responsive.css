@@ -1,0 +1,450 @@
+/* Ajustes para tela pequena e movimento reduzido. */
+@media (max-width: 900px) {
+  .app-header {
+    grid-template-columns: 1fr;
+  }
+
+  .location-summary {
+    justify-content: flex-start;
+  }
+
+  .auth-page {
+    grid-template-columns: minmax(0, 560px);
+  }
+
+  .bar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .details-content,
+  .reviews-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .details-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .business-metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .home-page,
+  .details-page,
+  .account-page,
+  .for-business-page {
+    width: min(100% - 20px, 1120px);
+    padding-top: 10px;
+    padding-bottom: 104px;
+  }
+
+  .bar-grid,
+  .menu-grid,
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-grid {
+    gap: 10px;
+  }
+
+  .account-panel,
+  .profile-panel {
+    padding: 16px;
+  }
+
+  .auth-page {
+    display: block;
+    min-height: auto;
+    padding-bottom: 92px;
+  }
+
+  .auth-page-intro {
+    margin: 28px 4px 24px;
+  }
+
+  .auth-page-intro img {
+    height: 48px;
+    margin-bottom: 16px;
+    width: 48px;
+  }
+
+  .auth-page-intro p {
+    font-size: 0.68rem;
+    margin-bottom: 8px;
+  }
+
+  .auth-page-intro h2 {
+    font-size: clamp(2.6rem, 13vw, 3.7rem);
+  }
+
+  .auth-panel {
+    margin: 0;
+  }
+
+  .details-hero {
+    height: clamp(250px, 34vh, 310px);
+  }
+
+  .details-hero-overlay {
+    padding: 18px;
+  }
+
+  .details-quick-actions {
+    gap: 8px;
+  }
+
+  .details-quick-actions a {
+    min-height: 58px;
+    padding: 9px 10px;
+  }
+
+  .details-quick-actions small {
+    display: none;
+  }
+
+  .details-main,
+  .details-side,
+  .menu-section,
+  .events-section,
+  .reviews-section {
+    padding: 16px;
+  }
+
+  .details-actions {
+    align-items: stretch;
+  }
+
+  .detail-favorite,
+  .back-button {
+    min-width: 0;
+  }
+
+  .menu-item {
+    align-items: flex-start;
+  }
+
+  .reviews-heading {
+    align-items: flex-start;
+  }
+
+  .star-button {
+    width: 40px;
+  }
+
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .business-panel {
+    width: 100%;
+    overflow: hidden;
+    padding: 14px;
+  }
+
+  .for-business-hero {
+    min-height: auto;
+    gap: 38px;
+    padding-bottom: 36px;
+  }
+
+  .for-business-mark {
+    max-width: 190px;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .for-business-hero h1 {
+    font-size: clamp(2.35rem, 12vw, 3.6rem);
+  }
+
+  .for-business-actions,
+  .for-business-final {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .for-business-actions button,
+  .for-business-final button {
+    width: 100%;
+  }
+
+  .for-business-proof {
+    display: grid;
+  }
+
+  .for-business-section {
+    padding: 36px 0;
+  }
+
+  .business-benefit-grid,
+  .business-plan-grid,
+  .business-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .business-benefit,
+  .business-plan {
+    padding: 16px;
+  }
+
+  .business-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .business-metric {
+    min-height: 88px;
+    padding: 9px 10px;
+  }
+
+  .business-metric strong {
+    font-size: 1.25rem;
+  }
+
+  .business-metric span {
+    font-size: 0.72rem;
+  }
+
+  .business-quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .business-overview-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .business-heading {
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 14px;
+  }
+
+  .business-heading > img,
+  .business-heading-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .business-heading h1 {
+    font-size: 1.45rem;
+  }
+
+  .business-heading p:not(.section-kicker) {
+    display: none;
+  }
+
+  .business-tabs {
+    position: sticky;
+    top: 8px;
+    z-index: 4;
+    gap: 7px;
+    margin: 0 -14px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(34, 34, 34, 0.94);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+    padding: 8px 14px;
+    backdrop-filter: blur(16px);
+  }
+
+  .business-tabs button {
+    width: 42px;
+    min-width: 42px;
+    flex: 0 0 42px;
+    gap: 0;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .business-tabs button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .business-toolbar {
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 14px;
+  }
+
+  .business-toolbar select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .business-toolbar .back-button {
+    min-height: 38px;
+    padding: 0 10px;
+  }
+
+  .business-item-row {
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .menu-item-main {
+    gap: 6px;
+  }
+
+  .menu-item-main .icon-delete {
+    width: 38px;
+    height: 38px;
+  }
+
+  .menu-item-details {
+    grid-template-columns: minmax(0, 1fr) 42px;
+    gap: 6px;
+  }
+
+  .menu-item-details > input {
+    grid-column: 1 / -1;
+    min-height: 38px;
+    font-size: 0.84rem;
+    padding: 8px 10px;
+  }
+
+  .menu-price-field {
+    min-height: 38px;
+    padding: 0 8px;
+  }
+
+  .menu-availability-switch {
+    justify-content: center;
+    width: 36px;
+    min-height: 24px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .menu-availability-switch > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .publish-status-switch {
+    justify-content: flex-end;
+    min-height: 30px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .timed-item-add {
+    min-height: 38px;
+    margin-top: 4px;
+    padding: 0 11px;
+    font-size: 0.84rem;
+  }
+
+  .business-save-bar {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 18px;
+    padding-top: 14px;
+  }
+
+  .business-save-bar .primary-action {
+    width: 100%;
+  }
+
+  .business-overview {
+    gap: 18px;
+  }
+
+  .business-overview-section {
+    padding-top: 14px;
+  }
+
+  .business-quick-grid button {
+    min-height: 58px;
+    padding: 10px;
+  }
+
+  .business-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .business-checklist span {
+    min-width: 0;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    padding: 7px 8px;
+  }
+
+  .cover-image-editor,
+  .business-hours-editor {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .cover-image-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cover-image-upload {
+    width: 100%;
+  }
+
+  .cover-image-preview {
+    min-height: 116px;
+  }
+
+  .cover-image-preview img {
+    height: 132px;
+  }
+
+  .hours-days {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .hours-days button,
+  .hours-days button:first-child {
+    min-width: 0;
+  }
+
+  .bar-address-number-grid,
+  .bar-address-state-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-card,
+  .bar-card-button,
+  .bar-card-image,
+  .favorite-toggle {
+    animation: none;
+    transition: none;
+  }
+
+  .bar-card-button:hover,
+  .bar-card-button:focus-visible,
+  .favorite-toggle:hover,
+  .favorite-toggle:focus-visible,
+  .bar-card-button:hover .bar-card-image,
+  .bar-card-button:focus-visible .bar-card-image {
+    filter: none;
+    transform: none;
+  }
+}

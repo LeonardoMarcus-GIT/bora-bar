@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getCategoryAnchor, getCategoryLabel } from "./MenuCategory.jsx";
+import { menuNav as menuNavText } from "../texts/misc.js";
 
 // Atalhos do cardápio: botões por categoria, grudados no topo enquanto a
 // pessoa está no cardápio. Tocar desliza suave até a categoria; a categoria
@@ -100,7 +101,7 @@ export default function MenuNav({ categories }) {
   }
 
   return (
-    <nav className="menu-nav" aria-label="Categorias do cardápio" ref={navRef}>
+    <nav className="menu-nav" aria-label={menuNavText.ariaLabel} ref={navRef}>
       {categories.map((name) => {
         const anchor = getCategoryAnchor(name);
 

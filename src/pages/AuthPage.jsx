@@ -1,122 +1,13 @@
 import { ArrowLeft, LockKeyhole, Mail, UserRound } from "lucide-react";
 import { useState } from "react";
-import AddressFields from "./AddressFields.jsx";
+import AddressFields from "../components/AddressFields.jsx";
 import { emptyAddress, geocodeAddress, toProfilePayload } from "../services/addressService.js";
 import { resetPassword, signIn, signUp } from "../services/authService.js";
 import logoIcon from "../assets/bora-bar-icon.png";
+import { getFriendlyAuthError } from "../texts/authErrors.js";
+import { auth } from "../texts/account.js";
 
-function getFriendlyAuthError(error, flow) {
-  const message = [
-    error?.message,
-    error?.code,
-    error?.error_code,
-    error?.name,
-    error?.status
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  if (message.includes("email not confirmed")) {
-    return "Confirme seu email antes de entrar.";
-  }
-
-  if (
-    message.includes("email_address_invalid") ||
-    message.includes("email address") ||
-    message.includes("invalid email") ||
-    message.includes("valid email")
-  ) {
-    return "Digite um e-mail válido para criar sua conta.";
-  }
-
-  if (
-    message.includes("already registered") ||
-    message.includes("user already") ||
-    message.includes("user_already_exists") ||
-    message.includes("email_exists")
-  ) {
-    return "Esse email já tem uma conta. Tente entrar ou recuperar a senha.";
-  }
-
-  if (
-    message.includes("invalid login") ||
-    message.includes("invalid credentials") ||
-    message.includes("invalid_credentials")
-  ) {
-    return "E-mail ou senha inválidos.";
-  }
-
-  if (message.includes("database") || message.includes("saving new user")) {
-    return "Não conseguimos criar seu perfil agora. Tente novamente em instantes.";
-  }
-
-  if (message.includes("email") && message.includes("send")) {
-    return "Não foi possível enviar o email de confirmação agora.";
-  }
-
-  if (
-    message.includes("login indisponível") ||
-    message.includes("supabase") ||
-    message.includes("api key")
-  ) {
-    return "Login indisponível no momento. Verifique a configuração do app.";
-  }
-
-  if (message.includes("failed to fetch") || message.includes("network")) {
-    return "Não foi possível conectar ao login agora. Tente novamente em instantes.";
-  }
-
-  if (message.includes("password")) {
-    return "Use uma senha com pelo menos 6 caracteres.";
-  }
-
-  if (message.includes("redirect") || message.includes("not allowed")) {
-    return "O dominio do app precisa estar liberado no Supabase.";
-  }
-
-  if (message.includes("signup") && message.includes("disabled")) {
-    return "Cadastro por email está desativado no Supabase.";
-  }
-
-  if (message.includes("rate limit") || message.includes("too many")) {
-    return "Muitas tentativas agora. Tente novamente em alguns minutos.";
-  }
-
-  if (flow === "recover") {
-    return "Não foi possível enviar o link agora.";
-  }
-
-  if (flow === "signup") {
-    return "Não foi possível criar a conta agora.";
-  }
-
-  return "Não foi possível entrar agora.";
-}
-
-function getHeadingText(mode) {
-  if (mode === "recover") {
-    return "Recuperar senha";
-  }
-
-  if (mode === "signup") {
-    return "Criar conta";
-  }
-
-  return "Entrar no Bora Bar";
-}
-
-function getHeadingCopy(mode) {
-  if (mode === "recover") {
-    return "Informe seu email para receber o link de recuperação.";
-  }
-
-  if (mode === "signup") {
-    return "Crie seu perfil para comentar e avaliar os lugares que visitar.";
-  }
-
-  return "Entre para acessar seu perfil, comentar e salvar suas preferências.";
-}
+const t = auth;
 
 function completeAuthentication(onAuthenticated) {
   try {
@@ -159,7 +50,7 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
           throw error;
         }
 
-        setFeedback("Se esse email estiver cadastrado, enviamos o link de recuperação.");
+        setFeedback(t.recoverSent);
         return;
       }
 
@@ -202,7 +93,7 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
           return;
         }
 
-        setFeedback("Confira seu email para confirmar sua conta.");
+        setFeedback(t.confirmEmail);
         setPassword("");
         return;
       }
@@ -227,29 +118,29 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
     <main className="account-page auth-page">
       <section className="auth-page-intro" aria-hidden="true">
         <img src={logoIcon} alt="" />
-        <p>Encontre o clima certo para a sua noite.</p>
-        <h2>Todo rolê<br />começa com um <em>bora.</em></h2>
+        <p>{t.introTagline}</p>
+        <h2>{t.introTitulo}<br />{t.introMeio} <em>{t.introDestaque}</em></h2>
       </section>
       <section className="account-panel auth-panel">
         <button className="auth-back-button" type="button" onClick={onBackToLanding}>
-          <ArrowLeft size={17} aria-hidden="true" /> Voltar
+          <ArrowLeft size={17} aria-hidden="true" /> {t.back}
         </button>
         <div className="account-heading">
-          <p className="section-kicker">Sua conta</p>
-          <h1>{getHeadingText(mode)}</h1>
-          <p>{getHeadingCopy(mode)}</p>
+          <p className="section-kicker">{t.kicker}</p>
+          <h1>{t.heading[mode]}</h1>
+          <p>{t.copy[mode]}</p>
         </div>
 
         <form className="account-form" onSubmit={handleSubmit}>
           {isSignup && (
             <label>
-              <span>Nome ou apelido</span>
+              <span>{t.nameLabel}</span>
               <div className="field-with-icon">
                 <UserRound size={18} aria-hidden="true" />
                 <input
                   value={displayName}
                   onChange={(event) => setDisplayName(event.target.value)}
-                  placeholder="Ex: Ana"
+                  placeholder={t.namePlaceholder}
                   required
                 />
               </div>
@@ -257,14 +148,14 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
           )}
 
           <label>
-            <span>Email</span>
+            <span>{t.emailLabel}</span>
             <div className="field-with-icon">
               <Mail size={18} aria-hidden="true" />
               <input
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="você@email.com"
+                placeholder={t.emailPlaceholder}
                 required
               />
             </div>
@@ -272,7 +163,7 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
 
           {!isRecover && (
             <label>
-              <span>Senha</span>
+              <span>{t.passwordLabel}</span>
               <div className="field-with-icon">
                 <LockKeyhole size={18} aria-hidden="true" />
                 <input
@@ -280,7 +171,7 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   minLength={6}
-                  placeholder="Minimo 6 caracteres"
+                  placeholder={t.passwordPlaceholder}
                   required
                 />
               </div>
@@ -290,13 +181,7 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
           {isSignup && <AddressFields address={address} onChange={setAddress} />}
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>
-            {isSubmitting
-              ? "Aguarde..."
-              : isRecover
-                ? "Enviar link"
-                : isSignup
-                  ? "Criar conta"
-                  : "Entrar"}
+            {isSubmitting ? t.submitting : t.submit[mode]}
           </button>
 
           {feedback && <p className="form-feedback">{feedback}</p>}
@@ -305,23 +190,23 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
         <div className="account-links">
           {isRecover ? (
             <button type="button" onClick={() => resetFeedback("login")}>
-              Voltar para entrar
+              {t.backToLogin}
             </button>
           ) : isSignup ? (
             <button type="button" onClick={() => resetFeedback("login")}>
-              Já tenho uma conta
+              {t.haveAccount}
             </button>
           ) : (
             <>
               <button type="button" onClick={() => resetFeedback("signup")}>
-                Criar conta
+                {t.createAccount}
               </button>
               <button
                 className="account-link-muted"
                 type="button"
                 onClick={() => resetFeedback("recover")}
               >
-                Esqueci minha senha
+                {t.forgotPassword}
               </button>
             </>
           )}

@@ -1,6 +1,6 @@
 import { ChevronRight, LogOut, Mail, Save, Store, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import AddressFields from "./AddressFields.jsx";
+import AddressFields from "../components/AddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
   emptyAddress,
@@ -10,6 +10,7 @@ import {
 } from "../services/addressService.js";
 import { signOut, updateUserMetadata } from "../services/authService.js";
 import { fetchProfile, saveProfile } from "../services/profilesService.js";
+import { profile as t } from "../texts/account.js";
 
 export default function ProfilePage({
   onLoginRequired,
@@ -148,7 +149,7 @@ export default function ProfilePage({
         });
       }
 
-      setFeedback("Perfil salvo.");
+      setFeedback(t.saved);
       window.dispatchEvent(
         new CustomEvent("bora-bar-profile-updated", {
           detail: { profile }
@@ -156,7 +157,7 @@ export default function ProfilePage({
       );
       onSaved?.();
     } catch {
-      setFeedback("Não foi possível salvar agora.");
+      setFeedback(t.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -171,8 +172,8 @@ export default function ProfilePage({
     return (
       <main className="account-page">
         <section className="empty-state">
-          <h2>Carregando perfil</h2>
-          <p>Estamos preparando sua conta.</p>
+          <h2>{t.loadingTitle}</h2>
+          <p>{t.loadingCopy}</p>
         </section>
       </main>
     );
@@ -190,27 +191,27 @@ export default function ProfilePage({
             {initials}
           </div>
           <div>
-            <p className="section-kicker">Perfil</p>
-            <h1>{displayName || "Seu perfil"}</h1>
+            <p className="section-kicker">{t.kicker}</p>
+            <h1>{displayName || t.fallbackName}</h1>
             <p>{user.email}</p>
           </div>
         </div>
 
         <form className="account-form" onSubmit={handleSave}>
           <label>
-            <span>Nome ou apelido</span>
+            <span>{t.nameLabel}</span>
             <div className="field-with-icon">
               <UserRound size={18} aria-hidden="true" />
               <input
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                placeholder="Como você quer aparecer"
+                placeholder={t.namePlaceholder}
               />
             </div>
           </label>
 
           <label>
-            <span>Email</span>
+            <span>{t.emailLabel}</span>
             <div className="field-with-icon">
               <Mail size={18} aria-hidden="true" />
               <input value={user.email} disabled />
@@ -221,7 +222,7 @@ export default function ProfilePage({
 
           <button className="primary-action" type="submit" disabled={isSaving}>
             <Save size={18} aria-hidden="true" />
-            {isSaving ? "Salvando..." : "Salvar perfil"}
+            {isSaving ? t.saving : t.save}
           </button>
           {feedback && <p className="form-feedback">{feedback}</p>}
         </form>
@@ -233,8 +234,8 @@ export default function ProfilePage({
         >
           <Store size={20} aria-hidden="true" />
           <span>
-            <strong>Área do estabelecimento</strong>
-            <small>Solicite acesso ou administre seu bar</small>
+            <strong>{t.businessAreaTitle}</strong>
+            <small>{t.businessAreaCopy}</small>
           </span>
         </button>
 
@@ -244,15 +245,15 @@ export default function ProfilePage({
           onClick={onOpenForBusiness}
         >
           <span>
-            <strong>Ainda não faz parte?</strong>
-            <small>Conheça os benefícios e planos para estabelecimentos</small>
+            <strong>{t.learnTitle}</strong>
+            <small>{t.learnCopy}</small>
           </span>
           <ChevronRight size={19} aria-hidden="true" />
         </button>
 
         <button className="secondary-action" type="button" onClick={handleSignOut}>
           <LogOut size={18} aria-hidden="true" />
-          Sair da conta
+          {t.signOut}
         </button>
       </section>
     </main>

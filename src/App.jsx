@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AppHeader from "./components/AppHeader.jsx";
-import AuthPage from "./components/AuthPage.jsx";
-import BarDetails from "./components/BarDetails.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
+import BarDetails from "./pages/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
 import BottomNav from "./components/BottomNav.jsx";
-import BusinessDashboard from "./components/BusinessDashboard.jsx";
+import BusinessDashboard from "./pages/BusinessDashboard.jsx";
 import FilterBar from "./components/FilterBar.jsx";
-import ForBusinessPage from "./components/ForBusinessPage.jsx";
-import LandingPage from "./components/LandingPage.jsx";
-import PasswordResetPage from "./components/PasswordResetPage.jsx";
-import ProfilePage from "./components/ProfilePage.jsx";
+import ForBusinessPage from "./pages/ForBusinessPage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
+import PasswordResetPage from "./pages/PasswordResetPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 import { ChevronRight, Store } from "lucide-react";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useGeolocation } from "./hooks/useGeolocation.js";
@@ -20,6 +20,8 @@ import { calculateDistanceKm } from "./utils/geo.js";
 import { getOpenStatus } from "./utils/openingHours.js";
 import { barMatchesVibe, getVibe } from "./utils/vibes.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
+import { home as t } from "./texts/app.js";
+import { transitionRoute } from "./utils/viewTransition.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
 const MAX_DISCOVERY_DISTANCE_KM = 20;
@@ -150,6 +152,9 @@ function getCoordinate(value) {
 export default function App() {
   const { user } = useAuth();
   const [route, setRoute] = useState(getRoute);
+  // Rota atual para a transição entre telas (o listener de hashchange é criado uma vez só).
+  const routeRef = useRef(route);
+  routeRef.current = route;
   const [bars, setBars] = useState([]);
   const [isLoadingBars, setIsLoadingBars] = useState(true);
   const [barsLoadError, setBarsLoadError] = useState(false);
@@ -204,7 +209,8 @@ export default function App() {
 
   useEffect(() => {
     const onHashChange = () => {
-      setRoute(getRoute());
+      const nextRoute = getRoute();
+      transitionRoute(() => setRoute(nextRoute), routeRef.current, nextRoute);
 
       if (isPromotionsHash()) {
         setShowFavoritesOnly(false);
@@ -379,13 +385,8 @@ export default function App() {
 
     return [...suggestions.values()]
       .map((suggestion) => {
-        const typeLabel =
-          suggestion.type === "bar"
-            ? "Estabelecimento"
-            : suggestion.type === "city"
-              ? "Cidade"
-              : "Bairro";
-        const countLabel = `${suggestion.count} ${suggestion.count === 1 ? "bar" : "bares"}`;
+        const typeLabel = t.suggestionType[suggestion.type];
+        const countLabel = t.barCount(suggestion.count);
 
         return {
           ...suggestion,
@@ -395,7 +396,7 @@ export default function App() {
               ? `${suggestion.city} - ${suggestion.bar.neighborhood}`
               : suggestion.type === "city"
               ? `${typeLabel} • ${countLabel}`
-              : `${typeLabel} em ${suggestion.city} • ${countLabel}`
+              : `${t.suggestionInCity(typeLabel, suggestion.city)} • ${countLabel}`
         };
       })
       .sort((a, b) => {
@@ -728,8 +729,8 @@ export default function App() {
       <>
         <main className="details-page">
           <section className="empty-state">
-            <h2>Carregando bar</h2>
-            <p>Estamos buscando as informações desse lugar.</p>
+            <h2>{t.loadingBarTitle}</h2>
+            <p>{t.loadingBarCopy}</p>
           </section>
         </main>
         <BottomNav
@@ -778,12 +779,12 @@ export default function App() {
           searchSuggestions={searchSuggestions}
           summaryLabel={
             barsLoadError
-              ? "Bares indisponíveis no momento"
+              ? t.summaryError
               : hasLocation
-              ? `${visibleBars.length} bares perto de você`
+              ? t.summaryNear(visibleBars.length)
               : isUsingProfileLocation
-                ? `${visibleBars.length} bares perto do seu endereço`
-              : `${visibleBars.length} bares encontrados`
+                ? t.summaryNearAddress(visibleBars.length)
+              : t.summaryFound(visibleBars.length)
           }
           onRequestLocation={requestLocation}
           onSearchChange={setSearchTerm}
@@ -793,37 +794,37 @@ export default function App() {
         {activeVibe && (
           <div className="vibe-filter-bar">
             <span>
-              Mostrando lugares com clima de <strong>{activeVibe.label}</strong>
+              {t.vibeShowing} <strong>{activeVibe.label}</strong>
             </span>
             <button type="button" onClick={goBack}>
-              Ver todos
+              {t.seeAll}
             </button>
           </div>
         )}
         {isLoadingBars ? (
           <section className="empty-state" aria-live="polite">
-            <h2>Carregando bares</h2>
-            <p>Buscando o que está rolando perto de você.</p>
+            <h2>{t.loadingTitle}</h2>
+            <p>{t.loadingCopy}</p>
           </section>
         ) : barsLoadError ? (
           <section className="empty-state" role="alert">
-            <h2>Não conseguimos carregar os bares agora</h2>
-            <p>Pode ser a conexão ou uma instabilidade rápida. Tente de novo em instantes.</p>
+            <h2>{t.errorTitle}</h2>
+            <p>{t.errorCopy}</p>
             <button className="primary-action" type="button" onClick={retryLoadBars}>
-              Tentar de novo
+              {t.retry}
             </button>
           </section>
         ) : bars.length === 0 ? (
           <section className="empty-state">
-            <h2>Nenhum bar por aqui ainda</h2>
-            <p>Os primeiros estabelecimentos estão chegando. Volte em breve.</p>
+            <h2>{t.emptyTitle}</h2>
+            <p>{t.emptyCopy}</p>
           </section>
         ) : activeVibe && visibleBars.length === 0 ? (
           <section className="empty-state">
-            <h2>Nenhum lugar com {activeVibe.label.toLowerCase()} por perto ainda</h2>
-            <p>Novos estabelecimentos estão chegando. Enquanto isso, veja todos os lugares.</p>
+            <h2>{t.vibeEmptyTitle(activeVibe.label.toLowerCase())}</h2>
+            <p>{t.vibeEmptyCopy}</p>
             <button className="primary-action" type="button" onClick={goBack}>
-              Ver todos
+              {t.seeAll}
             </button>
           </section>
         ) : (
@@ -840,14 +841,14 @@ export default function App() {
           className="home-business-invite"
           type="button"
           onClick={openForBusiness}
-          aria-label="Conhecer o Bora Bar para estabelecimentos"
+          aria-label={t.inviteAria}
         >
           <span className="home-business-icon">
             <Store size={20} aria-hidden="true" />
           </span>
           <span className="home-business-copy">
-            <strong>Seu estabelecimento no Bora Bar</strong>
-            <span>Atualize cardápio, promoções e eventos pelo celular.</span>
+            <strong>{t.inviteTitle}</strong>
+            <span>{t.inviteCopy}</span>
           </span>
           <span className="home-business-arrow">
             <ChevronRight size={20} aria-hidden="true" />

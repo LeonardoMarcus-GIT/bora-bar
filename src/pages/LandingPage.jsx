@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Apple,
+  BadgePercent,
   ArrowDownRight,
   ArrowUpRight,
   Beer,
@@ -18,7 +19,6 @@ import {
   Music2,
   Search,
   Sparkles,
-  Star,
   Ticket,
   UsersRound,
   UtensilsCrossed,
@@ -30,20 +30,24 @@ import logoFull from "../assets/bora-bar-logo-full.png";
 import logoIcon from "../assets/bora-bar-icon.png";
 import landingBackdrop from "../assets/bora-bar-bg-test.png";
 import landingBackdropMobile from "../assets/bora-bar-bg-mobile.png";
-import "./LandingPage.css";
+import { getLoginError } from "../texts/authErrors.js";
+import { RevealWords, RotatingText } from "../components/TextEffects.jsx";
+import * as t from "../texts/landing.js";
+import "../styles/landing.css";
 
 const discoveryBars = mockBars.slice(0, 3);
 
 // Cada card leva à lista filtrada pelo clima (#clima/<id>, ver src/utils/vibes.js).
+// O nome de cada card fica em texts/landing.js (nightTypeLabels).
 const nightTypes = [
-  { vibe: "barzinho", label: "Barzinho", icon: Beer, image: discoveryBars[0]?.image },
-  { vibe: "comer-bem", label: "Comer bem", icon: UtensilsCrossed, image: discoveryBars[1]?.image },
-  { vibe: "drinks", label: "Drinks", icon: GlassWater, image: discoveryBars[2]?.image },
-  { vibe: "musica-ao-vivo", label: "Música ao vivo", icon: Music2, image: mockBars[3]?.image },
-  { vibe: "festa", label: "Festa", icon: Sparkles, image: mockBars[4]?.image },
-  { vibe: "date", label: "Date", icon: Heart, image: mockBars[5]?.image },
-  { vibe: "assistir-jogo", label: "Assistir jogo", icon: Ticket, image: discoveryBars[1]?.image },
-  { vibe: "rooftop", label: "Rooftop", icon: ArrowUpRight, image: discoveryBars[2]?.image }
+  { vibe: "barzinho", icon: Beer, image: discoveryBars[0]?.image },
+  { vibe: "comer-bem", icon: UtensilsCrossed, image: discoveryBars[1]?.image },
+  { vibe: "drinks", icon: GlassWater, image: discoveryBars[2]?.image },
+  { vibe: "musica-ao-vivo", icon: Music2, image: mockBars[3]?.image },
+  { vibe: "festa", icon: Sparkles, image: mockBars[4]?.image },
+  { vibe: "date", icon: Heart, image: mockBars[5]?.image },
+  { vibe: "assistir-jogo", icon: Ticket, image: discoveryBars[1]?.image },
+  { vibe: "rooftop", icon: ArrowUpRight, image: discoveryBars[2]?.image }
 ];
 
 
@@ -57,20 +61,6 @@ function LandingMedia({ image, alt, className = "", priority = false }) {
       decoding="async"
     />
   );
-}
-
-function getLoginError(error) {
-  const message = String(error?.message ?? "").toLowerCase();
-
-  if (message.includes("invalid") || message.includes("credentials")) {
-    return "E-mail ou senha incorretos.";
-  }
-
-  if (message.includes("confirmed")) {
-    return "Confirme seu e-mail antes de entrar.";
-  }
-
-  return "Não foi possível entrar agora. Tente novamente.";
 }
 
 function LoginModal({ onClose, onCreateAccount, onAuthenticated }) {
@@ -113,55 +103,55 @@ function LoginModal({ onClose, onCreateAccount, onAuthenticated }) {
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <button className="landing-modal-close" type="button" onClick={onClose} aria-label="Fechar login">
+        <button className="landing-modal-close" type="button" onClick={onClose} aria-label={t.loginModal.closeAria}>
           <X size={20} aria-hidden="true" />
         </button>
-        <img className="landing-modal-logo" src={logoIcon} alt="Bora Bar" />
-        <p className="landing-eyebrow">Sua noite começa agora</p>
-        <h2 id="landing-login-title">Bora? <span aria-hidden="true">🍻</span></h2>
-        <p className="landing-modal-copy">Entre e descubra onde a noite vai te levar.</p>
+        <img className="landing-modal-logo" src={logoIcon} alt={t.nav.brandName} />
+        <p className="landing-eyebrow">{t.loginModal.eyebrow}</p>
+        <h2 id="landing-login-title">{t.loginModal.title} <span aria-hidden="true">🍻</span></h2>
+        <p className="landing-modal-copy">{t.loginModal.copy}</p>
 
         <form className="landing-login-form" onSubmit={handleSubmit}>
           <label>
-            <span>E-mail</span>
+            <span>{t.loginModal.emailLabel}</span>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="voce@email.com"
+              placeholder={t.loginModal.emailPlaceholder}
               autoComplete="email"
               required
             />
           </label>
           <label>
-            <span>Senha</span>
+            <span>{t.loginModal.passwordLabel}</span>
             <input
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Sua senha"
+              placeholder={t.loginModal.passwordPlaceholder}
               autoComplete="current-password"
               required
             />
           </label>
           <button className="landing-cta landing-cta-primary landing-login-submit" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Entrando..." : "Entrar"}
+            {isSubmitting ? t.loginModal.submitting : t.loginModal.submit}
             <ArrowUpRight size={18} aria-hidden="true" />
           </button>
           {feedback && <p className="landing-login-feedback">{feedback}</p>}
         </form>
 
-        <div className="landing-social-divider"><span>ou entre com</span></div>
+        <div className="landing-social-divider"><span>{t.loginModal.divider}</span></div>
         <div className="landing-social-actions">
-          <button type="button" onClick={() => setFeedback("Login com Google estará disponível em breve.")}>
+          <button type="button" onClick={() => setFeedback(t.loginModal.googleSoon)}>
             <span className="landing-google-mark">G</span> Google
           </button>
-          <button type="button" onClick={() => setFeedback("Login com Apple estará disponível em breve.")}>
+          <button type="button" onClick={() => setFeedback(t.loginModal.appleSoon)}>
             <Apple size={18} aria-hidden="true" /> Apple
           </button>
         </div>
         <p className="landing-modal-footer">
-          Ainda não tem conta? <button type="button" onClick={onCreateAccount}>Criar conta</button>
+          {t.loginModal.noAccount} <button type="button" onClick={onCreateAccount}>{t.loginModal.createAccount}</button>
         </p>
       </section>
     </div>
@@ -173,15 +163,17 @@ function AppPreview() {
   const bar = discoveryBars[activeBar] ?? discoveryBars[0];
 
   return (
-    <div className="landing-phone" aria-label="Prévia do aplicativo Bora Bar">
+    <div className="landing-phone" aria-label={t.preview.ariaLabel}>
       <div className="landing-phone-island" />
       <div className="landing-phone-top"><span>09:41</span><span>●●●</span></div>
       <div className="landing-phone-greeting">
-        <div><p>Boa noite, Leo</p><strong>Qual vai ser hoje?</strong></div>
-        <button type="button" aria-label="Ver notificações"><Sparkles size={16} /></button>
+        <div><p>{t.preview.greeting}</p><strong>{t.preview.question}</strong></div>
+        <button type="button" aria-label={t.preview.notifications}><Sparkles size={16} /></button>
       </div>
-      <div className="landing-phone-search"><Search size={15} /><span>Bar, bairro ou cidade</span></div>
-      <div className="landing-phone-filters"><span>Todos</span><span>Happy hour</span><span>Ao vivo</span></div>
+      <div className="landing-phone-search"><Search size={15} /><span>{t.preview.search}</span></div>
+      <div className="landing-phone-filters">
+        {t.preview.filters.map((filter) => <span key={filter}>{filter}</span>)}
+      </div>
       <button
         type="button"
         className="landing-phone-place"
@@ -189,10 +181,10 @@ function AppPreview() {
       >
         <LandingMedia image={bar?.image} alt="" />
         <div className="landing-phone-place-overlay">
-          <span><Flame size={13} /> Bombando agora</span>
+          <span><Flame size={13} /> {t.preview.openNow}</span>
           <strong>{bar?.name}</strong>
           <p>{bar?.neighborhood} · {bar?.distanceKm?.toFixed(1).replace(".", ",")} km</p>
-          <div><Star size={14} fill="currentColor" /> 4,8 <small>· 86 pessoas</small></div>
+          <div><BadgePercent size={14} /> {t.preview.highlight}</div>
         </div>
       </button>
       <div className="landing-phone-nav"><MapPin size={17} /><Search size={17} /><Flame size={17} /><Heart size={17} /><CircleUserRound size={17} /></div>
@@ -212,19 +204,19 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
           <img src={landingBackdrop} alt="" fetchPriority="high" />
         </picture>
         <div className="landing-hero-overlay" />
-        <nav className="landing-nav" aria-label="Navegação da página">
-          <a className="landing-brand" href="#inicio" aria-label="Bora Bar, início">
+        <nav className="landing-nav" aria-label={t.nav.ariaLabel}>
+          <a className="landing-brand" href="#inicio" aria-label={t.nav.brandAria}>
             <img src={logoIcon} alt="" />
-            <span>Bora Bar</span>
+            <span>{t.nav.brandName}</span>
           </a>
           <div className={isMenuOpen ? "landing-nav-links is-open" : "landing-nav-links"}>
-            <a href="#descobrir" onClick={() => setIsMenuOpen(false)}>Explorar</a>
-            <a href="#como-funciona" onClick={() => setIsMenuOpen(false)}>Como funciona</a>
-            <button type="button" onClick={onCreateAccount}>Para estabelecimentos</button>
+            <a href="#descobrir" onClick={() => setIsMenuOpen(false)}>{t.nav.explore}</a>
+            <a href="#como-funciona" onClick={() => setIsMenuOpen(false)}>{t.nav.howItWorks}</a>
+            <button type="button" onClick={onCreateAccount}>{t.nav.forBusiness}</button>
           </div>
           <div className="landing-nav-actions">
-            <button className="landing-nav-login" type="button" onClick={() => setIsLoginOpen(true)}>Entrar</button>
-            <button className="landing-nav-menu" type="button" onClick={() => setIsMenuOpen((open) => !open)} aria-label="Abrir menu">
+            <button className="landing-nav-login" type="button" onClick={() => setIsLoginOpen(true)}>{t.nav.login}</button>
+            <button className="landing-nav-menu" type="button" onClick={() => setIsMenuOpen((open) => !open)} aria-label={t.nav.openMenu}>
               <Menu size={20} aria-hidden="true" />
             </button>
           </div>
@@ -232,29 +224,29 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
 
         <div className="landing-hero-content">
           <div className="landing-hero-copy">
-            <p className="landing-eyebrow"><span /> A cidade está chamando</p>
-            <img className="landing-hero-logo" src={logoFull} alt="Bora Bar" />
-            <h1>Seu rolê<br /><em>começa aqui.</em></h1>
-            <p className="landing-hero-description">Descubra bares, restaurantes e lugares que combinam com você. Veja onde a galera está indo e escolha o próximo rolê sem perder tempo.</p>
+            <p className="landing-eyebrow"><span /> {t.hero.eyebrow}</p>
+            <img className="landing-hero-logo" src={logoFull} alt={t.nav.brandName} />
+            <h1><RevealWords text={t.hero.titulo} /><br /><em><RevealWords text={t.hero.destaque} start={2} /></em></h1>
+            <p className="landing-hero-description">{t.hero.description}</p>
             <div className="landing-hero-actions">
-              <button className="landing-cta landing-cta-primary" type="button" onClick={() => setIsLoginOpen(true)}>Bora? <ArrowUpRight size={19} aria-hidden="true" /></button>
-              <button className="landing-cta landing-cta-secondary" type="button" onClick={onCreateAccount}>Criar minha conta</button>
+              <button className="landing-cta landing-cta-primary" type="button" onClick={() => setIsLoginOpen(true)}>{t.hero.primaryButton} <ArrowUpRight size={19} aria-hidden="true" /></button>
+              <button className="landing-cta landing-cta-secondary" type="button" onClick={onCreateAccount}>{t.hero.secondaryButton}</button>
             </div>
           </div>
           <div className="landing-hero-signal">
             <div className="landing-live-dot" />
-            <span>Agora em Volta Redonda</span>
-            <strong>38 lugares abertos</strong>
+            <span>{t.hero.signalLabel}</span>
+            <RotatingText items={t.hero.signalTexts} />
           </div>
         </div>
-        <a className="landing-scroll-cue" href="#descobrir"><span>Conheça o Bora Bar</span><ArrowDownRight size={18} /></a>
+        <a className="landing-scroll-cue" href="#descobrir"><span>{t.hero.scrollCue}</span><ArrowDownRight size={18} /></a>
       </section>
 
       <section className="landing-discovery landing-section" id="descobrir">
         <div className="landing-section-heading">
-          <p className="landing-eyebrow">Descoberta sem enrolação</p>
-          <h2>Nunca mais fique meia hora<br /><em>decidindo onde ir.</em></h2>
-          <p>Do boteco da esquina ao rooftop que está cheio de energia, o Bora Bar deixa o clima da cidade visível antes de você sair de casa.</p>
+          <p className="landing-eyebrow">{t.discovery.eyebrow}</p>
+          <h2>{t.discovery.titulo}<br /><em>{t.discovery.destaque}</em></h2>
+          <p>{t.discovery.description}</p>
         </div>
         <div className="landing-discovery-layout">
           <AppPreview />
@@ -263,25 +255,27 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
               <article className="landing-place-row" key={bar.id}>
                 <LandingMedia image={bar.image} alt="" />
                 <div>
-                  <span className={index === 0 ? "landing-place-live" : "landing-place-tag"}>{index === 0 ? <><Flame size={13} /> Bombando agora</> : index === 1 ? "🍻 Happy hour" : "🎸 Música ao vivo"}</span>
+                  <span className={index === 0 ? "landing-place-live" : "landing-place-tag"}>{index === 0 ? <><Flame size={13} /> {t.discovery.placeTags[0]}</> : t.discovery.placeTags[index]}</span>
                   <h3>{bar.name}</h3>
                   <p><MapPin size={14} /> {bar.distanceKm.toFixed(1).replace(".", ",")} km · {bar.neighborhood}</p>
                 </div>
-                <div className="landing-place-meta"><span><UsersRound size={15} /> {index === 0 ? 86 : index === 1 ? 42 : 61}</span><strong>4,{8 - index}</strong></div>
+                <div className="landing-place-meta"><span><BadgePercent size={14} /> {t.discovery.placeHighlights[index]}</span></div>
               </article>
             ))}
-            <button className="landing-text-link" type="button" onClick={onExplore}>Explorar lugares perto de mim <ChevronRight size={17} /></button>
+            <button className="landing-text-link" type="button" onClick={onExplore}>{t.discovery.exploreLink} <ChevronRight size={17} /></button>
           </div>
         </div>
       </section>
 
       <section className="landing-types landing-section">
         <div className="landing-types-heading">
-          <p className="landing-eyebrow">Do seu jeito</p>
-          <h2>Qual é o rolê<br /><em>de hoje?</em></h2>
+          <p className="landing-eyebrow">{t.nightTypesHeading.eyebrow}</p>
+          <h2>{t.nightTypesHeading.titulo}<br /><em>{t.nightTypesHeading.destaque}</em></h2>
         </div>
         <div className="landing-types-grid">
-          {nightTypes.map(({ vibe, label, icon: Icon, image }, index) => (
+          {nightTypes.map(({ vibe, icon: Icon, image }, index) => {
+            const label = t.nightTypeLabels[vibe];
+            return (
             <button
               className={`landing-type-card type-${index + 1}`}
               type="button"
@@ -297,28 +291,32 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
               <strong>{label}</strong>
               <ArrowUpRight className="landing-type-arrow" size={19} aria-hidden="true" />
             </button>
-          ))}
+            );
+          })}
         </div>
       </section>
 
       <section className="landing-how landing-section" id="como-funciona">
-        <div className="landing-how-heading"><p className="landing-eyebrow">Sem complicação</p><h2>Descubra. Combine.<br /><em>Bora.</em></h2></div>
+        <div className="landing-how-heading"><p className="landing-eyebrow">{t.how.eyebrow}</p><h2>{t.how.titulo}<br /><em>{t.how.destaque}</em></h2></div>
         <div className="landing-steps">
-          <article><span>01</span><MapPin size={28} /><h3>Descubra</h3><p>Encontre lugares próximos que combinam com você.</p></article>
-          <article><span>02</span><Clock3 size={28} /><h3>Confira antes de sair</h3><p>Veja se está aberto, o cardápio, os preços e as promoções do dia.</p></article>
-          <article><span>03</span><UsersRound size={28} /><h3>Chama a galera</h3><p>Compartilhe o lugar e transforme o plano em rolê.</p></article>
+          {t.how.steps.map(({ title, description }, index) => {
+            const StepIcon = [MapPin, Clock3, UsersRound][index];
+            return (
+              <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><StepIcon size={28} /><h3>{title}</h3><p>{description}</p></article>
+            );
+          })}
         </div>
       </section>
 
       <section className="landing-final-cta">
         <picture className="landing-final-media" aria-hidden="true"><source media="(max-width: 640px)" srcSet={landingBackdropMobile} /><img src={landingBackdrop} alt="" loading="lazy" /></picture>
         <div className="landing-final-overlay" />
-        <div className="landing-final-copy"><p className="landing-eyebrow">A cidade está viva</p><h2>A noite já<br /><em>começou.</em></h2><p>Só falta você decidir onde.</p><button className="landing-cta landing-cta-primary" type="button" onClick={() => setIsLoginOpen(true)}>Bora? <ArrowUpRight size={19} /></button></div>
+        <div className="landing-final-copy"><p className="landing-eyebrow">{t.finalCta.eyebrow}</p><h2>{t.finalCta.titulo}<br /><em>{t.finalCta.destaque}</em></h2><p>{t.finalCta.description}</p><button className="landing-cta landing-cta-primary" type="button" onClick={() => setIsLoginOpen(true)}>{t.finalCta.button} <ArrowUpRight size={19} /></button></div>
       </section>
 
       <footer className="landing-footer">
-        <div className="landing-footer-brand"><img src={logoIcon} alt="" /><strong>Bora Bar</strong><p>Bora Bar — encontre seu próximo rolê.</p></div>
-        <div className="landing-footer-links"><a href="#descobrir">Explorar</a><button type="button" onClick={onCreateAccount}>Para estabelecimentos</button><a href="#como-funciona">Sobre</a><a href="#inicio">Termos</a><a href="#inicio">Privacidade</a></div>
+        <div className="landing-footer-brand"><img src={logoIcon} alt="" /><strong>{t.nav.brandName}</strong><p>{t.footer.tagline}</p></div>
+        <div className="landing-footer-links"><a href="#descobrir">{t.footer.explore}</a><button type="button" onClick={onCreateAccount}>{t.footer.forBusiness}</button><a href="#como-funciona">{t.footer.about}</a><a href="#inicio">{t.footer.terms}</a><a href="#inicio">{t.footer.privacy}</a></div>
         <div className="landing-footer-social"><a href="#inicio" aria-label="Instagram"><Instagram size={19} /></a><a href="#inicio" aria-label="TikTok"><Music2 size={19} /></a></div>
       </footer>
 

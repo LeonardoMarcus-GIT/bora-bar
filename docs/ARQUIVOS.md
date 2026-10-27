@@ -24,7 +24,7 @@ Supabase (tabelas + RLS)
 | Arquivo | O que é |
 | --- | --- |
 | `CLAUDE.md` | Instruções para o Claude trabalhar no projeto: stack, comandos, regras, problemas conhecidos. |
-| `package.json` | Nome `bora-bar`, versão 0.1.0, módulos ES. Scripts `dev`, `build`, `preview`, `serve:dist`. Dependências: React 19, Vite 7, `@supabase/supabase-js`, `lucide-react`, `ogl`, `qrcode`. |
+| `package.json` | Nome `bora-bar`, versão 0.1.0, módulos ES. Scripts `dev`, `build`, `preview`, `serve:dist`. Dependências: React 19, Vite 7, `@supabase/supabase-js`, `lucide-react`, `qrcode` (e `ogl`, hoje sem uso). |
 | `package-lock.json` | Versões travadas das dependências (gerado pelo npm). |
 | `index.html` | HTML base em pt-BR com `<div id="root">` e meta description. Carrega `src/main.jsx`. Não tem tags Open Graph (prévia de link). |
 | `vite.config.js` | Config do Vite com plugin React e `base: "/"` (caminhos absolutos — necessário para a página `/r/<id>` achar os arquivos). |
@@ -73,9 +73,9 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 
 | Arquivo | O que é |
 | --- | --- |
-| `src/main.jsx` | Ponto de entrada. Escolhe a tela pelo endereço: **`/r/<id>/qr`** → `QrCodePage` (sem efeito de luz); **`/r/<id>`** → `StandalonePage` (página avulsa, com o efeito de luz `SideRays`); qualquer outro → o app normal. Renderiza o efeito `SideRays` (luz amarela no canto) e o `App` dentro do `AuthProvider`. Importa `styles.css`. |
+| `src/main.jsx` | Ponto de entrada. Escolhe a tela pelo endereço: **`/r/<id>/qr`** → `QrCodePage`; **`/r/<id>`** → `StandalonePage` (página avulsa); qualquer outro → o app normal. Renderiza o `App` dentro do `AuthProvider`. O fundo é preto liso (sem efeito de luz). Importa `styles/index.css`. |
 | `src/App.jsx` | Componente raiz (≈780 linhas). Faz o **roteamento por hash** (`getRoute`), carrega os bares, calcula a distância de cada um até o usuário (GPS ou endereço do perfil verificado), limita a descoberta a **20 km**, monta as sugestões de busca (bar, bairro, cidade), aplica filtros (aberto, promoção, mais barato, mais próximo, favoritos), guarda favoritos no `localStorage` e decide qual tela mostrar. Tem um relógio interno (`now`, atualizado a cada minuto) que recalcula o aberto/fechado de cada bar com `getOpenStatus` e adiciona `openStatusDetail` ao bar. O card "Seu estabelecimento no Bora Bar" no fim da lista é um botão inteiro (ícone, texto e seta levam a `#for-business`). Rota `#clima/<id>` filtra a lista pelo clima (`barMatchesVibe`) e mostra a faixa "Mostrando lugares com clima de…" com "Ver todos". Na lista mostra três estados: carregando, erro com botão "Tentar de novo" (`barsLoadError` / `retryLoadBars`) e "Nenhum bar por aqui ainda". |
-| `src/styles.css` | Todo o CSS do app (≈2.800 linhas): landing, lista, detalhes, painel, formulários, navegação inferior, responsivo. |
+| `src/styles/index.css` | Lista, na ordem, os arquivos de CSS da pasta `src/styles/` (a ordem importa: um arquivo pode sobrescrever o anterior). Veja a seção `src/styles/` abaixo. |
 
 ## `src/context/`
 
@@ -88,6 +88,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | Arquivo | O que é |
 | --- | --- |
 | `src/hooks/useGeolocation.js` | Pede a localização ao navegador (alta precisão, timeout 20 s). Rejeita leituras com precisão pior que 1 km, guarda a última posição no `localStorage` por 30 min. Retorna `coordinates`, `status` (`idle`, `loading`, `granted`, `cached`, `denied`, `unavailable`), `hasLocation`, `errorMessage` e `requestLocation()`. |
+| `src/hooks/useFlip.js` | Faz os itens da lista deslizarem para o novo lugar quando o filtro ou a busca muda (técnica FLIP). Usado em `BarList`; cada card tem `data-flip-id`. |
 
 ## `src/services/` — acesso a dados
 
@@ -111,6 +112,7 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `src/utils/openingHours.js` | **Aberto/fechado automático** (com `isClosingSoon` nos últimos `CLOSING_SOON_MINUTES` = 30 min). `getOpenStatus(textoDoHorario, abertoManual, agora)` lê o horário em texto ("Seg a qui: 17h-00h \| Sex e sab: 17h-02h", "Ter a dom: 15h-01h", "Seg, Qua e Sex: 18h30-02h", "Todos os dias: 16h-01h", vários horários no mesmo dia com "e"), sempre no fuso de Brasília, entende fechamento depois da meia-noite e devolve `{ isOpen, isAutomatic, detail }` — `detail` é "Fecha às 02h", "Abre hoje às 18h", "Abre amanhã às 15h" ou "Abre seg às 11h". Se o texto não puder ser lido, usa o valor manual (`is_open`). Também exporta `parseOpeningHours`, `parseOpeningDays` e `formatClock`. |
 | `src/utils/vibes.js` | **Clima do lugar**: lista `VIBES` (Barzinho, Comer bem, Drinks, Música ao vivo, Festa, Date, Assistir jogo, Rooftop) e `barMatchesVibe(bar, id)` — vale o que o dono marcou em `bars.vibes`; "música ao vivo" e "assistir jogo" também são reconhecidos pelos próximos eventos (samba, show, jogo, telão...). |
 | `src/utils/geo.js` | `calculateDistanceKm` (fórmula de Haversine), `formatDistanceKm` ("850 m" / "1,9 km"), `isValidCoordinate`. |
+| `src/utils/viewTransition.js` | `transitionRoute`: a foto do card cresce até virar a capa da página do bar (e volta), com a View Transitions API do navegador. Sem suporte, ou com "reduzir movimento", a troca é direta. Usado em `App.jsx`. |
 
 ## `src/data/`
 
@@ -126,35 +128,75 @@ Detalhes de tabelas e regras em `docs/BANCO-DE-DADOS.md`.
 | `src/assets/bora-bar-icon.png` | Ícone da marca (121 KB). Usado no cabeçalho do app e no rodapé da landing. |
 | `src/assets/bora-bar-logo-full.png` | Logo completo (803 KB). Usado na landing. |
 | `src/assets/bora-bar-bg-test.png` | Fundo da landing no desktop (1,2 MB). |
-| `src/assets/bora-bar-bg-mobile.png` | Fundo da landing no celular (1,4 MB). Também referenciado em `styles.css`. |
+| `src/assets/bora-bar-bg-mobile.png` | Fundo da landing no celular (1,4 MB). Também referenciado em `styles/responsive.css`. |
 
-## `src/components/` — telas
+## `src/pages/` — telas inteiras (cada uma é uma página do app)
 
 | Arquivo | O que é |
 | --- | --- |
-| `LandingPage.jsx` | Página de entrada (sem hash). Topo compacto "Seu rolê começa aqui", prévia do app com bares de exemplo, **"Qual é o rolê de hoje?"** (cada card abre a lista filtrada pelo clima: `#clima/<id>`), "Como funciona", chamada final e rodapé; modal de login (botão Google ainda "em breve"). Mapa ilustrativo e "Experiências reais" foram removidos em 15/10/2026 (o CSS deles ficou em `LandingPage.css`, sem uso). |
-| `AuthPage.jsx` | Login, cadastro e "esqueci a senha" (`#login`). No cadastro coleta nome e endereço opcional, calcula coordenadas e salva nos metadados do usuário. Traduz erros do Supabase para português. |
+| `LandingPage.jsx` | Página de entrada (sem hash). Topo compacto "Seu rolê começa aqui", prévia do app com bares de exemplo, **"Qual é o rolê de hoje?"** (cada card abre a lista filtrada pelo clima: `#clima/<id>`), "Como funciona", chamada final e rodapé; modal de login (botão Google ainda "em breve"). Mapa ilustrativo e "Experiências reais" foram removidos em 15/10/2026 (o CSS deles ficou em `styles/landing.css`, sem uso). |
+| `AuthPage.jsx` | Login, cadastro e "esqueci a senha" (`#login`). No cadastro coleta nome e endereço opcional, calcula coordenadas e salva nos metadados do usuário. Os erros do Supabase são traduzidos em `texts/authErrors.js`. |
 | `PasswordResetPage.jsx` | Tela para definir nova senha ao voltar do link de recuperação enviado por e-mail. |
 | `ProfilePage.jsx` | Perfil do usuário (`#profile`): nome e endereço (para calcular distância sem GPS), sair da conta, e atalhos para a área do estabelecimento. |
 | `BusinessDashboard.jsx` | **Painel do dono** (`#business`, ≈1.470 linhas). Sem vínculo: formulário para pedir acesso a um bar (nome, telefone, CNPJ opcional, mensagem) e status dos pedidos. Com vínculo: seletor de bar e 5 abas — **Visão geral** (percentual do perfil completo, métricas de 30 dias, atalhos; "Ver minha página" abre `/r/<id>` e "QR Code para imprimir" abre `/r/<id>/qr` em nova aba), **Perfil público** (nome, foto por upload ou URL, endereço por CEP, editor de dias/horário com minutos, chave **"Aceito pedidos pelo WhatsApp"** (`takes_whatsapp_orders`), **clima do lugar** (botões, salva em `bars.vibes`), telefone, descrição, faixa de preço e o status aberto/fechado — automático pelo horário; a chave manual só aparece quando o horário não pode ser lido. O editor de horário edita só o primeiro trecho: horários com vários trechos ("Seg a qui… \| Sex e sab…") viram um só se o dono mexer), **Cardápio** (categorias e itens com preço e disponibilidade), **Promoções** e **Eventos** (com início, fim, preço e ativo). Cada aba salva com um botão. |
-| `ForBusinessPage.jsx` | Página de vendas para donos (`#for-business`): benefícios, "como entrar" em 3 passos e o **Programa Parceiro Fundador** (30 dias grátis, 10 primeiros bares de Volta Redonda, sem preço publicado). Os botões "Quero ser parceiro"/"Quero minha vaga" abrem o WhatsApp comercial (constante `SALES_WHATSAPP`, hoje 24 99219-6584) com mensagem pronta. No fim, atalho para quem já é parceiro entrar no painel. |
+| `ForBusinessPage.jsx` | Página de vendas para donos (`#for-business`): benefícios, "como entrar" em 3 passos e o **Programa Parceiro Fundador** (30 dias grátis, 10 primeiros bares de Volta Redonda, sem preço publicado). Os botões "Quero ser parceiro"/"Quero minha vaga" abrem o WhatsApp comercial (constante `SALES_WHATSAPP` em `src/texts/contact.js`, hoje 24 99219-6584) com mensagem pronta. No fim, atalho para quem já é parceiro entrar no painel. |
+| `StandalonePage.jsx` | **Página avulsa do estabelecimento (`/r/<id>`)** — o "site" do restaurante/bar para QR Code e link no Instagram. Carrega um estabelecimento com `fetchBarById` (aparece no guia ou não), calcula aberto/fechado (a cada minuto) e distância (GPS do visitante, se ele tocar em "Ver distância") e renderiza **a mesma `BarDetails` do app** com `isStandalone` — design idêntico ao dos outros bares. Estados próprios: carregando, erro com "Tentar de novo" e "Página não encontrada". |
+| `BarDetails.jsx` | Página do bar (`#bar/<id>`): foto, status, ações rápidas (WhatsApp, ligar, Google Maps, Waze — cada clique é registrado como métrica), sobre, endereço, horário, promoções, resumo, cardápio, próximos eventos e avaliações. Registra uma visualização por sessão. No topo: foto, nome, bairro e, logo abaixo, o selo de status (a faixa de preço fica só em "Sobre o lugar"). Mostra os atalhos do cardápio (`MenuNav`). Com `isStandalone` (página `/r/<id>`): sem "Voltar", "Favoritar" e avaliações; no botão de WhatsApp aparece uma dica discreta (visível também no celular): "Peça por aqui" se o estabelecimento aceita pedidos pelo WhatsApp (`takesWhatsappOrders`), senão "Tire suas dúvidas"; distância só com GPS do visitante (botão "Ver distância"). Sem telefone cadastrado, WhatsApp e Ligar aparecem desativados ("Em breve"). |
+| `QrCodePage.jsx` | **Cartão de QR Code para imprimir** (`/r/<id>/qr`): nome do estabelecimento, QR para `/r/<id>`, "Aponte a câmera…", botões Imprimir e Baixar imagem (PNG 1200 px). Sem marca Bora Bar; estilo próprio para impressão. Usa a biblioteca `qrcode`. |
 
-## `src/components/` — peças do app
+## `src/components/` — peças reutilizadas pelas telas
 
 | Arquivo | O que é |
 | --- | --- |
 | `AppHeader.jsx` | Cabeçalho da lista: logo, sino (sem função), campo de busca com sugestões (bar, bairro, cidade, com distância) e botão de localização. |
 | `FilterBar.jsx` | Quatro filtros: Aberto agora, Mais barato, Mais próximo, Com promoção. |
 | `BarList.jsx` | Grade de `BarCard`; mostra estado vazio próprio para favoritos ou busca sem resultado. |
-| `BarCard.jsx` | Card do bar: foto, aberto/fechado, faixa de preço, bairro, distância, "a partir de R$", promoção e botão de favoritar. |
-| `StandalonePage.jsx` | **Página avulsa do estabelecimento (`/r/<id>`)** — o "site" do restaurante/bar para QR Code e link no Instagram. Carrega um estabelecimento com `fetchBarById` (aparece no guia ou não), calcula aberto/fechado (a cada minuto) e distância (GPS do visitante, se ele tocar em "Ver distância") e renderiza **a mesma `BarDetails` do app** com `isStandalone` — design idêntico ao dos outros bares. Estados próprios: carregando, erro com "Tentar de novo" e "Página não encontrada". |
-| `BarDetails.jsx` | Página do bar (`#bar/<id>`): foto, status, ações rápidas (WhatsApp, ligar, Google Maps, Waze — cada clique é registrado como métrica), sobre, endereço, horário, promoções, resumo, cardápio, próximos eventos e avaliações. Registra uma visualização por sessão. No topo: foto, nome, bairro e, logo abaixo, o selo de status (a faixa de preço fica só em "Sobre o lugar"). Mostra os atalhos do cardápio (`MenuNav`). Com `isStandalone` (página `/r/<id>`): sem "Voltar", "Favoritar" e avaliações; no botão de WhatsApp aparece uma dica discreta (visível também no celular): "Peça por aqui" se o estabelecimento aceita pedidos pelo WhatsApp (`takesWhatsappOrders`), senão "Tire suas dúvidas"; distância só com GPS do visitante (botão "Ver distância"). Sem telefone cadastrado, WhatsApp e Ligar aparecem desativados ("Em breve"). |
+| `BarCard.jsx` | Card do bar no estilo da prévia da landing: foto grande com o texto por cima (selo aberto/fechado, nome, bairro · distância, faixa de preço e "a partir de R$", promoção) e botão de favoritar redondo. |
 | `MenuCategory.jsx` | Uma categoria do cardápio com itens, descrição (se houver) e preços; cada categoria tem id `menu-<nome>` para os atalhos; traduz as chaves antigas (`cervejas`, `drinks`, `porcoes`, `combos`). |
 | `Reviews.jsx` | Lista de avaliações com nota de 1 a 5, formulário para quem está logado e botão de apagar a própria avaliação. |
-| `StatusBadge.jsx` | Selo "Aberto"/"Fechado", com detalhe opcional ("· Fecha às 02h"). Fica **amarelo** nos últimos 30 min (`isClosingSoon`, "Fecha em 25 min"). |
+| `StatusBadge.jsx` | Selo "Aberto"/"Fechado", com detalhe opcional ("· Fecha às 02h"). Fica **pêssego** nos últimos 30 min (`isClosingSoon`, "Fecha em 25 min"). |
+| `TextEffects.jsx` | Efeitos de texto: `RevealWords` (palavra por palavra, usado no título da landing), `RotatingText` (frase que se alterna, no cartão do topo da landing) e `CountUp` (número que conta, no painel do dono). Todos respeitam "reduzir movimento". |
 | `MenuNav.jsx` | **Atalhos do cardápio**: um botão por categoria (aparece com 3+ categorias), grudado no topo enquanto o cardápio está na tela; toque desliza suave até a categoria; a categoria visível fica destacada. **Uma linha só**: no celular desliza pro lado com o dedo (pontas esmaecidas, sem barra de rolagem), e a fileira anda sozinha para mostrar a categoria atual. |
-| `QrCodePage.jsx` | **Cartão de QR Code para imprimir** (`/r/<id>/qr`): nome do estabelecimento, QR para `/r/<id>`, "Aponte a câmera…", botões Imprimir e Baixar imagem (PNG 1200 px). Sem marca Bora Bar; estilo próprio para impressão. Usa a biblioteca `qrcode`. |
 | `BottomNav.jsx` | Barra inferior: Início, Buscar, Promoções (ou Cardápio na página do bar), Favoritos, Perfil. |
 | `AddressFields.jsx` | Campos de endereço do perfil do usuário: CEP com busca automática, UF e cidade por listas do IBGE, bairro. |
 | `BarAddressFields.jsx` | Campos de endereço do estabelecimento no painel: CEP com busca, rua, número, complemento, bairro, cidade, estado. |
-| `SideRays.jsx` | Efeito visual de raios de luz em WebGL (biblioteca `ogl`) desenhado atrás do app. Para não piscar no celular: o fundo tem altura fixa (`100lvh`, a maior tela possível), o canvas só é redimensionado quando a largura muda ou a altura muda mais de 160 px, e redesenha na hora após redimensionar; no celular, sem `mix-blend-mode`. |
+
+## `src/styles/` — design (CSS)
+
+Um arquivo por área da interface. `index.css` importa todos, na ordem da tabela. Para mudar a aparência de uma tela, abra o arquivo dela; as cores e fontes ficam em `base.css` (`:root`).
+
+| Arquivo | O que tem |
+| --- | --- |
+| `index.css` | Fonte do Google e a lista de imports (ordem importa). |
+| `base.css` | **Identidade visual**: o acento do site inteiro é `--coral` (com `--coral-dark` e `--coral-soft`, o âmbar de preços e estrelas) e `--radius`. Troque aqui para mudar a cor em todas as telas (menos a landing, que tem as próprias cores em `landing.css`). O fundo do app é um cinza suave (--bg, #1b1b1b, igual à prévia da landing), com cards em --card e campos em branco translúcido; o preto fica só nos degradês sobre as fotos. Também tem fontes e reset. |
+| `header.css` | Cabeçalho enxuto, busca arredondada, sugestões e filtros (chips coral). |
+| `bar-card.css` | Lista e card de cada bar, selo aberto/fechado, promoções. |
+| `bar-details.css` | Página do bar: capa, ações rápidas, informações. |
+| `account.css` | Login, perfil, endereço e botões padrão (`primary-action`, `secondary-action`). |
+| `menu-events.css` | Cardápio, destaques e eventos. |
+| `for-business.css` | Página "Para estabelecimentos". |
+| `dashboard.css` | Painel do dono do bar. |
+| `reviews.css` | Avaliações e campos de formulário. |
+| `bottom-nav.css` | Menu fixo de baixo (celular). |
+| `responsive.css` | Ajustes de tela pequena (celular) e movimento reduzido — vários trechos de outras telas ficam aqui. |
+| `extras.css` | Atalhos do cardápio, filtro por clima e ajustes finais. |
+| `motion.css` | **Animações**: entrada das telas, cards da lista em sequência, resposta ao toque (botões, filtros, menu), pulo do coração e sugestões da busca. Tempos e curva em `base.css` (`--dur-fast`, `--dur-base`, `--ease-out`). Respeita "reduzir movimento". |
+| `landing.css` | Página inicial; carregada por `pages/LandingPage.jsx`. |
+
+## `src/texts/` — textos (para editar sem mexer na tela)
+
+Todo texto que o usuário vê fica aqui; as telas só importam e mostram. Para mudar uma frase, procure-a no arquivo da tela correspondente. Títulos com destaque vêm em duas partes (`titulo` e `destaque`).
+
+| Arquivo | Tela / componente | O que tem |
+| --- | --- | --- |
+| `contact.js` | `ForBusinessPage` | WhatsApp comercial do Bora Bar, mensagem pronta e dados do Programa Parceiro Fundador (vagas, cidade). |
+| `forBusiness.js` | `ForBusinessPage` | Benefícios, vantagens do fundador e passos "Como entrar". |
+| `landing.js` | `LandingPage` | Menu, topo, descoberta, "Qual é o rolê de hoje?", "Como funciona", chamada final, rodapé e modal de login. |
+| `account.js` | `AuthPage`, `PasswordResetPage`, `ProfilePage` | Login/cadastro, nova senha e perfil. |
+| `authErrors.js` | login, cadastro, senha | Mensagens de erro (Supabase → português). |
+| `app.js` | `App`, `AppHeader`, `FilterBar`, `BarList`, `BarCard`, `BottomNav`, `StatusBadge` | Tela inicial do app, busca, filtros, cards, menu de baixo, selo aberto/fechado. |
+| `bar.js` | `BarDetails`, `Reviews` | Página do bar e avaliações. |
+| `dashboard.js` | `BusinessDashboard` | Painel do dono: abas, pedido de acesso, perfil, cardápio, promoções/eventos, visão geral. |
+| `misc.js` | `QrCodePage`, `StandalonePage`, `AddressFields`, `BarAddressFields`, `MenuNav` | Textos menores. |
+
+Ficaram fora de `texts/` de propósito: os rótulos dos dias ("Seg", "Todos os dias") e do horário em `BusinessDashboard.jsx`, porque são gravados no banco e lidos por `utils/openingHours.js`; os nomes dos climas (`utils/vibes.js`) e das categorias do cardápio (`MenuCategory.jsx`), que também são dados; e os bares de exemplo (`data/mockBars.js`). Mensagens de `console.warn` seguem no código.

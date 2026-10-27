@@ -3,6 +3,7 @@ import { Bell, LocateFixed, MapPin, MapPinned, Navigation, Search, Store } from 
 import logoSrc from "../assets/bora-bar-icon.png";
 import { normalizeText } from "../utils/format.js";
 import { formatDistanceKm } from "../utils/geo.js";
+import { header as t } from "../texts/app.js";
 
 export default function AppHeader({
   hasLocation,
@@ -20,12 +21,12 @@ export default function AppHeader({
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const isLoadingLocation = locationStatus === "loading";
   const locationLabel = isLoadingLocation
-    ? "Buscando localização"
+    ? t.locationLoading
     : hasLocation
-      ? "Atualizar localização"
+      ? t.locationRefresh
       : isUsingProfileLocation
-        ? "Usar GPS em vez do endereço salvo"
-        : "Usar minha localização";
+        ? t.locationUseGps
+        : t.locationUse;
   const normalizedSearch = normalizeText(searchTerm.trim());
   const visibleSuggestions = useMemo(() => {
     const matches = normalizedSearch
@@ -50,19 +51,19 @@ export default function AppHeader({
     <header className="app-header">
       <div className="app-topbar">
         <div className="brand-lockup">
-          <span className="brand-logo-slot" aria-label="Logo Bora Bar">
-            <img src={logoSrc} alt="Bora Bar" />
+          <span className="brand-logo-slot" aria-label={t.logoAria}>
+            <img src={logoSrc} alt={t.brandName} />
           </span>
           <div className="brand-copy">
-            <h1>Bora Bar</h1>
-            <p className="brand-kicker">Escolha o bar antes de sair</p>
+            <h1>{t.brandName}</h1>
+            <p className="brand-kicker">{t.kicker}</p>
           </div>
         </div>
         <button
           className="icon-action"
           type="button"
-          aria-label="Notificacoes"
-          title="Notificacoes"
+          aria-label={t.notifications}
+          title={t.notifications}
         >
           <Bell size={19} aria-hidden="true" />
         </button>
@@ -79,8 +80,8 @@ export default function AppHeader({
           }}
           onFocus={() => setIsSuggestionsOpen(true)}
           onBlur={() => window.setTimeout(() => setIsSuggestionsOpen(false), 120)}
-          placeholder="Bar, bairro ou cidade"
-          aria-label="Buscar por nome do bar, cidade ou bairro"
+          placeholder={t.searchPlaceholder}
+          aria-label={t.searchAria}
           aria-expanded={shouldShowSuggestions}
           aria-controls="search-suggestions"
           autoComplete="off"
@@ -134,7 +135,7 @@ export default function AppHeader({
       <div className="location-summary" aria-live="polite">
         <MapPin size={18} aria-hidden="true" />
         <span>
-          {isLoading ? "Carregando bares" : summaryLabel ?? `${resultCount} bares encontrados`}
+          {isLoading ? t.loadingBars : summaryLabel ?? t.barsFound(resultCount)}
         </span>
       </div>
     </header>

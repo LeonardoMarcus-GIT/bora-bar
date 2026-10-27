@@ -1,5 +1,6 @@
 import { Building2, Hash, LocateFixed, MapPin, Navigation } from "lucide-react";
 import { useMemo, useState } from "react";
+import { barAddress as t } from "../texts/misc.js";
 import {
   fetchAddressByCep,
   formatCep,
@@ -48,13 +49,9 @@ export default function BarAddressFields({ address, onChange }) {
           locationUpdatedAt: ""
         })
       );
-      setFeedback(
-        "Endereço encontrado. Confira e ajuste número ou qualquer outro campo."
-      );
+      setFeedback(t.found);
     } catch {
-      setFeedback(
-        "Não encontramos esse CEP. Preencha os campos manualmente."
-      );
+      setFeedback(t.cepNotFound);
     } finally {
       setIsLoadingCep(false);
     }
@@ -71,15 +68,12 @@ export default function BarAddressFields({ address, onChange }) {
 
   return (
     <fieldset className="bar-address-fields">
-      <legend>Endereço do estabelecimento</legend>
-      <p>
-        O CEP preenche os dados automaticamente, mas todos os campos podem ser
-        corrigidos.
-      </p>
+      <legend>{t.legend}</legend>
+      <p>{t.intro}</p>
 
       <div className="profile-grid">
         <label>
-          <span>CEP</span>
+          <span>{t.cep}</span>
           <div className="field-with-icon">
             <LocateFixed size={18} aria-hidden="true" />
             <input
@@ -93,14 +87,14 @@ export default function BarAddressFields({ address, onChange }) {
         </label>
 
         <label>
-          <span>Rua ou avenida</span>
+          <span>{t.street}</span>
           <div className="field-with-icon">
             <Navigation size={18} aria-hidden="true" />
             <input
               autoComplete="address-line1"
               value={normalizedAddress.street}
               onChange={(event) => updateAddress({ street: event.target.value })}
-              placeholder="Rua 33"
+              placeholder={t.streetPlaceholder}
             />
           </div>
         </label>
@@ -108,7 +102,7 @@ export default function BarAddressFields({ address, onChange }) {
 
       <div className="bar-address-number-grid">
         <label>
-          <span>Número</span>
+          <span>{t.number}</span>
           <div className="field-with-icon">
             <Hash size={18} aria-hidden="true" />
             <input
@@ -116,13 +110,13 @@ export default function BarAddressFields({ address, onChange }) {
               onChange={(event) =>
                 updateAddress({ addressNumber: event.target.value })
               }
-              placeholder="77"
+              placeholder={t.numberPlaceholder}
             />
           </div>
         </label>
 
         <label>
-          <span>Complemento</span>
+          <span>{t.complement}</span>
           <div className="field-with-icon">
             <Building2 size={18} aria-hidden="true" />
             <input
@@ -131,7 +125,7 @@ export default function BarAddressFields({ address, onChange }) {
               onChange={(event) =>
                 updateAddress({ addressComplement: event.target.value })
               }
-              placeholder="Loja 2, fundos..."
+              placeholder={t.complementPlaceholder}
             />
           </div>
         </label>
@@ -139,7 +133,7 @@ export default function BarAddressFields({ address, onChange }) {
 
       <div className="profile-grid">
         <label>
-          <span>Bairro</span>
+          <span>{t.neighborhood}</span>
           <div className="field-with-icon">
             <MapPin size={18} aria-hidden="true" />
             <input
@@ -148,20 +142,20 @@ export default function BarAddressFields({ address, onChange }) {
               onChange={(event) =>
                 updateAddress({ neighborhood: event.target.value })
               }
-              placeholder="Vila Santa Cecília"
+              placeholder={t.neighborhoodPlaceholder}
             />
           </div>
         </label>
 
         <label>
-          <span>Cidade</span>
+          <span>{t.city}</span>
           <div className="field-with-icon">
             <MapPin size={18} aria-hidden="true" />
             <input
               autoComplete="address-level2"
               value={normalizedAddress.city}
               onChange={(event) => updateAddress({ city: event.target.value })}
-              placeholder="Volta Redonda"
+              placeholder={t.cityPlaceholder}
             />
           </div>
         </label>
@@ -169,20 +163,20 @@ export default function BarAddressFields({ address, onChange }) {
 
       <div className="bar-address-state-grid">
         <label>
-          <span>Estado</span>
+          <span>{t.state}</span>
           <div className="field-with-icon">
             <MapPin size={18} aria-hidden="true" />
             <input
               autoComplete="address-level1"
               value={normalizedAddress.state}
               onChange={(event) => updateAddress({ state: event.target.value })}
-              placeholder="Rio de Janeiro"
+              placeholder={t.statePlaceholder}
             />
           </div>
         </label>
 
         <label>
-          <span>UF</span>
+          <span>{t.uf}</span>
           <div className="field-with-icon">
             <input
               maxLength={2}
@@ -192,20 +186,20 @@ export default function BarAddressFields({ address, onChange }) {
                   stateCode: event.target.value.toUpperCase()
                 })
               }
-              placeholder="RJ"
+              placeholder={t.ufPlaceholder}
             />
           </div>
         </label>
       </div>
 
-      {isLoadingCep && <p className="form-hint">Buscando endereço...</p>}
+      {isLoadingCep && <p className="form-hint">{t.searching}</p>}
       {feedback && <p className="bar-address-feedback">{feedback}</p>}
 
       <div className="bar-address-preview">
         <MapPin size={18} aria-hidden="true" />
         <span>
-          <strong>Como aparecera no app</strong>
-          <small>{addressPreview || "Preencha o endereço acima."}</small>
+          <strong>{t.previewTitle}</strong>
+          <small>{addressPreview || t.previewEmpty}</small>
         </span>
       </div>
     </fieldset>

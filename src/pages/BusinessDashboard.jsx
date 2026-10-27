@@ -21,13 +21,15 @@ import {
   UtensilsCrossed
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import BarAddressFields from "./BarAddressFields.jsx";
+import BarAddressFields from "../components/BarAddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
 import { fetchBarMetrics } from "../services/analyticsService.js";
 import { uploadBusinessCoverImage } from "../services/businessImageService.js";
 import { getOpenStatus, parseOpeningDays } from "../utils/openingHours.js";
 import { VIBES } from "../utils/vibes.js";
+import { CountUp } from "../components/TextEffects.jsx";
+import * as t from "../texts/dashboard.js";
 import {
   createBarClaim,
   fetchBusinessAccess,
@@ -39,11 +41,11 @@ import {
 } from "../services/businessService.js";
 
 const tabs = [
-  { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
-  { id: "overview", label: "Perfil público", icon: Store },
-  { id: "menu", label: "Cardápio", icon: UtensilsCrossed },
-  { id: "promotions", label: "Promoções", icon: Tag },
-  { id: "events", label: "Eventos", icon: CalendarDays }
+  { id: "dashboard", label: t.tabs.dashboard, icon: LayoutDashboard },
+  { id: "overview", label: t.tabs.overview, icon: Store },
+  { id: "menu", label: t.tabs.menu, icon: UtensilsCrossed },
+  { id: "promotions", label: t.tabs.promotions, icon: Tag },
+  { id: "events", label: t.tabs.events, icon: CalendarDays }
 ];
 
 function createTemporaryId() {
@@ -137,15 +139,7 @@ function normalizeTimedItems(items) {
 }
 
 function getClaimStatusLabel(status) {
-  if (status === "approved") {
-    return "Aprovado";
-  }
-
-  if (status === "rejected") {
-    return "Não aprovado";
-  }
-
-  return "Em análise";
+  return t.claimStatus[status] ?? t.claimStatus.pending;
 }
 
 const WEEK_DAYS = [
@@ -362,7 +356,7 @@ export default function BusinessDashboard({
       })
       .catch(() => {
         if (isMounted) {
-          setFeedback("Não foi possível carregar os dados do estabelecimento.");
+          setFeedback(t.messages.loadFailed);
         }
       })
       .finally(() => {
@@ -401,7 +395,7 @@ export default function BusinessDashboard({
     event.preventDefault();
 
     if (!claim.barId || !claim.contactName.trim() || !claim.contactPhone.trim()) {
-      setFeedback("Selecione o bar e preencha seu nome e telefone.");
+      setFeedback(t.messages.claimMissing);
       return;
     }
 
@@ -426,13 +420,13 @@ export default function BusinessDashboard({
         businessDocument: "",
         message: ""
       }));
-      setFeedback("Solicitação enviada. Vamos verificar o vínculo com o bar.");
+      setFeedback(t.messages.claimSent);
     } catch (error) {
       const message = `${error?.message ?? ""} ${error?.code ?? ""}`.toLowerCase();
       setFeedback(
         message.includes("duplicate")
-          ? "Já existe uma solicitação em análise para esse bar."
-          : "Não foi possível enviar a solicitação agora."
+          ? t.messages.claimDuplicate
+          : t.messages.claimFailed
       );
     } finally {
       setIsSaving(false);
@@ -460,14 +454,14 @@ export default function BusinessDashboard({
     try {
       const imageUrl = await uploadBusinessCoverImage(selectedBarId, file);
       updateBar({ image: imageUrl });
-      setFeedback("Foto pronta. Salve o perfil público para publicar a alteração.");
+      setFeedback(t.messages.coverReady);
     } catch (error) {
       if (error?.message === "INVALID_IMAGE_TYPE") {
-        setFeedback("Escolha uma imagem JPG, PNG ou WebP.");
+        setFeedback(t.messages.invalidImageType);
       } else if (error?.message === "IMAGE_TOO_LARGE") {
-        setFeedback("A imagem deve ter no máximo 8 MB.");
+        setFeedback(t.messages.imageTooLarge);
       } else {
-        setFeedback("Não foi possível enviar a imagem agora. Tente novamente.");
+        setFeedback(t.messages.imageFailed);
       }
     } finally {
       setIsUploadingImage(false);
@@ -557,7 +551,7 @@ export default function BusinessDashboard({
     setFeedback("");
 
     try {
-      let successMessage = "Alteracoes salvas e publicadas.";
+      let successMessage = t.messages.saved;
 
       if (activeTab === "overview") {
         let barToSave = managedData.bar;
@@ -577,8 +571,7 @@ export default function BusinessDashboard({
             };
           }
         } catch {
-          successMessage =
-            "Endereço salvo. Não foi possível atualizar a distância agora.";
+          successMessage = t.messages.savedAddressOnly;
         }
 
         const nextBar = await updateManagedBar(selectedBarId, barToSave);
@@ -614,7 +607,7 @@ export default function BusinessDashboard({
       setFeedback(successMessage);
       onDataChanged?.();
     } catch {
-      setFeedback("Não foi possível salvar agora. Verifique os campos e tente novamente.");
+      setFeedback(t.messages.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -627,8 +620,8 @@ export default function BusinessDashboard({
     return (
       <main className="account-page business-page">
         <section className="empty-state">
-          <h2>Carregando área do estabelecimento</h2>
-          <p>Estamos verificando seus acessos.</p>
+          <h2>{t.states.loadingTitle}</h2>
+          <p>{t.states.loadingCopy}</p>
         </section>
       </main>
     );
@@ -644,20 +637,17 @@ export default function BusinessDashboard({
         <section className="business-panel">
           <button className="back-button" type="button" onClick={onBack}>
             <ArrowLeft size={18} aria-hidden="true" />
-            Voltar
+            {t.common.back}
           </button>
-          <p className="section-kicker">Área do estabelecimento</p>
-          <h1>Não foi possível abrir esta área</h1>
-          <p className="business-muted">
-            Sua conta está conectada, mas a consulta do painel falhou. Tente
-            novamente para renovar a conexão.
-          </p>
+          <p className="section-kicker">{t.states.kicker}</p>
+          <h1>{t.states.errorTitle}</h1>
+          <p className="business-muted">{t.states.errorCopy}</p>
           <button
             className="primary-action"
             type="button"
             onClick={() => setReloadKey((currentKey) => currentKey + 1)}
           >
-            Tentar novamente
+            {t.states.retry}
           </button>
         </section>
       </main>
@@ -670,7 +660,7 @@ export default function BusinessDashboard({
         <section className="business-panel business-claim-panel">
           <button className="back-button" type="button" onClick={onBack}>
             <ArrowLeft size={18} aria-hidden="true" />
-            Voltar
+            {t.common.back}
           </button>
 
           <div className="business-heading">
@@ -678,12 +668,9 @@ export default function BusinessDashboard({
               <Store size={24} aria-hidden="true" />
             </span>
             <div>
-              <p className="section-kicker">Para estabelecimentos</p>
-              <h1>Administre seu bar no Bora Bar</h1>
-              <p>
-                Solicite o acesso ao estabelecimento. Depois da verificação,
-                você poderá manter cardápio, preços, promoções e eventos.
-              </p>
+              <p className="section-kicker">{t.claim.kicker}</p>
+              <h1>{t.claim.title}</h1>
+              <p>{t.claim.copy}</p>
             </div>
           </div>
 
@@ -692,7 +679,7 @@ export default function BusinessDashboard({
               {access.claims.map((item) => (
                 <article className="claim-status" key={item.id}>
                   <div>
-                    <strong>{item.bar?.name ?? "Estabelecimento"}</strong>
+                    <strong>{item.bar?.name ?? t.common.establishment}</strong>
                     <span>{getClaimStatusLabel(item.status)}</span>
                   </div>
                   {item.reviewNotes && <p>{item.reviewNotes}</p>}
@@ -704,7 +691,7 @@ export default function BusinessDashboard({
           {availableBars.length > 0 ? (
             <form className="business-form" onSubmit={handleClaimSubmit}>
               <label>
-                <span>Qual estabelecimento e seu?</span>
+                <span>{t.claim.whichBar}</span>
                 <select
                   value={claim.barId}
                   onChange={(event) =>
@@ -715,7 +702,7 @@ export default function BusinessDashboard({
                   }
                   required
                 >
-                  <option value="">Selecione um bar</option>
+                  <option value="">{t.claim.selectBar}</option>
                   {availableBars.map((bar) => (
                     <option key={bar.id} value={bar.id}>
                       {bar.name} - {bar.neighborhood}
@@ -726,7 +713,7 @@ export default function BusinessDashboard({
 
               <div className="profile-grid">
                 <label>
-                  <span>Nome do responsável</span>
+                  <span>{t.claim.responsibleName}</span>
                   <input
                     value={claim.contactName}
                     onChange={(event) =>
@@ -739,7 +726,7 @@ export default function BusinessDashboard({
                   />
                 </label>
                 <label>
-                  <span>Telefone ou WhatsApp</span>
+                  <span>{t.common.phoneOrWhatsapp}</span>
                   <input
                     inputMode="tel"
                     value={claim.contactPhone}
@@ -755,7 +742,7 @@ export default function BusinessDashboard({
               </div>
 
               <label>
-                <span>CNPJ ou documento do estabelecimento (opcional)</span>
+                <span>{t.claim.document}</span>
                 <input
                   value={claim.businessDocument}
                   onChange={(event) =>
@@ -768,7 +755,7 @@ export default function BusinessDashboard({
               </label>
 
               <label>
-                <span>Como podemos confirmar seu vínculo?</span>
+                <span>{t.claim.howConfirm}</span>
                 <textarea
                   value={claim.message}
                   onChange={(event) =>
@@ -777,7 +764,7 @@ export default function BusinessDashboard({
                       message: event.target.value
                     }))
                   }
-                  placeholder="Ex: sou o proprietario e posso confirmar pelo telefone cadastrado."
+                  placeholder={t.claim.messagePlaceholder}
                   rows={4}
                 />
               </label>
@@ -788,13 +775,11 @@ export default function BusinessDashboard({
                 disabled={isSaving}
               >
                 <BadgeCheck size={18} aria-hidden="true" />
-                {isSaving ? "Enviando..." : "Solicitar acesso"}
+                {isSaving ? t.claim.sending : t.claim.submit}
               </button>
             </form>
           ) : (
-            <p className="business-muted">
-              Não há outro estabelecimento disponível para uma nova solicitação.
-            </p>
+            <p className="business-muted">{t.claim.noOtherBar}</p>
           )}
 
           {feedback && <p className="form-feedback">{feedback}</p>}
@@ -809,12 +794,12 @@ export default function BusinessDashboard({
         <div className="business-toolbar">
           <button className="back-button" type="button" onClick={onBack}>
             <ArrowLeft size={18} aria-hidden="true" />
-            Voltar
+            {t.common.back}
           </button>
 
           {access.memberships.length > 1 && (
             <select
-              aria-label="Selecionar estabelecimento"
+              aria-label={t.header.selectEstablishment}
               value={selectedBarId}
               onChange={(event) => setSelectedBarId(event.target.value)}
             >
@@ -832,11 +817,9 @@ export default function BusinessDashboard({
             <div className="business-heading">
               <img src={managedData.bar.image} alt="" />
               <div>
-                <p className="section-kicker">Painel do estabelecimento</p>
+                <p className="section-kicker">{t.header.kicker}</p>
                 <h1>{managedData.bar.name}</h1>
-                <p>
-                  Edite as informações que aparecem para os clientes no Bora Bar.
-                </p>
+                <p>{t.header.copy}</p>
               </div>
             </div>
 
@@ -881,12 +864,12 @@ export default function BusinessDashboard({
               <div className="business-editor">
                 <div className="profile-grid">
                   <BusinessField
-                    label="Nome do estabelecimento"
+                    label={t.profile.name}
                     value={managedData.bar.name}
                     onChange={(value) => updateBar({ name: value })}
                   />
                   <BusinessField
-                    label="Telefone ou WhatsApp"
+                    label={t.common.phoneOrWhatsapp}
                     icon={Phone}
                     value={managedData.bar.phone}
                     onChange={(value) => updateBar({ phone: value })}
@@ -894,7 +877,7 @@ export default function BusinessDashboard({
                 </div>
 
                 <BusinessField
-                  label="Descrição"
+                  label={t.profile.description}
                   multiline
                   value={managedData.bar.description}
                   onChange={(value) => updateBar({ description: value })}
@@ -913,11 +896,11 @@ export default function BusinessDashboard({
                 {managedData.bar.whatsappOrdersSupported && (
                   <label className="business-switch-row">
                     <span>
-                      Aceito pedidos pelo WhatsApp
+                      {t.profile.acceptOrders}
                       <small>
                         {managedData.bar.takesWhatsappOrders
-                          ? "O botão de WhatsApp mostra “Peça por aqui”. Os pedidos chegam no seu WhatsApp."
-                          : "O botão de WhatsApp mostra “Tire suas dúvidas”."}
+                          ? t.profile.ordersOn
+                          : t.profile.ordersOff}
                       </small>
                     </span>
                     <input
@@ -932,10 +915,8 @@ export default function BusinessDashboard({
 
                 {managedData.bar.vibesSupported && (
                   <div className="vibes-editor">
-                    <span>
-                      Clima do lugar: em quais buscas da página inicial ele aparece
-                    </span>
-                    <div className="vibes-editor-options" role="group" aria-label="Clima do lugar">
+                    <span>{t.profile.vibesIntro}</span>
+                    <div className="vibes-editor-options" role="group" aria-label={t.profile.vibesAria}>
                       {VIBES.map((vibe) => {
                         const isActive = managedData.bar.vibes.includes(vibe.id);
 
@@ -970,36 +951,33 @@ export default function BusinessDashboard({
 
                 <div className="profile-grid">
                   <label>
-                    <span>Faixa de preco</span>
+                    <span>{t.profile.priceLevel}</span>
                     <select
                       value={managedData.bar.priceLevel}
                       onChange={(event) =>
                         updateBar({ priceLevel: event.target.value })
                       }
                     >
-                      <option value="$">$ - Econômico</option>
-                      <option value="$$">$$ - Moderado</option>
-                      <option value="$$$">$$$ - Premium</option>
+                      <option value="$">{t.profile.priceLow}</option>
+                      <option value="$$">{t.profile.priceMid}</option>
+                      <option value="$$$">{t.profile.priceHigh}</option>
                     </select>
                   </label>
 
                   {openStatus.isAutomatic ? (
                     <div className="business-switch-row business-auto-status">
                       <span>
-                        {openStatus.isOpen ? "Aberto agora" : "Fechado agora"}
+                        {openStatus.isOpen ? t.profile.openNow : t.profile.closedNow}
                         <small>
-                          {openStatus.detail}. Muda sozinho pelo horário acima.
+                          {openStatus.detail}{t.profile.autoNote}
                         </small>
                       </span>
                     </div>
                   ) : (
                     <label className="business-switch-row">
                       <span>
-                        Aberto agora
-                        <small>
-                          Não conseguimos ler o horário. Ajuste os dias e horas
-                          acima para o status mudar sozinho.
-                        </small>
+                        {t.profile.openNow}
+                        <small>{t.profile.unreadableHours}</small>
                       </span>
                       <input
                         type="checkbox"
@@ -1020,7 +998,7 @@ export default function BusinessDashboard({
                   <section className="business-list-section" key={category.id}>
                     <div className="business-section-heading">
                       <input
-                        aria-label="Nome da categoria"
+                        aria-label={t.menu.categoryName}
                         value={category.name}
                         onChange={(event) =>
                           updateCategory(category.id, {
@@ -1031,7 +1009,7 @@ export default function BusinessDashboard({
                               .replace(/\s+/g, "-")
                           })
                         }
-                        placeholder="Ex: Cervejas"
+                        placeholder={t.menu.categoryPlaceholder}
                       />
                       <button
                         className="icon-delete"
@@ -1044,7 +1022,7 @@ export default function BusinessDashboard({
                             )
                           }))
                         }
-                        aria-label={`Remover categoria ${category.name}`}
+                        aria-label={t.menu.removeCategory(category.name)}
                       >
                         <Trash2 size={17} aria-hidden="true" />
                       </button>
@@ -1055,14 +1033,14 @@ export default function BusinessDashboard({
                         <article className="business-item-row" key={item.id}>
                           <div className="menu-item-main">
                             <input
-                              aria-label="Nome do item"
+                              aria-label={t.menu.itemName}
                               value={item.name}
                               onChange={(event) =>
                                 updateMenuItem(category.id, item.id, {
                                   name: event.target.value
                                 })
                               }
-                              placeholder="Nome do item"
+                              placeholder={t.menu.itemName}
                             />
                             <button
                               className="icon-delete"
@@ -1070,7 +1048,7 @@ export default function BusinessDashboard({
                               onClick={() =>
                                 removeMenuItem(category.id, item.id)
                               }
-                              aria-label={`Remover ${item.name}`}
+                              aria-label={t.menu.remove(item.name)}
                             >
                               <Trash2 size={17} aria-hidden="true" />
                             </button>
@@ -1078,20 +1056,20 @@ export default function BusinessDashboard({
 
                           <div className="menu-item-details">
                             <input
-                              aria-label="Descrição do item"
+                              aria-label={t.menu.itemDescription}
                               value={item.description}
                               onChange={(event) =>
                                 updateMenuItem(category.id, item.id, {
                                   description: event.target.value
                                 })
                               }
-                              placeholder="Descrição opcional"
+                              placeholder={t.common.optionalDescription}
                             />
                             <label className="menu-price-field">
-                              <span className="sr-only">Preco do item</span>
+                              <span className="sr-only">{t.menu.price}</span>
                               <b aria-hidden="true">R$</b>
                               <input
-                                aria-label="Preco do item"
+                                aria-label={t.menu.price}
                                 type="number"
                                 min="0"
                                 step="0.01"
@@ -1105,10 +1083,10 @@ export default function BusinessDashboard({
                               />
                             </label>
                             <label className="menu-availability-switch">
-                              <span>Disponível</span>
+                              <span>{t.menu.available}</span>
                               <input
                                 type="checkbox"
-                                aria-label="Item disponível"
+                                aria-label={t.menu.itemAvailable}
                                 checked={item.isAvailable}
                                 onChange={(event) =>
                                   updateMenuItem(category.id, item.id, {
@@ -1128,7 +1106,7 @@ export default function BusinessDashboard({
                       onClick={() => addMenuItem(category.id)}
                     >
                       <Plus size={17} aria-hidden="true" />
-                      Adicionar item
+                      {t.menu.addItem}
                     </button>
                   </section>
                 ))}
@@ -1144,7 +1122,7 @@ export default function BusinessDashboard({
                   }
                 >
                   <Plus size={17} aria-hidden="true" />
-                  Nova categoria
+                  {t.menu.newCategory}
                 </button>
               </div>
             )}
@@ -1197,7 +1175,7 @@ export default function BusinessDashboard({
                   disabled={isSaving}
                 >
                   <Save size={18} aria-hidden="true" />
-                  {isSaving ? "Salvando..." : `Salvar ${tabs.find((tab) => tab.id === activeTab)?.label}`}
+                  {isSaving ? t.save.saving : t.save.save(tabs.find((tab) => tab.id === activeTab)?.label)}
                 </button>
                 {feedback && <p className="form-feedback">{feedback}</p>}
               </div>
@@ -1218,53 +1196,57 @@ function BusinessOverview({
   onPreview
 }) {
   const checks = [
-    { label: "Foto e descrição", done: Boolean(data.bar.image && data.bar.description) },
-    { label: "Endereço e contato", done: Boolean(data.bar.address && data.bar.phone) },
-    { label: "Horário publicado", done: Boolean(data.bar.hours) },
+    { label: t.overview.checks.photo, done: Boolean(data.bar.image && data.bar.description) },
+    { label: t.overview.checks.contact, done: Boolean(data.bar.address && data.bar.phone) },
+    { label: t.overview.checks.hours, done: Boolean(data.bar.hours) },
     {
-      label: "Cardápio com itens",
+      label: t.overview.checks.menu,
       done: data.categories.some((category) => category.items.length > 0)
     },
     {
-      label: "Promoção ou evento ativo",
+      label: t.overview.checks.promo,
       done: data.promotions.some((item) => item.isActive) ||
         data.events.some((item) => item.isActive)
     }
   ];
   const completed = checks.filter((item) => item.done).length;
   const completion = Math.round((completed / checks.length) * 100);
+  // A barra começa vazia e enche (a transição está em motion.css).
+  const [shownCompletion, setShownCompletion] = useState(0);
+  useEffect(() => {
+    const frameId = requestAnimationFrame(() => setShownCompletion(completion));
+    return () => cancelAnimationFrame(frameId);
+  }, [completion]);
   const totals = metrics.totals ?? {};
   const metricItems = [
-    { label: "Visualizacoes", value: totals.view ?? 0, icon: Eye },
-    { label: "WhatsApp", value: totals.whatsapp ?? 0, icon: MessageCircle },
+    { label: t.overview.metrics.views, value: totals.view ?? 0, icon: Eye },
+    { label: t.overview.metrics.whatsapp, value: totals.whatsapp ?? 0, icon: MessageCircle },
     {
-      label: "Rotas abertas",
+      label: t.overview.metrics.routes,
       value: (totals.route_google ?? 0) + (totals.route_waze ?? 0),
       icon: Navigation
     },
-    { label: "Ligacoes", value: totals.phone ?? 0, icon: PhoneCall },
-    { label: "Favoritos", value: totals.favorite ?? 0, icon: Heart }
+    { label: t.overview.metrics.calls, value: totals.phone ?? 0, icon: PhoneCall },
+    { label: t.overview.metrics.favorites, value: totals.favorite ?? 0, icon: Heart }
   ];
 
   return (
     <div className="business-overview">
       <section className="business-overview-summary">
         <div>
-          <p className="section-kicker">Qualidade do perfil</p>
-          <h2>{completion}% completo</h2>
-          <p>
-            Perfis completos ajudam o cliente a decidir com menos duvidas.
-          </p>
+          <p className="section-kicker">{t.overview.qualityKicker}</p>
+          <h2><CountUp value={completion} />{t.overview.completeSuffix}</h2>
+          <p>{t.overview.qualityCopy}</p>
         </div>
         <div
           className="business-progress"
           role="progressbar"
-          aria-label="Progresso do perfil"
+          aria-label={t.overview.progressAria}
           aria-valuemin="0"
           aria-valuemax="100"
           aria-valuenow={completion}
         >
-          <span style={{ width: `${completion}%` }} />
+          <span style={{ width: `${shownCompletion}%` }} />
         </div>
         <div className="business-checklist">
           {checks.map((item) => (
@@ -1279,16 +1261,16 @@ function BusinessOverview({
       <section className="business-overview-section">
         <div className="business-overview-title">
           <div>
-            <p className="section-kicker">Ultimos {metrics.days} dias</p>
-            <h2>Interesse dos clientes</h2>
+            <p className="section-kicker">{t.overview.lastDays(metrics.days)}</p>
+            <h2>{t.overview.interest}</h2>
           </div>
-          {!metrics.available && <span className="metrics-pending">Sem dados ainda</span>}
+          {!metrics.available && <span className="metrics-pending">{t.overview.noData}</span>}
         </div>
         <div className="business-metrics-grid">
           {metricItems.map(({ label, value, icon: Icon }) => (
             <article className="business-metric" key={label}>
               <Icon size={19} aria-hidden="true" />
-              <strong>{value}</strong>
+              <strong><CountUp value={value} /></strong>
               <span>{label}</span>
             </article>
           ))}
@@ -1298,26 +1280,26 @@ function BusinessOverview({
       <section className="business-overview-section">
         <div className="business-overview-title">
           <div>
-            <p className="section-kicker">Atalhos</p>
-            <h2>O que você quer fazer?</h2>
+            <p className="section-kicker">{t.overview.shortcutsKicker}</p>
+            <h2>{t.overview.shortcutsTitle}</h2>
           </div>
         </div>
         <div className="business-quick-grid">
           <button type="button" onClick={onPreview}>
             <Eye size={19} aria-hidden="true" />
-            <span><strong>Ver minha página</strong><small>A página do QR Code e do link no Instagram</small></span>
+            <span><strong>{t.overview.viewPage}</strong><small>{t.overview.viewPageCopy}</small></span>
           </button>
           <button type="button" onClick={onOpenQrCode}>
             <QrCode size={19} aria-hidden="true" />
-            <span><strong>QR Code para imprimir</strong><small>Para mesa, balcão e vitrine</small></span>
+            <span><strong>{t.overview.qr}</strong><small>{t.overview.qrCopy}</small></span>
           </button>
           <button type="button" onClick={onEditProfile}>
             <Store size={19} aria-hidden="true" />
-            <span><strong>Atualizar informações</strong><small>Contato, endereço, foto e horário</small></span>
+            <span><strong>{t.overview.updateInfo}</strong><small>{t.overview.updateInfoCopy}</small></span>
           </button>
           <button type="button" onClick={onNewPromotion}>
             <Tag size={19} aria-hidden="true" />
-            <span><strong>Publicar promoção</strong><small>Crie um motivo para visitar hoje</small></span>
+            <span><strong>{t.overview.publishPromo}</strong><small>{t.overview.publishPromoCopy}</small></span>
           </button>
         </div>
       </section>
@@ -1361,8 +1343,8 @@ function BusinessCoverImagePicker({ image, isUploading, onFileSelected, onUrlCha
     <section className="cover-image-editor">
       <div className="cover-image-heading">
         <div>
-          <span>Foto principal</span>
-          <small>Mostre o ambiente que mais representa seu estabelecimento.</small>
+          <span>{t.cover.title}</span>
+          <small>{t.cover.copy}</small>
         </div>
         <button
           className="secondary-action cover-image-upload"
@@ -1371,7 +1353,7 @@ function BusinessCoverImagePicker({ image, isUploading, onFileSelected, onUrlCha
           disabled={isUploading}
         >
           <Upload size={17} aria-hidden="true" />
-          {isUploading ? "Enviando foto" : "Escolher foto"}
+          {isUploading ? t.cover.uploading : t.cover.choose}
         </button>
       </div>
 
@@ -1384,11 +1366,11 @@ function BusinessCoverImagePicker({ image, isUploading, onFileSelected, onUrlCha
       />
 
       <div className="cover-image-preview">
-        {image ? <img src={image} alt="Previa da foto principal" /> : <Image size={24} aria-hidden="true" />}
+        {image ? <img src={image} alt={t.cover.previewAlt} /> : <Image size={24} aria-hidden="true" />}
       </div>
 
       <label className="cover-image-url">
-        <span>Ou use uma URL de imagem</span>
+        <span>{t.cover.orUrl}</span>
         <div className="field-with-icon">
           <Image size={18} aria-hidden="true" />
           <input value={image} onChange={(event) => onUrlChange(event.target.value)} />
@@ -1427,13 +1409,13 @@ function BusinessHoursEditor({ value, onChange }) {
     <section className="business-hours-editor">
       <div className="hours-editor-heading">
         <div>
-          <span>Horário de funcionamento</span>
+          <span>{t.hours.title}</span>
           <small>{formatBusinessHours(schedule)}</small>
         </div>
         <Clock3 size={20} aria-hidden="true" />
       </div>
 
-      <div className="hours-days" role="group" aria-label="Dias de funcionamento">
+      <div className="hours-days" role="group" aria-label={t.hours.daysAria}>
         <button
           className={allDaysSelected ? "is-active" : ""}
           type="button"
@@ -1441,7 +1423,7 @@ function BusinessHoursEditor({ value, onChange }) {
             updateSchedule({ days: allDaysSelected ? [] : WEEK_DAYS.map((day) => day.id) })
           }
         >
-          Todos
+          {t.hours.all}
         </button>
         {WEEK_DAYS.map((day) => (
           <button
@@ -1457,7 +1439,7 @@ function BusinessHoursEditor({ value, onChange }) {
 
       <div className="hours-time-fields">
         <label>
-          <span>Abre</span>
+          <span>{t.hours.opens}</span>
           <input
             type="time"
             value={schedule.opensAt}
@@ -1465,7 +1447,7 @@ function BusinessHoursEditor({ value, onChange }) {
           />
         </label>
         <label>
-          <span>Fecha</span>
+          <span>{t.hours.closes}</span>
           <input
             type="time"
             value={schedule.closesAt}
@@ -1486,18 +1468,18 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
         <section className="business-list-section" key={item.id}>
           <div className="business-section-heading">
             <input
-              aria-label={isEvent ? "Nome do evento" : "Título da promoção"}
+              aria-label={isEvent ? t.timed.eventName : t.timed.promoTitle}
               value={item.title}
               onChange={(event) =>
                 onUpdate(item.id, { title: event.target.value })
               }
-              placeholder={isEvent ? "Ex: Samba ao vivo" : "Ex: Chopp em dobro"}
+              placeholder={isEvent ? t.timed.eventPlaceholder : t.timed.promoPlaceholder}
             />
             <button
               className="icon-delete"
               type="button"
               onClick={() => onRemove(item.id)}
-              aria-label={`Remover ${item.title}`}
+              aria-label={t.menu.remove(item.title)}
             >
               <Trash2 size={17} aria-hidden="true" />
             </button>
@@ -1508,13 +1490,13 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
             onChange={(event) =>
               onUpdate(item.id, { description: event.target.value })
             }
-            placeholder="Descrição opcional"
+            placeholder={t.common.optionalDescription}
             rows={3}
           />
 
           <div className="profile-grid">
             <label>
-              <span>Inicio</span>
+              <span>{t.timed.start}</span>
               <input
                 type="datetime-local"
                 value={item.startsAt}
@@ -1525,7 +1507,7 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
               />
             </label>
             <label>
-              <span>Fim</span>
+              <span>{t.timed.end}</span>
               <input
                 type="datetime-local"
                 value={item.endsAt}
@@ -1538,7 +1520,7 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
 
           {isEvent && (
             <label>
-              <span>Valor da entrada (opcional)</span>
+              <span>{t.timed.entryPrice}</span>
               <input
                 type="number"
                 min="0"
@@ -1554,20 +1536,20 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
           <label className="publish-status-switch">
             <input
               type="checkbox"
-              aria-label={isEvent ? "Evento publicado" : "Promoção publicada"}
+              aria-label={isEvent ? t.timed.eventPublished : t.timed.promoPublished}
               checked={item.isActive}
               onChange={(event) =>
                 onUpdate(item.id, { isActive: event.target.checked })
               }
             />
-            <span>{isEvent ? "Evento publicado" : "Promoção publicada"}</span>
+            <span>{isEvent ? t.timed.eventPublished : t.timed.promoPublished}</span>
           </label>
         </section>
       ))}
 
       <button className="secondary-action timed-item-add" type="button" onClick={onAdd}>
         <Plus size={17} aria-hidden="true" />
-        {isEvent ? "Novo evento" : "Nova promoção"}
+        {isEvent ? t.timed.newEvent : t.timed.newPromo}
       </button>
     </div>
   );

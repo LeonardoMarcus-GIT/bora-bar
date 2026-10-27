@@ -1,0 +1,172 @@
+/* Animações do app. Poucas e curtas: entrada das telas, cards em sequência e resposta ao toque.
+   Os tempos e a curva ficam em base.css (--dur-*, --ease-out). Quem pede menos movimento não vê nada daqui. */
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.35);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Texto palavra por palavra (components/TextEffects.jsx): cada palavra sobe um pouco depois da anterior. */
+.reveal-word {
+  display: inline-block;
+  animation: hero-rise 700ms var(--ease-out) backwards;
+  animation-delay: calc(120ms + var(--i, 0) * 110ms);
+}
+
+/* Frase que se alterna: a nova entra por baixo. */
+.rotating-text {
+  animation: swap-in 380ms var(--ease-out);
+}
+
+/* Troca de tela: a nova página entra suave. "backwards" evita deixar transform preso depois. */
+.home-page,
+.details-page,
+.account-page,
+.for-business-page {
+  animation: page-in var(--dur-base) var(--ease-out) backwards;
+}
+
+/* Cards da lista entram em sequência (o único momento "orquestrado" da tela inicial). */
+.bar-card {
+  animation: page-in 420ms var(--ease-out) backwards;
+}
+
+.bar-grid > .bar-card:nth-child(2) { animation-delay: 60ms; }
+.bar-grid > .bar-card:nth-child(3) { animation-delay: 120ms; }
+.bar-grid > .bar-card:nth-child(4) { animation-delay: 180ms; }
+.bar-grid > .bar-card:nth-child(5) { animation-delay: 240ms; }
+.bar-grid > .bar-card:nth-child(n + 6) { animation-delay: 300ms; }
+
+/* Resposta ao toque: a interface "afunda" um pouco quando apertada. */
+.filter-chip,
+.bottom-nav button,
+.bottom-nav a,
+.back-button,
+.icon-action,
+.primary-action,
+.secondary-action,
+.details-quick-actions a,
+.favorite-toggle,
+.search-location-action {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.filter-chip:active,
+.bottom-nav button:active,
+.bottom-nav a:active,
+.back-button:active,
+.icon-action:active,
+.primary-action:active,
+.secondary-action:active,
+.details-quick-actions a:active,
+.search-location-action:active {
+  transform: scale(0.95);
+}
+
+/* Coração: dá um "pulo" quando o bar é favoritado. */
+.favorite-toggle.is-favorite svg {
+  animation: heart-pop 320ms var(--ease-out);
+}
+
+/* Sugestões da busca abrem em vez de aparecerem de repente. */
+.search-suggestions {
+  animation: pop-in var(--dur-fast) var(--ease-out);
+  transform-origin: top center;
+}
+
+/* Barra de busca: a borda coral entra suave ao focar. */
+.search-box {
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* Painel: a barra de qualidade do perfil enche em vez de aparecer pronta. */
+.business-progress span {
+  transition: width 900ms var(--ease-out);
+}
+
+/* Foto do card que vira a capa da página do bar (src/utils/viewTransition.js).
+   Durante a transição, as animações de entrada ficam desligadas para não brigar com ela. */
+.details-hero img {
+  view-transition-name: bar-hero;
+}
+
+.vt-running .home-page,
+.vt-running .details-page,
+.vt-running .bar-card {
+  animation: none;
+}
+
+::view-transition-group(bar-hero) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-out);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+::view-transition-old(bar-hero),
+::view-transition-new(bar-hero) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

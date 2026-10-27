@@ -11,16 +11,17 @@ import {
   Phone,
   Route
 } from "lucide-react";
-import MenuCategory from "./MenuCategory.jsx";
-import MenuNav from "./MenuNav.jsx";
-import Reviews from "./Reviews.jsx";
-import StatusBadge from "./StatusBadge.jsx";
+import MenuCategory from "../components/MenuCategory.jsx";
+import MenuNav from "../components/MenuNav.jsx";
+import Reviews from "../components/Reviews.jsx";
+import StatusBadge from "../components/StatusBadge.jsx";
 import {
   recordBarEvent,
   recordBarViewOnce
 } from "../services/analyticsService.js";
 import { formatCurrency } from "../utils/format.js";
 import { formatDistanceKm } from "../utils/geo.js";
+import { barDetails as t } from "../texts/bar.js";
 
 function formatEventDate(value) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -87,24 +88,24 @@ export default function BarDetails({
       <div className="details-actions">
         <button className="back-button" type="button" onClick={onBack}>
           <ArrowLeft size={18} aria-hidden="true" />
-          Voltar
+          {t.back}
         </button>
         <button
           className={`detail-favorite ${isFavorite ? "is-favorite" : ""}`}
           type="button"
           onClick={() => onToggleFavorite(bar.id)}
-          aria-label={`${isFavorite ? "Remover" : "Favoritar"} ${bar.name}`}
+          aria-label={`${isFavorite ? t.remove : t.favorite} ${bar.name}`}
           aria-pressed={isFavorite}
-          title={isFavorite ? "Remover dos favoritos" : "Favoritar"}
+          title={isFavorite ? t.removeFromFavorites : t.favorite}
         >
           <Heart size={19} aria-hidden="true" />
-          {isFavorite ? "Favorito" : "Favoritar"}
+          {isFavorite ? t.isFavorite : t.favorite}
         </button>
       </div>
       )}
 
       <section className="details-hero">
-        <img src={bar.image} alt={`Ambiente do ${bar.name}`} />
+        <img src={bar.image} alt={t.heroAlt(bar.name)} />
         <div className="details-hero-overlay">
           <h1>{bar.name}</h1>
           <p>
@@ -120,13 +121,13 @@ export default function BarDetails({
             {distanceLabel ? (
               <span>{distanceLabel}</span>
             ) : !isStandalone ? (
-              <span>Distância indisponível</span>
+              <span>{t.distanceUnavailable}</span>
             ) : null}
           </div>
         </div>
       </section>
 
-      <section className="details-quick-actions" aria-label="Ações do estabelecimento">
+      <section className="details-quick-actions" aria-label={t.actionsAria}>
         {hasPhone ? (
           <a
             className="is-primary"
@@ -137,27 +138,27 @@ export default function BarDetails({
           >
             <MessageCircle size={20} aria-hidden="true" />
             <span>
-              <strong>WhatsApp</strong>
+              <strong>{t.whatsapp}</strong>
               <small className="whatsapp-hint">
-                {bar.takesWhatsappOrders ? "Peça por aqui" : "Tire suas dúvidas"}
+                {bar.takesWhatsappOrders ? t.whatsappOrders : t.whatsappQuestions}
               </small>
             </span>
           </a>
         ) : (
           <span className="is-primary is-unavailable" aria-disabled="true">
             <MessageCircle size={20} aria-hidden="true" />
-            <span><strong>WhatsApp</strong><small>Em breve</small></span>
+            <span><strong>{t.whatsapp}</strong><small>{t.soon}</small></span>
           </span>
         )}
         {hasPhone ? (
           <a href={`tel:+${phoneDigits}`} onClick={() => track("phone")}>
             <Phone size={20} aria-hidden="true" />
-            <span><strong>Ligar</strong><small>{bar.phone}</small></span>
+            <span><strong>{t.call}</strong><small>{bar.phone}</small></span>
           </a>
         ) : (
           <span className="is-unavailable" aria-disabled="true">
             <Phone size={20} aria-hidden="true" />
-            <span><strong>Ligar</strong><small>Em breve</small></span>
+            <span><strong>{t.call}</strong><small>{t.soon}</small></span>
           </span>
         )}
         <a
@@ -167,7 +168,7 @@ export default function BarDetails({
           onClick={() => track("route_google")}
         >
           <Navigation size={20} aria-hidden="true" />
-          <span><strong>Como chegar</strong><small>Google Maps</small></span>
+          <span><strong>{t.howToGet}</strong><small>{t.googleMaps}</small></span>
         </a>
         <a
           href={routeLinks.waze}
@@ -176,14 +177,14 @@ export default function BarDetails({
           onClick={() => track("route_waze")}
         >
           <Route size={20} aria-hidden="true" />
-          <span><strong>Abrir no Waze</strong><small>Iniciar rota</small></span>
+          <span><strong>{t.openWaze}</strong><small>{t.startRoute}</small></span>
         </a>
       </section>
 
       <section className="details-content">
         <div className="details-main">
           <div className="section-heading">
-            <h2>Sobre o lugar</h2>
+            <h2>{t.aboutTitle}</h2>
             <span>{bar.priceLevel}</span>
           </div>
           <p className="description">{bar.description}</p>
@@ -191,15 +192,15 @@ export default function BarDetails({
           <div className="info-list">
             <p>
               <MapPin size={18} aria-hidden="true" />
-              <span><strong>Endereço</strong><small>{bar.address}</small></span>
+              <span><strong>{t.address}</strong><small>{bar.address}</small></span>
             </p>
             <p>
               <Clock3 size={18} aria-hidden="true" />
-              <span><strong>Funcionamento</strong><small>{bar.hours}</small></span>
+              <span><strong>{t.hours}</strong><small>{bar.hours}</small></span>
             </p>
             <p>
               <Phone size={18} aria-hidden="true" />
-              <span><strong>Contato</strong><small>{bar.phone || "Em breve"}</small></span>
+              <span><strong>{t.contact}</strong><small>{bar.phone || t.soon}</small></span>
             </p>
           </div>
 
@@ -226,11 +227,11 @@ export default function BarDetails({
         </div>
 
         <aside className="details-side">
-          <p className="section-kicker">Antes de sair</p>
-          <h2>Resumo rápido</h2>
+          <p className="section-kicker">{t.quickKicker}</p>
+          <h2>{t.quickTitle}</h2>
           <dl>
             <div>
-              <dt>Distância</dt>
+              <dt>{t.distance}</dt>
               <dd>
                 {distanceLabel ??
                   (canAskDistance ? (
@@ -241,29 +242,29 @@ export default function BarDetails({
                       disabled={locationStatus === "loading"}
                     >
                       {locationStatus === "loading"
-                        ? "Calculando..."
+                        ? t.calculating
                         : locationStatus === "denied"
-                          ? "Localização bloqueada"
-                          : "Ver distância"}
+                          ? t.locationBlocked
+                          : t.seeDistance}
                     </button>
                   ) : (
-                    "Indisponível"
+                    t.unavailable
                   ))}
               </dd>
             </div>
             <div>
-              <dt>Status</dt>
+              <dt>{t.statusLabel}</dt>
               <dd>
                 {bar.isOpen
                   ? bar.isClosingSoon
-                    ? "Fechando em breve"
-                    : "Aberto agora"
-                  : "Fechado no momento"}
+                    ? t.closingSoon
+                    : t.openNow
+                  : t.closedNow}
                 {bar.openStatusDetail && <small>{bar.openStatusDetail}</small>}
               </dd>
             </div>
             <div>
-              <dt>Faixa de preço</dt>
+              <dt>{t.priceRange}</dt>
               <dd>{bar.priceLevel}</dd>
             </div>
           </dl>
@@ -273,10 +274,10 @@ export default function BarDetails({
       <section className="menu-section">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">Confira antes de pedir</p>
-            <h2>Cardápio</h2>
+            <p className="section-kicker">{t.menuKicker}</p>
+            <h2>{t.menuTitle}</h2>
           </div>
-          <span>{Object.values(bar.menu).flat().length} itens</span>
+          <span>{t.itemCount(Object.values(bar.menu).flat().length)}</span>
         </div>
         {menuCategories.length >= 3 && <MenuNav categories={menuCategories} />}
         <div className="menu-grid">
@@ -291,7 +292,7 @@ export default function BarDetails({
       {bar.events?.length > 0 && (
         <section className="events-section">
           <div className="section-heading">
-            <h2>Próximos eventos</h2>
+            <h2>{t.eventsTitle}</h2>
             <span>{bar.events.length}</span>
           </div>
           <div className="event-grid">
@@ -303,7 +304,7 @@ export default function BarDetails({
                   <span>{formatEventDate(event.startsAt)}</span>
                   {event.description && <p>{event.description}</p>}
                   {event.price !== null && (
-                    <small>Entrada: {formatCurrency(event.price)}</small>
+                    <small>{t.entry} {formatCurrency(event.price)}</small>
                   )}
                 </div>
               </article>

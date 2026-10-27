@@ -1,18 +1,23 @@
-import { BadgePercent, Heart, MapPin, WalletCards } from "lucide-react";
+import { BadgePercent, Heart } from "lucide-react";
 import StatusBadge from "./StatusBadge.jsx";
 import { formatDistanceKm } from "../utils/geo.js";
 import { formatCurrency, getStartingPrice } from "../utils/format.js";
+import { barCard as t } from "../texts/app.js";
 
 export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite }) {
+  const place = [bar.neighborhood, bar.hasCoordinates ? formatDistanceKm(bar.distanceKm) : bar.city]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <article className="bar-card">
+    <article className="bar-card" data-flip-id={bar.id}>
       <button
         className={`favorite-toggle ${isFavorite ? "is-favorite" : ""}`}
         type="button"
         onClick={() => onToggleFavorite(bar.id)}
-        aria-label={`${isFavorite ? "Remover" : "Favoritar"} ${bar.name}`}
+        aria-label={`${isFavorite ? t.remove : t.favorite} ${bar.name}`}
         aria-pressed={isFavorite}
-        title={isFavorite ? "Remover dos favoritos" : "Favoritar"}
+        title={isFavorite ? t.removeFromFavorites : t.favorite}
       >
         <Heart size={19} aria-hidden="true" />
       </button>
@@ -20,40 +25,26 @@ export default function BarCard({ bar, isFavorite, onSelect, onToggleFavorite })
         className="bar-card-button"
         type="button"
         onClick={() => onSelect(bar)}
-        aria-label={`Abrir detalhes de ${bar.name}`}
+        aria-label={t.openDetails(bar.name)}
       >
         <div className="bar-card-media">
           <img className="bar-card-image" src={bar.image} alt={bar.name} />
         </div>
         <div className="bar-card-body">
-          <div className="bar-card-topline">
-            <StatusBadge
-              isOpen={bar.isOpen}
-              isClosingSoon={bar.isClosingSoon}
-              detail={bar.openStatusDetail}
-            />
-            <span className="price-level">{bar.priceLevel}</span>
-          </div>
-
+          <StatusBadge
+            isOpen={bar.isOpen}
+            isClosingSoon={bar.isClosingSoon}
+            detail={bar.openStatusDetail}
+          />
           <h2>{bar.name}</h2>
-          <p className="muted">
-            {bar.neighborhood}, {bar.city}
+          <p className="muted">{place}</p>
+          <p className="bar-card-price">
+            <span className="price-level">{bar.priceLevel}</span>
+            {t.startingAt} {formatCurrency(getStartingPrice(bar))}
           </p>
-
-          <div className="bar-meta-grid">
-            <span>
-              <MapPin size={16} aria-hidden="true" />
-              {bar.hasCoordinates ? formatDistanceKm(bar.distanceKm) : "Distância indisponível"}
-            </span>
-            <span>
-              <WalletCards size={16} aria-hidden="true" />
-              A partir de {formatCurrency(getStartingPrice(bar))}
-            </span>
-          </div>
-
           {bar.promotion && (
             <p className="promo-pill">
-              <BadgePercent size={16} aria-hidden="true" />
+              <BadgePercent size={15} aria-hidden="true" />
               {bar.promotion}
             </p>
           )}

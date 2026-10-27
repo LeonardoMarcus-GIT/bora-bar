@@ -1,4 +1,7 @@
+import { useRef } from "react";
 import BarCard from "./BarCard.jsx";
+import { useFlip } from "../hooks/useFlip.js";
+import { barList as t } from "../texts/app.js";
 
 export default function BarList({
   bars,
@@ -7,21 +10,20 @@ export default function BarList({
   onSelectBar,
   onToggleFavorite
 }) {
+  const gridRef = useRef(null);
+  useFlip(gridRef, bars.map((bar) => bar.id).join(","));
+
   if (!bars.length) {
     return (
       <section className="empty-state">
-        <h2>{isFavoritesView ? "Nenhum favorito ainda" : "Nenhum bar encontrado"}</h2>
-        <p>
-          {isFavoritesView
-            ? "Toque no coração de um bar para salvar aqui."
-            : "Tente outro bairro, cidade ou remova algum filtro."}
-        </p>
+        <h2>{isFavoritesView ? t.noFavoritesTitle : t.noBarsTitle}</h2>
+        <p>{isFavoritesView ? t.noFavoritesCopy : t.noBarsCopy}</p>
       </section>
     );
   }
 
   return (
-    <section className="bar-grid" aria-label="Lista de bares">
+    <section className="bar-grid" aria-label={t.ariaLabel} ref={gridRef}>
       {bars.map((bar) => (
         <BarCard
           bar={bar}

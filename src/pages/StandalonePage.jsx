@@ -4,6 +4,7 @@ import { useGeolocation } from "../hooks/useGeolocation.js";
 import { fetchBarById } from "../services/barsService.js";
 import { calculateDistanceKm } from "../utils/geo.js";
 import { getOpenStatus } from "../utils/openingHours.js";
+import { standalone as t } from "../texts/misc.js";
 
 // Página avulsa do estabelecimento: /r/<id>.
 // É o "site" do restaurante/bar para QR Code e link no Instagram, sem a marca
@@ -81,7 +82,7 @@ export default function StandalonePage({ barId }) {
     return (
       <main className="details-page">
         <section className="empty-state" aria-live="polite">
-          <h2>Carregando…</h2>
+          <h2>{t.loading}</h2>
         </section>
       </main>
     );
@@ -91,14 +92,14 @@ export default function StandalonePage({ barId }) {
     return (
       <main className="details-page">
         <section className="empty-state" role="alert">
-          <h2>Não conseguimos abrir esta página agora</h2>
-          <p>Pode ser a conexão. Tente de novo em instantes.</p>
+          <h2>{t.errorTitle}</h2>
+          <p>{t.errorCopy}</p>
           <button
             className="primary-action"
             type="button"
             onClick={() => setReloadKey((key) => key + 1)}
           >
-            Tentar de novo
+            {t.retry}
           </button>
         </section>
       </main>
@@ -109,8 +110,8 @@ export default function StandalonePage({ barId }) {
     return (
       <main className="details-page">
         <section className="empty-state">
-          <h2>Página não encontrada</h2>
-          <p>Confira o link ou o QR Code e tente de novo.</p>
+          <h2>{t.notFoundTitle}</h2>
+          <p>{t.notFoundCopy}</p>
         </section>
       </main>
     );
