@@ -242,3 +242,16 @@
   background: var(--coral);
   color: #131313;
 }
+
+/* Revisão 30/10/2026: links pequenos com área de toque de pelo menos ~40 px no celular. */
+.auth-back-button,
+.account-links button,
+.account-link-muted,
+.distance-request,
+.lpb-footer nav a,
+.lpb-footer nav button {
+  min-height: 40px;
+  padding-block: 10px;
+}
+
+.account-links { gap: 4px 18px; }

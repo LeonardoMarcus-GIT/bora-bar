@@ -7,6 +7,7 @@ export default function BarList({
   bars,
   favoriteIds,
   isFavoritesView,
+  isOpenFilterOn = false,
   onSelectBar,
   onToggleFavorite
 }) {
@@ -16,8 +17,8 @@ export default function BarList({
   if (!bars.length) {
     return (
       <section className="empty-state">
-        <h2>{isFavoritesView ? t.noFavoritesTitle : t.noBarsTitle}</h2>
-        <p>{isFavoritesView ? t.noFavoritesCopy : t.noBarsCopy}</p>
+        <h2>{isFavoritesView ? t.noFavoritesTitle : isOpenFilterOn ? t.noOpenTitle : t.noBarsTitle}</h2>
+        <p>{isFavoritesView ? t.noFavoritesCopy : isOpenFilterOn ? t.noOpenCopy : t.noBarsCopy}</p>
       </section>
     );
   }

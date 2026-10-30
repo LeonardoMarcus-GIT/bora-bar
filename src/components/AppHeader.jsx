@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Bell, LocateFixed, MapPin, MapPinned, Navigation, Search, Store } from "lucide-react";
+import { BadgePercent, LocateFixed, MapPin, MapPinned, Navigation, Search, Store } from "lucide-react";
 import logoSrc from "../assets/bora-bar-icon.png";
 import { normalizeText } from "../utils/format.js";
 import { formatDistanceKm } from "../utils/geo.js";
@@ -17,7 +17,9 @@ export default function AppHeader({
   resultCount,
   searchSuggestions = [],
   summaryLabel,
-  title
+  title,
+  hasPromotions = false,
+  onPromotions
 }) {
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const isLoadingLocation = locationStatus === "loading";
@@ -60,13 +62,15 @@ export default function AppHeader({
             <p className="brand-kicker">{t.kicker}</p>
           </div>
         </div>
+        {/* Atalho para as promoções de hoje (o pontinho aparece quando há alguma no ar). */}
         <button
-          className="icon-action"
+          className={`icon-action promo-shortcut${hasPromotions ? " has-dot" : ""}`}
           type="button"
-          aria-label={t.notifications}
-          title={t.notifications}
+          onClick={onPromotions}
+          aria-label={t.promotionsShortcut}
+          title={t.promotionsShortcut}
         >
-          <Bell size={19} aria-hidden="true" />
+          <BadgePercent size={19} aria-hidden="true" />
         </button>
       </div>
 

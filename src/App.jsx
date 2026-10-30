@@ -19,7 +19,7 @@ import { fetchProfile } from "./services/profilesService.js";
 import { fetchBars } from "./services/barsService.js";
 import { calculateDistanceKm } from "./utils/geo.js";
 import { getOpenStatus } from "./utils/openingHours.js";
-import { barMatchesVibe, getVibe, VIBES } from "./utils/vibes.js";
+import { barMatchesVibe, getVibe } from "./utils/vibes.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
 import { home as t, nearby as nearbyText } from "./texts/app.js";
 import { transitionRoute } from "./utils/viewTransition.js";
@@ -788,6 +788,8 @@ export default function App() {
       <main className="home-page">
         <AppHeader
           hasLocation={hasLocation}
+          hasPromotions={bars.some((bar) => bar.promotion)}
+          onPromotions={showPromotions}
           isLoading={isLoadingBars}
           isUsingProfileLocation={isUsingProfileLocation}
           locationStatus={locationStatus}
@@ -810,18 +812,6 @@ export default function App() {
         />
         {showStories && <BarStories bars={visibleBars} onSelectBar={selectBar} />}
         <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
-        <nav className="vibe-chips" aria-label={t.vibesAria}>
-          {VIBES.map((vibe) => (
-            <a
-              className={activeVibeId === vibe.id ? "is-active" : ""}
-              href={activeVibeId === vibe.id ? "#app" : `#clima/${vibe.id}`}
-              key={vibe.id}
-              aria-current={activeVibeId === vibe.id ? "true" : undefined}
-            >
-              {vibe.label}
-            </a>
-          ))}
-        </nav>
         {activeVibe && (
           <div className="vibe-filter-bar">
             <span>
@@ -868,6 +858,7 @@ export default function App() {
               bars={visibleBars}
               favoriteIds={favoriteIds}
               isFavoritesView={showFavoritesOnly}
+              isOpenFilterOn={activeFilters.includes("open")}
               onSelectBar={selectBar}
               onToggleFavorite={toggleFavorite}
             />

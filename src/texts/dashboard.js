@@ -160,7 +160,27 @@ export const overview = {
   updateInfo: "Atualizar informações",
   updateInfoCopy: "Contato, endereço, foto e horário",
   publishPromo: "Publicar promoção",
-  publishPromoCopy: "Crie um motivo para visitar hoje"
+  publishPromoCopy: "Com data de início e fim",
+  editMenu: "Editar cardápio",
+  editMenuCopy: "Preços e itens esgotados",
+  newEvent: "Novo evento",
+  newEventCopy: "Show, samba, jogo no telão",
+  statusAuto: "Muda sozinho pelo seu horário",
+  statusManual: "Cadastre o horário para mudar sozinho",
+  quickPromoTitle: "Promoção de hoje",
+  quickPromoPlaceholder: "Ex: Chopp em dobro até 20h",
+  quickPromoPublish: "Publicar",
+  quickPromoPublishing: "Publicando...",
+  quickPromoPreview: "Aparece assim no app:",
+  quickPromoNone: "Nenhuma promoção no ar agora. Publique uma e ela entra nos stories do app.",
+  quickPromoHint: "Fica no ar até 23h59 de hoje. Para outra data ou foto, use a aba Promoções.",
+  quickPromoPublished: "Promoção publicada. Já aparece no app.",
+  promoEnded: "Promoção encerrada.",
+  endPromo: "Encerrar",
+  dailyTitle: "Visitas por dia",
+  dailyTotal: (total) => `${total} ${total === 1 ? "visita" : "visitas"} na semana`,
+  dailyEmpty: "Ainda sem visitas registradas nesta semana.",
+  weekday: (isoDay) => ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][new Date(`${isoDay}T12:00:00`).getDay()]
 };
 
 export const cover = {

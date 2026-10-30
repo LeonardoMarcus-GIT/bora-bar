@@ -145,4 +145,4 @@ e login/painel ficam indisponíveis.
    Fundador (30 dias grátis, contato pelo WhatsApp comercial). Ainda não há
    cobrança no sistema: mensalidade por Pix, combinada na conversa.
 8. `src/data/barCoordinates.js` não é importado por nenhum arquivo (código morto).
-9. Telefones dos bares de exemplo usam DDD 11, mas os bares são de Volta Redonda (DDD 24).
+9. ~~Telefones dos bares de exemplo com DDD de outras cidades~~ — resolvido em 30/10/2026: banco, `mockBars.js` e `seed-mock-bars.sql` usam DDD 24.

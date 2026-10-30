@@ -24,7 +24,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BarAddressFields from "../components/BarAddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
-import { fetchBarMetrics } from "../services/analyticsService.js";
+import { fetchBarDailyViews, fetchBarMetrics } from "../services/analyticsService.js";
 import { uploadBusinessCoverImage, uploadBusinessStoryImage } from "../services/businessImageService.js";
 import { getOpenStatus, parseOpeningDays } from "../utils/openingHours.js";
 import { VIBES } from "../utils/vibes.js";
@@ -212,6 +212,9 @@ export default function BusinessDashboard({
   const [managedData, setManagedData] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [metrics, setMetrics] = useState({ available: false, days: 30, totals: {} });
+  const [dailyViews, setDailyViews] = useState([]);
+  // Aviso rápido da visão geral (não é apagado quando a lista de bares recarrega).
+  const [toast, setToast] = useState({ text: "", id: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -377,16 +380,20 @@ export default function BusinessDashboard({
 
     if (!selectedBarId) {
       setMetrics({ available: false, days: 30, totals: {} });
+      setDailyViews([]);
       return () => {
         isMounted = false;
       };
     }
 
-    fetchBarMetrics(selectedBarId).then((nextMetrics) => {
-      if (isMounted) {
-        setMetrics(nextMetrics);
+    Promise.all([fetchBarMetrics(selectedBarId), fetchBarDailyViews(selectedBarId, 7)]).then(
+      ([nextMetrics, nextDailyViews]) => {
+        if (isMounted) {
+          setMetrics(nextMetrics);
+          setDailyViews(nextDailyViews);
+        }
       }
-    });
+    );
 
     return () => {
       isMounted = false;
@@ -542,6 +549,60 @@ export default function BusinessDashboard({
       promotions: [...currentData.promotions, emptyPromotion()]
     }));
     setActiveTab("promotions");
+  }
+
+  // Salva a lista inteira de promoções (padrão replace_bar_promotions) a partir da visão geral.
+  async function savePromotionList(nextPromotions, successMessage) {
+    setIsSaving(true);
+
+    try {
+      await replaceManagedPromotions(
+        selectedBarId,
+        nextPromotions.map((promotion) => ({
+          ...promotion,
+          startsAt: toIsoDate(promotion.startsAt),
+          endsAt: toIsoDate(promotion.endsAt)
+        }))
+      );
+      setManagedData((currentData) => ({ ...currentData, promotions: nextPromotions }));
+      setToast({ text: successMessage, id: Date.now() });
+      onDataChanged?.();
+      return true;
+    } catch {
+      setToast({ text: t.messages.saveFailed, id: Date.now() });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  // "Promoção de hoje": começa agora e vale até 23h59 de hoje.
+  function publishQuickPromotion(title) {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 0, 0);
+
+    return savePromotionList(
+      [
+        ...managedData.promotions,
+        {
+          ...emptyPromotion(),
+          title,
+          startsAt: toDateTimeInput(now.toISOString()),
+          endsAt: toDateTimeInput(endOfDay.toISOString())
+        }
+      ],
+      t.overview.quickPromoPublished
+    );
+  }
+
+  function endPromotion(promotionId) {
+    return savePromotionList(
+      managedData.promotions.map((promotion) =>
+        promotion.id === promotionId ? { ...promotion, isActive: false } : promotion
+      ),
+      t.overview.promoEnded
+    );
   }
 
   async function saveCurrentTab() {
@@ -851,10 +912,18 @@ export default function BusinessDashboard({
 
             {activeTab === "dashboard" && (
               <BusinessOverview
+                dailyViews={dailyViews}
                 data={managedData}
+                isSaving={isSaving}
                 metrics={metrics}
-                onEditProfile={() => setActiveTab("overview")}
-                onNewPromotion={openNewPromotion}
+                openStatus={openStatus}
+                onEndPromotion={endPromotion}
+                onOpenTab={(tabId) => {
+                  if (tabId === "promotions" && !managedData.promotions.length) openNewPromotion();
+                  else setActiveTab(tabId);
+                  setFeedback("");
+                }}
+                onQuickPromotion={publishQuickPromotion}
                 onPreview={() => onPreviewBar?.(selectedBarId)}
                 onOpenQrCode={() =>
                   window.open(`/r/${encodeURIComponent(selectedBarId)}/qr`, "_blank", "noopener")
@@ -1186,6 +1255,10 @@ export default function BusinessDashboard({
                 {feedback && <p className="form-feedback">{feedback}</p>}
               </div>
             )}
+
+            {activeTab === "dashboard" && toast.text && (
+              <p className="pnl-toast" role="status" aria-live="polite" key={toast.id}>{toast.text}</p>
+            )}
           </>
         )}
       </section>
@@ -1193,14 +1266,21 @@ export default function BusinessDashboard({
   );
 }
 
+// Visão geral do painel (visual da Versão 3 "Bolso"): capa com status automático,
+// "Promoção de hoje" publicada em um toque, números grandes, visitas da semana e atalhos.
 function BusinessOverview({
+  dailyViews,
   data,
+  isSaving,
   metrics,
-  onEditProfile,
-  onNewPromotion,
+  openStatus,
+  onEndPromotion,
+  onOpenTab,
   onOpenQrCode,
-  onPreview
+  onPreview,
+  onQuickPromotion
 }) {
+  const [quickTitle, setQuickTitle] = useState("");
   const checks = [
     { label: t.overview.checks.photo, done: Boolean(data.bar.image && data.bar.description) },
     { label: t.overview.checks.contact, done: Boolean(data.bar.address && data.bar.phone) },
@@ -1223,8 +1303,9 @@ function BusinessOverview({
     const frameId = requestAnimationFrame(() => setShownCompletion(completion));
     return () => cancelAnimationFrame(frameId);
   }, [completion]);
+
   const totals = metrics.totals ?? {};
-  const metricItems = [
+  const mainMetrics = [
     { label: t.overview.metrics.views, value: totals.view ?? 0, icon: Eye },
     { label: t.overview.metrics.whatsapp, value: totals.whatsapp ?? 0, icon: MessageCircle },
     {
@@ -1232,20 +1313,148 @@ function BusinessOverview({
       value: (totals.route_google ?? 0) + (totals.route_waze ?? 0),
       icon: Navigation
     },
-    { label: t.overview.metrics.calls, value: totals.phone ?? 0, icon: PhoneCall },
+    { label: t.overview.metrics.calls, value: totals.phone ?? 0, icon: PhoneCall }
+  ];
+  const extraMetrics = [
     { label: t.overview.metrics.favorites, value: totals.favorite ?? 0, icon: Heart },
     { label: t.overview.metrics.storyViews, value: totals.story_view ?? 0, icon: Image },
     { label: t.overview.metrics.storyOpens, value: totals.story_open ?? 0, icon: Store }
   ];
 
+  const now = new Date();
+  const activePromotions = data.promotions.filter((item) => {
+    if (!item.isActive || !item.title.trim()) return false;
+    const starts = item.startsAt ? new Date(item.startsAt) : null;
+    const ends = item.endsAt ? new Date(item.endsAt) : null;
+    return (!starts || starts <= now) && (!ends || ends >= now);
+  });
+  const weekTotal = dailyViews.reduce((sum, item) => sum + item.total, 0);
+  const maxDay = Math.max(1, ...dailyViews.map((item) => item.total));
+
+  async function handleQuickSubmit(event) {
+    event.preventDefault();
+    const title = quickTitle.trim();
+    if (!title) return;
+    if (await onQuickPromotion(title)) setQuickTitle("");
+  }
+
   return (
-    <div className="business-overview">
-      <section className="business-overview-summary">
-        <div>
-          <p className="section-kicker">{t.overview.qualityKicker}</p>
-          <h2><CountUp value={completion} />{t.overview.completeSuffix}</h2>
-          <p>{t.overview.qualityCopy}</p>
+    <div className="business-overview pnl">
+      <section
+        className="pnl-hero"
+        style={data.bar.image ? { backgroundImage: `url(${data.bar.image})` } : undefined}
+      >
+        <div className="pnl-hero-body">
+          <span className={`pnl-status ${openStatus.isOpen ? "is-open" : ""}`}>
+            <i aria-hidden="true" />
+            {openStatus.isOpen ? t.profile.openNow : t.profile.closedNow}
+            {openStatus.detail && <small> · {openStatus.detail}</small>}
+          </span>
+          <small className="pnl-status-note">
+            {openStatus.isAutomatic ? t.overview.statusAuto : t.overview.statusManual}
+          </small>
+          <div className="pnl-hero-actions">
+            <button type="button" onClick={onPreview}>
+              <Eye size={17} aria-hidden="true" /> {t.overview.viewPage}
+            </button>
+            <button type="button" onClick={onOpenQrCode}>
+              <QrCode size={17} aria-hidden="true" /> {t.overview.qr}
+            </button>
+          </div>
         </div>
+      </section>
+
+      <section className="pnl-card pnl-promo">
+        <h2><Tag size={18} aria-hidden="true" /> {t.overview.quickPromoTitle}</h2>
+        {activePromotions.length ? (
+          <ul className="pnl-promo-list">
+            {activePromotions.map((item) => (
+              <li key={item.id}>
+                <span>{item.title}</span>
+                <button type="button" onClick={() => onEndPromotion(item.id)} disabled={isSaving}>
+                  {t.overview.endPromo}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="pnl-muted">{t.overview.quickPromoNone}</p>
+        )}
+        <form className="pnl-promo-form" onSubmit={handleQuickSubmit}>
+          <input
+            value={quickTitle}
+            onChange={(event) => setQuickTitle(event.target.value)}
+            placeholder={t.overview.quickPromoPlaceholder}
+            maxLength={80}
+            aria-label={t.overview.quickPromoTitle}
+          />
+          <button className="primary-action" type="submit" disabled={isSaving || !quickTitle.trim()}>
+            {isSaving ? t.overview.quickPromoPublishing : t.overview.quickPromoPublish}
+          </button>
+        </form>
+        {quickTitle.trim() && (
+          <p className="pnl-preview">
+            {t.overview.quickPromoPreview} <strong>{quickTitle.trim()}</strong>
+          </p>
+        )}
+        <p className="pnl-hint">{t.overview.quickPromoHint}</p>
+      </section>
+
+      <section className="pnl-section">
+        <div className="pnl-section-title">
+          <div>
+            <p className="section-kicker">{t.overview.lastDays(metrics.days)}</p>
+            <h2>{t.overview.interest}</h2>
+          </div>
+          {!metrics.available && <span className="metrics-pending">{t.overview.noData}</span>}
+        </div>
+        <div className="pnl-metrics">
+          {mainMetrics.map(({ label, value, icon: Icon }) => (
+            <article className="pnl-metric" key={label}>
+              <Icon size={20} aria-hidden="true" />
+              <strong><CountUp value={value} /></strong>
+              <span>{label}</span>
+            </article>
+          ))}
+        </div>
+        <div className="pnl-metrics-extra">
+          {extraMetrics.map(({ label, value, icon: Icon }) => (
+            <span key={label}>
+              <Icon size={15} aria-hidden="true" />
+              <strong><CountUp value={value} /></strong> {label}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="pnl-card pnl-chart">
+        <div className="pnl-section-title">
+          <h2>{t.overview.dailyTitle}</h2>
+          <span className="pnl-muted">{t.overview.dailyTotal(weekTotal)}</span>
+        </div>
+        {dailyViews.length ? (
+          <div className="pnl-bars">
+            {dailyViews.map((item, index) => (
+              <div key={item.day} title={`${item.total}`}>
+                <b>{item.total || ""}</b>
+                <i
+                  style={{
+                    "--h": `${Math.max(4, Math.round((item.total / maxDay) * 100))}%`,
+                    "--n": index
+                  }}
+                />
+                <span>{t.overview.weekday(item.day)}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="pnl-muted">{t.overview.dailyEmpty}</p>
+        )}
+      </section>
+
+      <section className="pnl-card pnl-quality">
+        <p className="section-kicker">{t.overview.qualityKicker}</p>
+        <h2><CountUp value={completion} />{t.overview.completeSuffix}</h2>
         <div
           className="business-progress"
           role="progressbar"
@@ -1266,48 +1475,33 @@ function BusinessOverview({
         </div>
       </section>
 
-      <section className="business-overview-section">
-        <div className="business-overview-title">
-          <div>
-            <p className="section-kicker">{t.overview.lastDays(metrics.days)}</p>
-            <h2>{t.overview.interest}</h2>
-          </div>
-          {!metrics.available && <span className="metrics-pending">{t.overview.noData}</span>}
-        </div>
-        <div className="business-metrics-grid">
-          {metricItems.map(({ label, value, icon: Icon }) => (
-            <article className="business-metric" key={label}>
-              <Icon size={19} aria-hidden="true" />
-              <strong><CountUp value={value} /></strong>
-              <span>{label}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="business-overview-section">
-        <div className="business-overview-title">
+      <section className="pnl-section">
+        <div className="pnl-section-title">
           <div>
             <p className="section-kicker">{t.overview.shortcutsKicker}</p>
             <h2>{t.overview.shortcutsTitle}</h2>
           </div>
         </div>
-        <div className="business-quick-grid">
-          <button type="button" onClick={onPreview}>
-            <Eye size={19} aria-hidden="true" />
-            <span><strong>{t.overview.viewPage}</strong><small>{t.overview.viewPageCopy}</small></span>
+        <div className="pnl-shortcuts">
+          <button type="button" onClick={() => onOpenTab("overview")}>
+            <Store size={20} aria-hidden="true" />
+            <strong>{t.overview.updateInfo}</strong>
+            <small>{t.overview.updateInfoCopy}</small>
           </button>
-          <button type="button" onClick={onOpenQrCode}>
-            <QrCode size={19} aria-hidden="true" />
-            <span><strong>{t.overview.qr}</strong><small>{t.overview.qrCopy}</small></span>
+          <button type="button" onClick={() => onOpenTab("menu")}>
+            <UtensilsCrossed size={20} aria-hidden="true" />
+            <strong>{t.overview.editMenu}</strong>
+            <small>{t.overview.editMenuCopy}</small>
           </button>
-          <button type="button" onClick={onEditProfile}>
-            <Store size={19} aria-hidden="true" />
-            <span><strong>{t.overview.updateInfo}</strong><small>{t.overview.updateInfoCopy}</small></span>
+          <button type="button" onClick={() => onOpenTab("promotions")}>
+            <Tag size={20} aria-hidden="true" />
+            <strong>{t.overview.publishPromo}</strong>
+            <small>{t.overview.publishPromoCopy}</small>
           </button>
-          <button type="button" onClick={onNewPromotion}>
-            <Tag size={19} aria-hidden="true" />
-            <span><strong>{t.overview.publishPromo}</strong><small>{t.overview.publishPromoCopy}</small></span>
+          <button type="button" onClick={() => onOpenTab("events")}>
+            <CalendarDays size={20} aria-hidden="true" />
+            <strong>{t.overview.newEvent}</strong>
+            <small>{t.overview.newEventCopy}</small>
           </button>
         </div>
       </section>

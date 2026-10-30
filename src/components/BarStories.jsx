@@ -223,7 +223,7 @@ function StoryViewer({ stories, isPreview, position, onChange, onClose, onSeen, 
   return (
     <div className="story-viewer" role="dialog" aria-modal="true" aria-label={t.dialogAria(bar.name)}>
       <div className="story-frame">
-        <img className="story-photo" src={slide.image} alt="" key={slide.key} />
+        <img className="story-photo" src={slide.image} alt="" key={`foto-${slide.key}`} />
         <div className="story-progress">
           {slides.map((item, index) => (
             <i key={item.key}>
@@ -258,7 +258,7 @@ function StoryViewer({ stories, isPreview, position, onChange, onClose, onSeen, 
           onPointerDown={() => (pausedRef.current = true)}
           onClick={() => go(1)}
         />
-        <div className="story-text" key={slide.key}>
+        <div className="story-text" key={`texto-${slide.key}`}>
           <p className="story-kicker">{slide.kicker}</p>
           <h2>{slide.title}</h2>
           {slide.line && <p>{slide.line}</p>}

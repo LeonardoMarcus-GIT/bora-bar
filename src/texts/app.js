@@ -7,7 +7,7 @@ export const header = {
   kicker: "Escolha o bar antes de sair",
   greeting: (hour) => (hour < 5 ? "Boa madrugada" : hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite"),
   title: "Qual vai ser hoje?",
-  notifications: "Notificações",
+  promotionsShortcut: "Promoções de hoje",
   searchPlaceholder: "Bar, bairro ou cidade",
   searchAria: "Buscar por nome do bar, cidade ou bairro",
   locationLoading: "Buscando localização",
@@ -31,7 +31,9 @@ export const barList = {
   noFavoritesTitle: "Nenhum favorito ainda",
   noFavoritesCopy: "Toque no coração de um bar para salvar aqui.",
   noBarsTitle: "Nenhum bar encontrado",
-  noBarsCopy: "Tente outro bairro, cidade ou remova algum filtro."
+  noBarsCopy: "Tente outro bairro, cidade ou remova algum filtro.",
+  noOpenTitle: "Nenhum bar aberto agora",
+  noOpenCopy: "Tire o filtro Aberto agora para ver quem abre mais tarde."
 };
 
 export const barCard = {
@@ -94,7 +96,6 @@ export const home = {
   loadingBarCopy: "Estamos buscando as informações desse lugar.",
   vibeShowing: "Mostrando lugares com clima de",
   seeAll: "Ver todos",
-  vibesAria: "Clima do rolê",
   favoritesTitle: "Seus favoritos",
   loadingTitle: "Carregando bares",
   loadingCopy: "Buscando o que está rolando perto de você.",

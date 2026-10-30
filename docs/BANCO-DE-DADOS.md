@@ -45,6 +45,7 @@ Storage: bucket público **`bar-images`** (8 MB, JPG/PNG/WebP). Arquivos em
 | --- | --- |
 | `is_bar_manager(bar_id)` | Verdadeiro se o usuário logado é `owner` ou `manager` do bar. Base de todas as policies de escrita. (`staff` ainda não tem permissão nenhuma.) |
 | `get_bar_metrics(bar_id, since_at)` | Totais por tipo de evento desde a data. Só para quem administra o bar. |
+| `get_bar_daily_views(bar_id, day_count)` | Visitas da página por dia nos últimos N dias (máx. 31, horário de Brasília, inclui dias com zero). Gráfico do painel. Só para quem administra o bar. |
 | `replace_bar_menu(bar_id, categories jsonb)` | Apaga e regrava todas as categorias e itens do bar. |
 | `replace_bar_promotions(bar_id, list jsonb)` | Apaga e regrava todas as promoções do bar. |
 | `replace_bar_events(bar_id, list jsonb)` | Apaga e regrava todos os eventos do bar. Promoções e eventos aceitam `imageUrl` (foto do story). |

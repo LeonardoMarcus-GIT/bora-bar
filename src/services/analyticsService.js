@@ -88,3 +88,22 @@ export async function fetchBarMetrics(barId, days = 30) {
 
   return { available: true, days, totals };
 }
+
+// Visitas da página por dia (últimos `days` dias, com os dias zerados) para o gráfico do painel.
+export async function fetchBarDailyViews(barId, days = 7) {
+  if (!isSupabaseConfigured || !barId) {
+    return [];
+  }
+
+  const { data, error } = await supabase.rpc("get_bar_daily_views", {
+    target_bar_id: barId,
+    day_count: days
+  });
+
+  if (error) {
+    console.warn("Não foi possível carregar as visitas por dia.", error);
+    return [];
+  }
+
+  return data.map((item) => ({ day: item.day, total: Number(item.total ?? 0) }));
+}

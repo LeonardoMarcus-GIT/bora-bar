@@ -14,7 +14,7 @@ export const mockBars = [
     promotion: "Chopp em dobro até 20h",
     address: "Rua 33, 77 - Vila Santa Cecília, Volta Redonda",
     hours: "Seg a qui: 17h-00h | Sex e sab: 17h-02h | Dom: 16h-23h",
-    phone: "(11) 95555-0177",
+    phone: "(24) 95555-0177",
     description:
       "Bar de esquina com mesas na calçada, chopp gelado e porções clássicas para dividir.",
     menu: {
@@ -54,7 +54,7 @@ export const mockBars = [
     promotion: "Combo pastel + cerveja por R$ 29",
     address: "Rua 14, 420 - Aterrado, Volta Redonda",
     hours: "Ter a dom: 15h-01h",
-    phone: "(11) 94444-2090",
+    phone: "(24) 94444-2090",
     description:
       "Clima simples, preço amigo e cardápio direto ao ponto para happy hour sem complicação.",
     menu: {
@@ -94,7 +94,7 @@ export const mockBars = [
     promotion: "",
     address: "Rua Paulo de Frontin, 1200 - Jardim Amália, Volta Redonda",
     hours: "Qua a sab: 18h-02h | Dom: 12h-18h",
-    phone: "(31) 98888-1200",
+    phone: "(24) 98888-1200",
     description:
       "Varanda arejada, cozinha de bar autoral e carta de drinks para noites mais longas.",
     menu: {
@@ -134,7 +134,7 @@ export const mockBars = [
     promotion: "Caipirinha de frutas com 25% off",
     address: "Av. Sávio Gama, 1888 - Retiro, Volta Redonda",
     hours: "Todos os dias: 16h-01h",
-    phone: "(81) 97777-1888",
+    phone: "(24) 97777-1888",
     description:
       "Bar descontraído perto da praia, com petiscos de frutos do mar e drinks tropicais.",
     menu: {
@@ -174,7 +174,7 @@ export const mockBars = [
     promotion: "Música ao vivo sem couvert às quintas",
     address: "Rua Gustavo Lira, 310 - Centro, Volta Redonda",
     hours: "Qui a sab: 17h-02h | Dom: 13h-21h",
-    phone: "(41) 96666-0310",
+    phone: "(24) 96666-0310",
     description:
       "Quintal urbano com mesas coletivas, cervejas locais e porções bem servidas.",
     menu: {
@@ -214,7 +214,7 @@ export const mockBars = [
     promotion: "",
     address: "Rua Sessenta, 91 - Conforto, Volta Redonda",
     hours: "Qua a dom: 18h-03h",
-    phone: "(21) 93333-0091",
+    phone: "(24) 93333-0091",
     description:
       "Boteco musical com roda de samba, cerveja bem gelada e cozinha brasileira.",
     menu: {

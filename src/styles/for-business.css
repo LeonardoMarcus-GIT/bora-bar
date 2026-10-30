@@ -270,3 +270,18 @@ a.secondary-action {
 .for-business-final > div {
   max-width: 680px;
 }
+
+/* Revisão 30/10/2026: no celular o topo e o texto do topo passavam da largura da tela
+   (itens de grid não encolhiam). */
+.for-business-hero > *,
+.for-business-topbar > * {
+  min-width: 0;
+}
+
+.for-business-topbar { width: 100%; }
+.for-business-mark { overflow-wrap: anywhere; }
+
+/* "estabelecimento" não cabia em 375 px no tamanho antigo do título. */
+@media (max-width: 640px) {
+  .for-business-page .for-business-hero h1 { font-size: clamp(2rem, 10vw, 3.6rem); }
+}
