@@ -16,7 +16,8 @@ export default function AppHeader({
   onSearchSelect,
   resultCount,
   searchSuggestions = [],
-  summaryLabel
+  summaryLabel,
+  title
 }) {
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const isLoadingLocation = locationStatus === "loading";
@@ -67,6 +68,11 @@ export default function AppHeader({
         >
           <Bell size={19} aria-hidden="true" />
         </button>
+      </div>
+
+      <div className="home-hello">
+        <p>{t.greeting(new Date().getHours())}</p>
+        <h2>{title ?? t.title}</h2>
       </div>
 
       <div className={`search-box ${shouldShowSuggestions ? "has-suggestions" : ""}`}>

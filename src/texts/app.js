@@ -5,6 +5,8 @@ export const header = {
   logoAria: "Logo Bora Bar",
   brandName: "Bora Bar",
   kicker: "Escolha o bar antes de sair",
+  greeting: (hour) => (hour < 5 ? "Boa madrugada" : hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite"),
+  title: "Qual vai ser hoje?",
   notifications: "Notificações",
   searchPlaceholder: "Bar, bairro ou cidade",
   searchAria: "Buscar por nome do bar, cidade ou bairro",
@@ -38,7 +40,28 @@ export const barCard = {
   removeFromFavorites: "Remover dos favoritos",
   openDetails: (name) => `Abrir detalhes de ${name}`,
   distanceUnavailable: "Distância indisponível",
-  startingAt: "A partir de"
+  startingAt: "A partir de",
+  since: "desde"
+};
+
+// Stories de "Hoje nos bares" (components/BarStories.jsx).
+export const stories = {
+  ariaLabel: "Hoje nos bares",
+  promotion: "Promoção de hoje",
+  event: "Vem aí",
+  eventToday: "Hoje tem",
+  dialogAria: (name) => `Story de ${name}`,
+  close: "Fechar",
+  previous: "Anterior",
+  next: "Próximo",
+  seeBar: "Ver o bar"
+};
+
+// Faixa "Perto de você" (components/NearbyStrip.jsx).
+export const nearby = {
+  title: "Perto de você",
+  titleNoLocation: "Em destaque",
+  allTitle: "Todos os lugares"
 };
 
 export const bottomNav = {
@@ -69,6 +92,8 @@ export const home = {
   loadingBarCopy: "Estamos buscando as informações desse lugar.",
   vibeShowing: "Mostrando lugares com clima de",
   seeAll: "Ver todos",
+  vibesAria: "Clima do rolê",
+  favoritesTitle: "Seus favoritos",
   loadingTitle: "Carregando bares",
   loadingCopy: "Buscando o que está rolando perto de você.",
   errorTitle: "Não conseguimos carregar os bares agora",
@@ -77,8 +102,5 @@ export const home = {
   emptyTitle: "Nenhum bar por aqui ainda",
   emptyCopy: "Os primeiros estabelecimentos estão chegando. Volte em breve.",
   vibeEmptyTitle: (label) => `Nenhum lugar com ${label} por perto ainda`,
-  vibeEmptyCopy: "Novos estabelecimentos estão chegando. Enquanto isso, veja todos os lugares.",
-  inviteAria: "Conhecer o Bora Bar para estabelecimentos",
-  inviteTitle: "Seu estabelecimento no Bora Bar",
-  inviteCopy: "Atualize cardápio, promoções e eventos pelo celular."
+  vibeEmptyCopy: "Novos estabelecimentos estão chegando. Enquanto isso, veja todos os lugares."
 };

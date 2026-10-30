@@ -55,7 +55,9 @@ export function transitionRoute(update, previous, next) {
     }
   });
 
-  transition.finished.finally(() => {
+  // Uma transição pulada (aba em segundo plano, troca rápida) não é erro.
+  transition.ready.catch(() => {});
+  transition.finished.catch(() => {}).finally(() => {
     if (taggedImage) {
       taggedImage.style.viewTransitionName = "";
     }

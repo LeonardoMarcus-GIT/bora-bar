@@ -39,7 +39,8 @@ WhatsApp de cada bar (campo `phone`), que o próprio dono cadastra no painel.
 ## Stack
 
 - React 19 + Vite 7, JavaScript puro (sem TypeScript), CSS dividido por área em `src/styles/` (`index.css` define a ordem)
-- Ícones: `lucide-react`. Fundo preto liso, sem efeito de luz (a biblioteca `ogl` ficou sem uso em `package.json`)
+- Visual: Versão 3 "Bolso" (30/10/2026) — fontes Plus Jakarta Sans + Instrument Serif itálica, cinza `#1b1b1b` e coral; protótipos das 3 versões em `../bora-bar-conceitos/`
+- Ícones: `lucide-react`. Fundo cinza liso, sem efeito de luz (a biblioteca `ogl` ficou sem uso em `package.json`)
 - Backend: Supabase (Postgres + Auth + Storage), acessado direto do navegador com a chave pública; a segurança está nas policies RLS
 - Uma função serverless: `api/geocode-profile.js` (CEP/endereço → latitude/longitude via Nominatim), servida na Netlify pelo adaptador `netlify/functions/geocode-profile.mjs`
 - APIs públicas usadas no navegador: ViaCEP (endereço por CEP) e IBGE (estados e cidades)

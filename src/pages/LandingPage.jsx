@@ -1,67 +1,28 @@
 import { useEffect, useState } from "react";
-import {
-  Apple,
-  BadgePercent,
-  ArrowDownRight,
-  ArrowUpRight,
-  Beer,
-  CalendarDays,
-  ChevronRight,
-  CircleUserRound,
-  Clock3,
-  Flame,
-  GlassWater,
-  Heart,
-  Instagram,
-  LockKeyhole,
-  MapPin,
-  Menu,
-  Music2,
-  Search,
-  Sparkles,
-  Ticket,
-  UsersRound,
-  UtensilsCrossed,
-  X
-} from "lucide-react";
+import { Apple, ArrowUpRight, BadgePercent, Check, Clock3, Eye, Music, Search, Share2, X } from "lucide-react";
 import { mockBars } from "../data/mockBars.js";
 import { signIn } from "../services/authService.js";
-import logoFull from "../assets/bora-bar-logo-full.png";
 import logoIcon from "../assets/bora-bar-icon.png";
-import landingBackdrop from "../assets/bora-bar-bg-test.png";
-import landingBackdropMobile from "../assets/bora-bar-bg-mobile.png";
 import { getLoginError } from "../texts/authErrors.js";
-import { RevealWords, RotatingText } from "../components/TextEffects.jsx";
+import { RotatingText } from "../components/TextEffects.jsx";
+import BarStories from "../components/BarStories.jsx";
+import { VIBES } from "../utils/vibes.js";
+import { formatCurrency } from "../utils/format.js";
 import * as t from "../texts/landing.js";
 import "../styles/landing.css";
+import "../styles/landing-bolso.css";
 
-const discoveryBars = mockBars.slice(0, 3);
-
-// Cada card leva à lista filtrada pelo clima (#clima/<id>, ver src/utils/vibes.js).
-// O nome de cada card fica em texts/landing.js (nightTypeLabels).
-const nightTypes = [
-  { vibe: "barzinho", icon: Beer, image: discoveryBars[0]?.image },
-  { vibe: "comer-bem", icon: UtensilsCrossed, image: discoveryBars[1]?.image },
-  { vibe: "drinks", icon: GlassWater, image: discoveryBars[2]?.image },
-  { vibe: "musica-ao-vivo", icon: Music2, image: mockBars[3]?.image },
-  { vibe: "festa", icon: Sparkles, image: mockBars[4]?.image },
-  { vibe: "date", icon: Heart, image: mockBars[5]?.image },
-  { vibe: "assistir-jogo", icon: Ticket, image: discoveryBars[1]?.image },
-  { vibe: "rooftop", icon: ArrowUpRight, image: discoveryBars[2]?.image }
-];
-
-
-function LandingMedia({ image, alt, className = "", priority = false }) {
-  return (
-    <img
-      className={className}
-      src={image}
-      alt={alt}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-    />
-  );
-}
+// A landing usa os bares de exemplo (mockBars) só como ilustração.
+const VIBE_EMOJI = {
+  barzinho: "🍻",
+  "comer-bem": "🍽️",
+  drinks: "🍸",
+  "musica-ao-vivo": "🎶",
+  festa: "🪩",
+  date: "🕯️",
+  "assistir-jogo": "⚽",
+  rooftop: "🌆"
+};
 
 function LoginModal({ onClose, onCreateAccount, onAuthenticated }) {
   const [email, setEmail] = useState("");
@@ -158,166 +119,166 @@ function LoginModal({ onClose, onCreateAccount, onAuthenticated }) {
   );
 }
 
-function AppPreview() {
-  const [activeBar, setActiveBar] = useState(0);
-  const bar = discoveryBars[activeBar] ?? discoveryBars[0];
+// Celular do topo: três telas que se revezam sozinhas (lista, bar e story).
+function PhoneDemo() {
+  const [screen, setScreen] = useState(0);
+  const [list, featured, story] = [mockBars.slice(0, 3), mockBars[0], mockBars[5] ?? mockBars[1]];
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timerId = window.setInterval(() => setScreen((current) => (current + 1) % 3), 3400);
+    return () => window.clearInterval(timerId);
+  }, []);
+
+  const screenClass = (index) => `lpb-screen${screen === index ? " is-active" : ""}`;
 
   return (
-    <div className="landing-phone" aria-label={t.preview.ariaLabel}>
-      <div className="landing-phone-island" />
-      <div className="landing-phone-top"><span>09:41</span><span>●●●</span></div>
-      <div className="landing-phone-greeting">
-        <div><p>{t.preview.greeting}</p><strong>{t.preview.question}</strong></div>
-        <button type="button" aria-label={t.preview.notifications}><Sparkles size={16} /></button>
+    <div className="lpb-phone" role="img" aria-label={t.phone.ariaLabel}>
+      <div className="lpb-island" />
+      <div className="lpb-phone-screen">
+        <section className={screenClass(0)}>
+          <p className="lpb-k">{t.phone.greeting}</p>
+          <p className="lpb-h">{t.phone.question}</p>
+          <div className="lpb-search"><Search size={12} aria-hidden="true" /> {t.phone.search}</div>
+          <div className="lpb-mini-stories">
+            {mockBars.slice(0, 5).map((bar) => <i key={bar.id} style={{ backgroundImage: `url(${bar.image})` }} />)}
+          </div>
+          {list.map((bar) => (
+            <div className="lpb-card" key={bar.id}>
+              <i style={{ backgroundImage: `url(${bar.image})` }} />
+              <div><b>{bar.name}</b><span>{bar.neighborhood}</span><em>{bar.promotion}</em></div>
+            </div>
+          ))}
+        </section>
+        <section className={screenClass(1)}>
+          <div className="lpb-cover" style={{ backgroundImage: `url(${featured.image})` }} />
+          <p className="lpb-ok">● {t.phone.openNow}</p>
+          <p className="lpb-h">{featured.name}</p>
+          <div className="lpb-promo"><small>{t.phone.promoLabel}</small>{featured.promotion}</div>
+          {(featured.menu?.cervejas ?? []).map((item) => (
+            <p className="lpb-item" key={item.name}><span>{item.name}</span><b>{formatCurrency(item.price)}</b></p>
+          ))}
+        </section>
+        <section className={`${screenClass(2)} lpb-story`} style={{ backgroundImage: `linear-gradient(transparent 35%, rgba(0,0,0,.85)), url(${story.image})` }}>
+          <div className="lpb-bars"><i /><i /></div>
+          <p className="lpb-k">{t.phone.storyKicker}</p>
+          <p className="lpb-h">{t.phone.storyTitle}</p>
+          <p className="lpb-l">{t.phone.storyLine}</p>
+          <span className="lpb-cta">{t.phone.storyCta}</span>
+        </section>
       </div>
-      <div className="landing-phone-search"><Search size={15} /><span>{t.preview.search}</span></div>
-      <div className="landing-phone-filters">
-        {t.preview.filters.map((filter) => <span key={filter}>{filter}</span>)}
-      </div>
-      <button
-        type="button"
-        className="landing-phone-place"
-        onClick={() => setActiveBar((current) => (current + 1) % discoveryBars.length)}
-      >
-        <LandingMedia image={bar?.image} alt="" />
-        <div className="landing-phone-place-overlay">
-          <span><Flame size={13} /> {t.preview.openNow}</span>
-          <strong>{bar?.name}</strong>
-          <p>{bar?.neighborhood} · {bar?.distanceKm?.toFixed(1).replace(".", ",")} km</p>
-          <div><BadgePercent size={14} /> {t.preview.highlight}</div>
-        </div>
-      </button>
-      <div className="landing-phone-nav"><MapPin size={17} /><Search size={17} /><Flame size={17} /><Heart size={17} /><CircleUserRound size={17} /></div>
     </div>
   );
 }
 
 export default function LandingPage({ onExplore, onCreateAccount, onAuthenticated }) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const FloatIcons = [BadgePercent, Music, Clock3];
 
   return (
-    <main className="landing-page">
-      <section className="landing-hero" id="inicio">
-        <picture className="landing-hero-media" aria-hidden="true">
-          <source media="(max-width: 640px)" srcSet={landingBackdropMobile} />
-          <img src={landingBackdrop} alt="" fetchPriority="high" />
-        </picture>
-        <div className="landing-hero-overlay" />
-        <nav className="landing-nav" aria-label={t.nav.ariaLabel}>
-          <a className="landing-brand" href="#inicio" aria-label={t.nav.brandAria}>
-            <img src={logoIcon} alt="" />
-            <span>{t.nav.brandName}</span>
-          </a>
-          <div className={isMenuOpen ? "landing-nav-links is-open" : "landing-nav-links"}>
-            <a href="#descobrir" onClick={() => setIsMenuOpen(false)}>{t.nav.explore}</a>
-            <a href="#como-funciona" onClick={() => setIsMenuOpen(false)}>{t.nav.howItWorks}</a>
-            <button type="button" onClick={onCreateAccount}>{t.nav.forBusiness}</button>
-          </div>
-          <div className="landing-nav-actions">
-            <button className="landing-nav-login" type="button" onClick={() => setIsLoginOpen(true)}>{t.nav.login}</button>
-            <button className="landing-nav-menu" type="button" onClick={() => setIsMenuOpen((open) => !open)} aria-label={t.nav.openMenu}>
-              <Menu size={20} aria-hidden="true" />
-            </button>
-          </div>
-        </nav>
+    <main className="landing-page lpb">
+      <nav className="lpb-nav" aria-label={t.nav.ariaLabel}>
+        <a className="lpb-brand" href="#inicio" aria-label={t.nav.brandAria}>
+          <img src={logoIcon} alt="" />
+          <span>{t.nav.brandName}</span>
+        </a>
+        <div className="lpb-nav-links">
+          <a href="#como-funciona">{t.nav.howItWorks}</a>
+          <a href="#for-business">{t.nav.forBusiness}</a>
+          <button type="button" onClick={() => setIsLoginOpen(true)}>{t.nav.login}</button>
+        </div>
+        <button className="lpb-btn lpb-btn-small" type="button" onClick={onExplore}>{t.nav.openApp}</button>
+      </nav>
 
-        <div className="landing-hero-content">
-          <div className="landing-hero-copy">
-            <p className="landing-eyebrow"><span /> {t.hero.eyebrow}</p>
-            <img className="landing-hero-logo" src={logoFull} alt={t.nav.brandName} />
-            <h1><RevealWords text={t.hero.titulo} /><br /><em><RevealWords text={t.hero.destaque} start={2} /></em></h1>
-            <p className="landing-hero-description">{t.hero.description}</p>
-            <div className="landing-hero-actions">
-              <button className="landing-cta landing-cta-primary" type="button" onClick={() => setIsLoginOpen(true)}>{t.hero.primaryButton} <ArrowUpRight size={19} aria-hidden="true" /></button>
-              <button className="landing-cta landing-cta-secondary" type="button" onClick={onCreateAccount}>{t.hero.secondaryButton}</button>
-            </div>
-          </div>
-          <div className="landing-hero-signal">
-            <div className="landing-live-dot" />
-            <span>{t.hero.signalLabel}</span>
-            <RotatingText items={t.hero.signalTexts} />
-          </div>
+      <section className="lpb-hero" id="inicio">
+        <p className="lpb-pill"><span className="lpb-dot" /> {t.hero.pill}</p>
+        <h1>
+          {t.hero.titulo} <span className="lpb-swap"><RotatingText items={t.hero.destaques} interval={2600} as="em" /></span>
+        </h1>
+        <p className="lpb-sub">{t.hero.description}</p>
+        <div className="lpb-actions">
+          <button className="lpb-btn" type="button" onClick={onExplore}>{t.hero.primaryButton} <ArrowUpRight size={18} aria-hidden="true" /></button>
+          <a className="lpb-btn lpb-btn-ghost" href="#for-business">{t.hero.secondaryButton}</a>
         </div>
-        <a className="landing-scroll-cue" href="#descobrir"><span>{t.hero.scrollCue}</span><ArrowDownRight size={18} /></a>
-      </section>
-
-      <section className="landing-discovery landing-section" id="descobrir">
-        <div className="landing-section-heading">
-          <p className="landing-eyebrow">{t.discovery.eyebrow}</p>
-          <h2>{t.discovery.titulo}<br /><em>{t.discovery.destaque}</em></h2>
-          <p>{t.discovery.description}</p>
-        </div>
-        <div className="landing-discovery-layout">
-          <AppPreview />
-          <div className="landing-discovery-list">
-            {discoveryBars.map((bar, index) => (
-              <article className="landing-place-row" key={bar.id}>
-                <LandingMedia image={bar.image} alt="" />
-                <div>
-                  <span className={index === 0 ? "landing-place-live" : "landing-place-tag"}>{index === 0 ? <><Flame size={13} /> {t.discovery.placeTags[0]}</> : t.discovery.placeTags[index]}</span>
-                  <h3>{bar.name}</h3>
-                  <p><MapPin size={14} /> {bar.distanceKm.toFixed(1).replace(".", ",")} km · {bar.neighborhood}</p>
-                </div>
-                <div className="landing-place-meta"><span><BadgePercent size={14} /> {t.discovery.placeHighlights[index]}</span></div>
-              </article>
-            ))}
-            <button className="landing-text-link" type="button" onClick={onExplore}>{t.discovery.exploreLink} <ChevronRight size={17} /></button>
-          </div>
-        </div>
-      </section>
-
-      <section className="landing-types landing-section">
-        <div className="landing-types-heading">
-          <p className="landing-eyebrow">{t.nightTypesHeading.eyebrow}</p>
-          <h2>{t.nightTypesHeading.titulo}<br /><em>{t.nightTypesHeading.destaque}</em></h2>
-        </div>
-        <div className="landing-types-grid">
-          {nightTypes.map(({ vibe, icon: Icon, image }, index) => {
-            const label = t.nightTypeLabels[vibe];
-            return (
-            <button
-              className={`landing-type-card type-${index + 1}`}
-              type="button"
-              key={label}
-              onClick={() => {
-                window.location.hash = `clima/${vibe}`;
-                window.scrollTo({ top: 0 });
-              }}
-            >
-              <LandingMedia image={image} alt="" />
-              <span className="landing-type-shade" />
-              <Icon size={20} aria-hidden="true" />
-              <strong>{label}</strong>
-              <ArrowUpRight className="landing-type-arrow" size={19} aria-hidden="true" />
-            </button>
-            );
+        <div className="lpb-phone-area">
+          <PhoneDemo />
+          {t.phone.floating.map((label, index) => {
+            const Icon = FloatIcons[index];
+            return <span className={`lpb-float f${index + 1}`} key={label} aria-hidden="true"><Icon size={16} /> {label}</span>;
           })}
         </div>
       </section>
 
-      <section className="landing-how landing-section" id="como-funciona">
-        <div className="landing-how-heading"><p className="landing-eyebrow">{t.how.eyebrow}</p><h2>{t.how.titulo}<br /><em>{t.how.destaque}</em></h2></div>
-        <div className="landing-steps">
-          {t.how.steps.map(({ title, description }, index) => {
-            const StepIcon = [MapPin, Clock3, UsersRound][index];
-            return (
-              <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><StepIcon size={28} /><h3>{title}</h3><p>{description}</p></article>
-            );
-          })}
+      <section className="lpb-sec">
+        <header className="lpb-head">
+          <p className="lpb-eyebrow">{t.today.eyebrow}</p>
+          <h2>{t.today.titulo} <em>{t.today.destaque}</em></h2>
+          <p>{t.today.description}</p>
+        </header>
+        <div className="lpb-stories"><BarStories bars={mockBars} onSelectBar={onExplore} /></div>
+      </section>
+
+      <section className="lpb-sec">
+        <header className="lpb-head">
+          <p className="lpb-eyebrow">{t.nightTypesHeading.eyebrow}</p>
+          <h2>{t.nightTypesHeading.titulo} <em>{t.nightTypesHeading.destaque}</em></h2>
+        </header>
+        <div className="lpb-vibes">
+          {VIBES.map((vibe, index) => (
+            <a className="lpb-vibe" href={`#clima/${vibe.id}`} key={vibe.id} onClick={() => window.scrollTo({ top: 0 })}>
+              <img src={mockBars[index % mockBars.length]?.image} alt="" loading="lazy" />
+              <span aria-hidden="true">{VIBE_EMOJI[vibe.id]}</span>
+              <b>{vibe.label}</b>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section className="lpb-sec lpb-steps" id="como-funciona">
+        <header className="lpb-head">
+          <p className="lpb-eyebrow">{t.how.eyebrow}</p>
+          <h2>{t.how.titulo} <em>{t.how.destaque}</em></h2>
+        </header>
+        {t.how.steps.map(({ title, description }, index) => {
+          const Icon = [Search, Eye, Share2][index];
+          return (
+            <article className="lpb-step" style={{ "--n": index }} key={title}>
+              <span><Icon size={26} aria-hidden="true" /></span>
+              <small>0{index + 1}</small>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="lpb-sec">
+        <div className="lpb-owners">
+          <p className="lpb-eyebrow">{t.owners.eyebrow}</p>
+          <h2>{t.owners.titulo} <em>{t.owners.destaque}</em></h2>
+          <ul>{t.owners.perks.map((perk) => <li key={perk}><Check size={18} aria-hidden="true" /> {perk}</li>)}</ul>
+          <a className="lpb-btn" href="#for-business">{t.owners.button}</a>
         </div>
       </section>
 
       <section className="landing-final-cta">
-        <picture className="landing-final-media" aria-hidden="true"><source media="(max-width: 640px)" srcSet={landingBackdropMobile} /><img src={landingBackdrop} alt="" loading="lazy" /></picture>
-        <div className="landing-final-overlay" />
-        <div className="landing-final-copy"><p className="landing-eyebrow">{t.finalCta.eyebrow}</p><h2>{t.finalCta.titulo}<br /><em>{t.finalCta.destaque}</em></h2><p>{t.finalCta.description}</p><button className="landing-cta landing-cta-primary" type="button" onClick={() => setIsLoginOpen(true)}>{t.finalCta.button} <ArrowUpRight size={19} /></button></div>
+        <div className="lpb-rings" aria-hidden="true"><i /><i /><i /></div>
+        <div className="landing-final-copy">
+          <p className="landing-eyebrow">{t.finalCta.eyebrow}</p>
+          <h2>{t.finalCta.titulo}<br /><em>{t.finalCta.destaque}</em></h2>
+          <p>{t.finalCta.description}</p>
+          <button className="landing-cta landing-cta-primary" type="button" onClick={onExplore}>{t.finalCta.button} <ArrowUpRight size={19} /></button>
+        </div>
       </section>
 
-      <footer className="landing-footer">
-        <div className="landing-footer-brand"><img src={logoIcon} alt="" /><strong>{t.nav.brandName}</strong><p>{t.footer.tagline}</p></div>
-        <div className="landing-footer-links"><a href="#descobrir">{t.footer.explore}</a><button type="button" onClick={onCreateAccount}>{t.footer.forBusiness}</button><a href="#como-funciona">{t.footer.about}</a><a href="#inicio">{t.footer.terms}</a><a href="#inicio">{t.footer.privacy}</a></div>
-        <div className="landing-footer-social"><a href="#inicio" aria-label="Instagram"><Instagram size={19} /></a><a href="#inicio" aria-label="TikTok"><Music2 size={19} /></a></div>
+      <footer className="lpb-footer">
+        <a className="lpb-brand" href="#inicio"><img src={logoIcon} alt="" /><span>{t.nav.brandName}</span></a>
+        <nav>
+          <button type="button" onClick={onExplore}>{t.footer.explore}</button>
+          <a href="#for-business">{t.footer.forBusiness}</a>
+          <button type="button" onClick={() => setIsLoginOpen(true)}>{t.footer.login}</button>
+        </nav>
+        <p>{t.footer.tagline}</p>
       </footer>
 
       {isLoginOpen && <LoginModal onClose={() => setIsLoginOpen(false)} onCreateAccount={onCreateAccount} onAuthenticated={onAuthenticated} />}

@@ -3,14 +3,15 @@ import AppHeader from "./components/AppHeader.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import BarDetails from "./pages/BarDetails.jsx";
 import BarList from "./components/BarList.jsx";
+import BarStories from "./components/BarStories.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import BusinessDashboard from "./pages/BusinessDashboard.jsx";
 import FilterBar from "./components/FilterBar.jsx";
 import ForBusinessPage from "./pages/ForBusinessPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
+import NearbyStrip from "./components/NearbyStrip.jsx";
 import PasswordResetPage from "./pages/PasswordResetPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
-import { ChevronRight, Store } from "lucide-react";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useGeolocation } from "./hooks/useGeolocation.js";
 import { recordBarEvent } from "./services/analyticsService.js";
@@ -18,9 +19,9 @@ import { fetchProfile } from "./services/profilesService.js";
 import { fetchBars } from "./services/barsService.js";
 import { calculateDistanceKm } from "./utils/geo.js";
 import { getOpenStatus } from "./utils/openingHours.js";
-import { barMatchesVibe, getVibe } from "./utils/vibes.js";
+import { barMatchesVibe, getVibe, VIBES } from "./utils/vibes.js";
 import { getStartingPrice, normalizeText } from "./utils/format.js";
-import { home as t } from "./texts/app.js";
+import { home as t, nearby as nearbyText } from "./texts/app.js";
 import { transitionRoute } from "./utils/viewTransition.js";
 
 const FAVORITES_KEY = "bora-bar-favorites";
@@ -68,7 +69,8 @@ function getRoute() {
     return { name: "home", vibe: hash.replace("clima/", "") };
   }
 
-  if (hash.startsWith("app")) {
+  // "#promotions" (botão Promoções) é a mesma lista do app, já filtrada por promoção.
+  if (hash.startsWith("app") || hash.startsWith("promotions")) {
     return { name: "home" };
   }
 
@@ -464,6 +466,11 @@ export default function App() {
     activeVibeId
   ]);
 
+  // Stories e "Perto de você" só aparecem na lista geral, sem busca nem favoritos.
+  const isBrowsingAll = !searchTerm.trim() && !showFavoritesOnly;
+  const showStories = isBrowsingAll && !activeVibe && !isLoadingBars && !barsLoadError;
+  const showNearby = isBrowsingAll && !activeVibe && visibleBars.length > 3;
+
   function toggleFavorite(barId) {
     if (!favoriteIds.includes(barId)) {
       void recordBarEvent(barId, "favorite");
@@ -519,9 +526,19 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function focusSearch() {
+  // Botão da lupa: vai para a lista (se estiver em outra tela), sobe ao topo e deixa a busca pronta para digitar.
+  function openSearch() {
     setShowFavoritesOnly(false);
-    document.querySelector('[aria-label="Buscar por cidade ou bairro"]')?.focus();
+
+    if (route.name !== "home") {
+      window.location.hash = "app";
+      setActiveFilters([]);
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.setTimeout(() => {
+      document.querySelector(".search-box input")?.focus({ preventScroll: true });
+    }, 400);
   }
 
   function scrollToMenu() {
@@ -633,7 +650,7 @@ export default function App() {
           onHome={goBack}
           onProfile={openProfile}
           onPromotions={showPromotions}
-          onSearch={goBack}
+          onSearch={openSearch}
         />
       </>
     );
@@ -655,7 +672,7 @@ export default function App() {
           onHome={goBack}
           onProfile={openProfile}
           onPromotions={showPromotions}
-          onSearch={goBack}
+          onSearch={openSearch}
         />
       </>
     );
@@ -677,7 +694,7 @@ export default function App() {
           onHome={goBack}
           onProfile={openProfile}
           onPromotions={showPromotions}
-          onSearch={goBack}
+          onSearch={openSearch}
         />
       </>
     );
@@ -693,7 +710,7 @@ export default function App() {
           onHome={goBack}
           onProfile={openProfile}
           onPromotions={showPromotions}
-          onSearch={goBack}
+          onSearch={openSearch}
         />
       </>
     );
@@ -718,7 +735,7 @@ export default function App() {
           onHome={goBack}
           onProfile={openProfile}
           onPromotions={showPromotions}
-          onSearch={goBack}
+          onSearch={openSearch}
         />
       </>
     );
@@ -738,7 +755,7 @@ export default function App() {
           onHome={goBack}
           onProfile={openProfile}
           onPromotions={showPromotions}
-          onSearch={goBack}
+          onSearch={openSearch}
         />
       </>
     );
@@ -756,7 +773,7 @@ export default function App() {
         <BottomNav
           mode="menu"
           onHome={goBack}
-          onSearch={goBack}
+          onSearch={openSearch}
           onFavorites={showFavorites}
           onMenu={scrollToMenu}
           onProfile={openProfile}
@@ -786,11 +803,25 @@ export default function App() {
                 ? t.summaryNearAddress(visibleBars.length)
               : t.summaryFound(visibleBars.length)
           }
+          title={activeVibe ? activeVibe.label : showFavoritesOnly ? t.favoritesTitle : undefined}
           onRequestLocation={requestLocation}
           onSearchChange={setSearchTerm}
           onSearchSelect={selectSearchSuggestion}
         />
+        {showStories && <BarStories bars={visibleBars} onSelectBar={selectBar} />}
         <FilterBar activeFilters={activeFilters} onToggleFilter={toggleFilter} />
+        <nav className="vibe-chips" aria-label={t.vibesAria}>
+          {VIBES.map((vibe) => (
+            <a
+              className={activeVibeId === vibe.id ? "is-active" : ""}
+              href={activeVibeId === vibe.id ? "#app" : `#clima/${vibe.id}`}
+              key={vibe.id}
+              aria-current={activeVibeId === vibe.id ? "true" : undefined}
+            >
+              {vibe.label}
+            </a>
+          ))}
+        </nav>
         {activeVibe && (
           <div className="vibe-filter-bar">
             <span>
@@ -828,32 +859,20 @@ export default function App() {
             </button>
           </section>
         ) : (
-          <BarList
-            bars={visibleBars}
-            favoriteIds={favoriteIds}
-            isFavoritesView={showFavoritesOnly}
-            onSelectBar={selectBar}
-            onToggleFavorite={toggleFavorite}
-          />
+          <>
+            {showNearby && (
+              <NearbyStrip bars={visibleBars} hasLocation={hasDistanceLocation} onSelectBar={selectBar} />
+            )}
+            {showNearby && <h2 className="home-section-title">{nearbyText.allTitle}</h2>}
+            <BarList
+              bars={visibleBars}
+              favoriteIds={favoriteIds}
+              isFavoritesView={showFavoritesOnly}
+              onSelectBar={selectBar}
+              onToggleFavorite={toggleFavorite}
+            />
+          </>
         )}
-        {/* O card inteiro é clicável (ícone, texto e seta). */}
-        <button
-          className="home-business-invite"
-          type="button"
-          onClick={openForBusiness}
-          aria-label={t.inviteAria}
-        >
-          <span className="home-business-icon">
-            <Store size={20} aria-hidden="true" />
-          </span>
-          <span className="home-business-copy">
-            <strong>{t.inviteTitle}</strong>
-            <span>{t.inviteCopy}</span>
-          </span>
-          <span className="home-business-arrow">
-            <ChevronRight size={20} aria-hidden="true" />
-          </span>
-        </button>
       </main>
       <BottomNav
         mode={
@@ -867,7 +886,7 @@ export default function App() {
         onHome={goBack}
         onProfile={openProfile}
         onPromotions={showPromotions}
-        onSearch={focusSearch}
+        onSearch={openSearch}
       />
     </>
   );

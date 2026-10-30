@@ -1,5 +1,5 @@
 /* Fonte (precisa ser o primeiro @import). */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant:wght@600;700&family=Lobster&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap");
 
 /* A ordem importa: um arquivo pode sobrescrever o anterior. */
 @import "./base.css";
@@ -14,4 +14,5 @@
 @import "./bottom-nav.css";
 @import "./responsive.css";
 @import "./extras.css";
+@import "./home.css";
 @import "./motion.css";
