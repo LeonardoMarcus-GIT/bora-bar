@@ -96,3 +96,15 @@ p {
   margin: 0 auto;
   padding: 22px 0 92px;
 }
+
+/* Listas de opções (select): o navegador pinta a lista aberta de branco quando o
+   fundo do campo é translúcido. Aqui ela fica no cinza do app, com texto claro. */
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: var(--card);
+  color: var(--ink);
+}
