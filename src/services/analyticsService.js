@@ -7,7 +7,9 @@ const ALLOWED_EVENTS = new Set([
   "phone",
   "route_google",
   "route_waze",
-  "favorite"
+  "favorite",
+  "story_view",
+  "story_open"
 ]);
 
 function getSessionId() {

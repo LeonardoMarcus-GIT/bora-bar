@@ -25,7 +25,7 @@ import BarAddressFields from "../components/BarAddressFields.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { geocodeAddress } from "../services/addressService.js";
 import { fetchBarMetrics } from "../services/analyticsService.js";
-import { uploadBusinessCoverImage } from "../services/businessImageService.js";
+import { uploadBusinessCoverImage, uploadBusinessStoryImage } from "../services/businessImageService.js";
 import { getOpenStatus, parseOpeningDays } from "../utils/openingHours.js";
 import { VIBES } from "../utils/vibes.js";
 import { CountUp } from "../components/TextEffects.jsx";
@@ -77,6 +77,7 @@ function emptyPromotion() {
     id: createTemporaryId(),
     title: "",
     description: "",
+    imageUrl: "",
     startsAt: "",
     endsAt: "",
     isActive: true
@@ -88,6 +89,7 @@ function emptyEvent() {
     id: createTemporaryId(),
     title: "",
     description: "",
+    imageUrl: "",
     startsAt: "",
     endsAt: "",
     price: "",
@@ -1131,6 +1133,8 @@ export default function BusinessDashboard({
               <TimedItemsEditor
                 items={managedData.promotions}
                 kind="promotion"
+                barId={selectedBarId}
+                onFeedback={setFeedback}
                 onAdd={() =>
                   setManagedData((currentData) => ({
                     ...currentData,
@@ -1153,6 +1157,8 @@ export default function BusinessDashboard({
               <TimedItemsEditor
                 items={managedData.events}
                 kind="event"
+                barId={selectedBarId}
+                onFeedback={setFeedback}
                 onAdd={() =>
                   setManagedData((currentData) => ({
                     ...currentData,
@@ -1227,7 +1233,9 @@ function BusinessOverview({
       icon: Navigation
     },
     { label: t.overview.metrics.calls, value: totals.phone ?? 0, icon: PhoneCall },
-    { label: t.overview.metrics.favorites, value: totals.favorite ?? 0, icon: Heart }
+    { label: t.overview.metrics.favorites, value: totals.favorite ?? 0, icon: Heart },
+    { label: t.overview.metrics.storyViews, value: totals.story_view ?? 0, icon: Image },
+    { label: t.overview.metrics.storyOpens, value: totals.story_open ?? 0, icon: Store }
   ];
 
   return (
@@ -1459,7 +1467,67 @@ function BusinessHoursEditor({ value, onChange }) {
   );
 }
 
-function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
+// Foto opcional da promoção/evento: vira o fundo do story no app.
+function StoryPhotoField({ barId, value, onChange, onFeedback }) {
+  const inputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  async function handleFile(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !barId) return;
+
+    setIsUploading(true);
+    onFeedback?.("");
+
+    try {
+      onChange(await uploadBusinessStoryImage(barId, file));
+      onFeedback?.(t.messages.storyPhotoReady);
+    } catch (error) {
+      onFeedback?.(
+        error?.message === "INVALID_IMAGE_TYPE"
+          ? t.messages.invalidImageType
+          : error?.message === "IMAGE_TOO_LARGE"
+            ? t.messages.imageTooLarge
+            : t.messages.imageFailed
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  return (
+    <div className="story-photo-field">
+      <div className="story-photo-preview">
+        {value ? <img src={value} alt="" /> : <Image size={22} aria-hidden="true" />}
+      </div>
+      <div className="story-photo-copy">
+        <span>{t.timed.photo}</span>
+        <small>{t.timed.photoHint}</small>
+        <div className="story-photo-actions">
+          <button className="secondary-action" type="button" onClick={() => inputRef.current?.click()} disabled={isUploading}>
+            <Upload size={16} aria-hidden="true" />
+            {isUploading ? t.cover.uploading : value ? t.timed.changePhoto : t.timed.choosePhoto}
+          </button>
+          {value && (
+            <button className="story-photo-remove" type="button" onClick={() => onChange("")}>
+              {t.timed.removePhoto}
+            </button>
+          )}
+        </div>
+      </div>
+      <input
+        ref={inputRef}
+        className="visually-hidden"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleFile}
+      />
+    </div>
+  );
+}
+
+function TimedItemsEditor({ items, kind, barId, onAdd, onFeedback, onRemove, onUpdate }) {
   const isEvent = kind === "event";
 
   return (
@@ -1492,6 +1560,13 @@ function TimedItemsEditor({ items, kind, onAdd, onRemove, onUpdate }) {
             }
             placeholder={t.common.optionalDescription}
             rows={3}
+          />
+
+          <StoryPhotoField
+            barId={barId}
+            value={item.imageUrl ?? ""}
+            onChange={(imageUrl) => onUpdate(item.id, { imageUrl })}
+            onFeedback={onFeedback}
           />
 
           <div className="profile-grid">

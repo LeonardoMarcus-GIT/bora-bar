@@ -96,6 +96,7 @@ function mapPromotion(promotion) {
     id: promotion.id,
     title: promotion.title,
     description: promotion.description ?? "",
+    imageUrl: promotion.image_url ?? "",
     startsAt: promotion.starts_at ?? "",
     endsAt: promotion.ends_at ?? "",
     isActive: promotion.is_active
@@ -107,6 +108,7 @@ function mapEvent(event) {
     id: event.id,
     title: event.title,
     description: event.description ?? "",
+    imageUrl: event.image_url ?? "",
     startsAt: event.starts_at ?? "",
     endsAt: event.ends_at ?? "",
     price: event.price === null ? "" : Number(event.price),
@@ -317,6 +319,7 @@ export async function replaceManagedPromotions(barId, promotions) {
     promotion_list: promotions.map((promotion) => ({
       title: promotion.title.trim(),
       description: promotion.description.trim(),
+      imageUrl: (promotion.imageUrl ?? "").trim(),
       startsAt: promotion.startsAt || "",
       endsAt: promotion.endsAt || "",
       isActive: promotion.isActive
@@ -336,6 +339,7 @@ export async function replaceManagedEvents(barId, events) {
     event_list: events.map((event) => ({
       title: event.title.trim(),
       description: event.description.trim(),
+      imageUrl: (event.imageUrl ?? "").trim(),
       startsAt: event.startsAt || "",
       endsAt: event.endsAt || "",
       price: event.price === "" ? "" : Number(event.price),

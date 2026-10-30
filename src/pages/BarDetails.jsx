@@ -22,32 +22,13 @@ import {
 import { formatCurrency } from "../utils/format.js";
 import { formatDistanceKm } from "../utils/geo.js";
 import { barDetails as t } from "../texts/bar.js";
+import { getPhoneDigits, getRouteLinks } from "../utils/barLinks.js";
 
 function formatEventDate(value) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(new Date(value));
-}
-
-function getPhoneDigits(phone) {
-  const digits = String(phone ?? "").replace(/\D/g, "");
-  return digits.length === 10 || digits.length === 11 ? `55${digits}` : digits;
-}
-
-function getRouteLinks(bar) {
-  const hasCoordinates =
-    Number.isFinite(bar.latitude) && Number.isFinite(bar.longitude);
-  const destination = hasCoordinates
-    ? `${bar.latitude},${bar.longitude}`
-    : `${bar.address}, ${bar.city}`;
-
-  return {
-    google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`,
-    waze: hasCoordinates
-      ? `https://www.waze.com/ul?ll=${encodeURIComponent(destination)}&navigate=yes`
-      : `https://www.waze.com/ul?q=${encodeURIComponent(destination)}&navigate=yes`
-  };
 }
 
 // Página de detalhes do estabelecimento.

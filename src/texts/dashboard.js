@@ -30,6 +30,7 @@ export const messages = {
   claimDuplicate: "Já existe uma solicitação em análise para esse bar.",
   claimFailed: "Não foi possível enviar a solicitação agora.",
   coverReady: "Foto pronta. Salve o perfil público para publicar a alteração.",
+  storyPhotoReady: "Foto pronta. Toque em Salvar para publicar no story.",
   invalidImageType: "Escolha uma imagem JPG, PNG ou WebP.",
   imageTooLarge: "A imagem deve ter no máximo 8 MB.",
   imageFailed: "Não foi possível enviar a imagem agora. Tente novamente.",
@@ -113,7 +114,12 @@ export const timed = {
   eventPublished: "Evento publicado",
   promoPublished: "Promoção publicada",
   newEvent: "Novo evento",
-  newPromo: "Nova promoção"
+  newPromo: "Nova promoção",
+  photo: "Foto do story (opcional)",
+  photoHint: "Aparece em tela cheia nos stories do app e sai sozinha 8 horas depois de enviada. Use uma foto em pé, do prato, do drink ou do palco.",
+  choosePhoto: "Tirar ou escolher foto",
+  changePhoto: "Trocar foto",
+  removePhoto: "Remover foto"
 };
 
 export const save = {
@@ -134,7 +140,9 @@ export const overview = {
     whatsapp: "WhatsApp",
     routes: "Rotas abertas",
     calls: "Ligações",
-    favorites: "Favoritos"
+    favorites: "Favoritos",
+    storyViews: "Viram seu story",
+    storyOpens: "Abriram o bar pelo story"
   },
   qualityKicker: "Qualidade do perfil",
   completeSuffix: "% completo",

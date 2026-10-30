@@ -215,7 +215,7 @@ export default function LandingPage({ onExplore, onCreateAccount, onAuthenticate
           <h2>{t.today.titulo} <em>{t.today.destaque}</em></h2>
           <p>{t.today.description}</p>
         </header>
-        <div className="lpb-stories"><BarStories bars={mockBars} onSelectBar={onExplore} /></div>
+        <div className="lpb-stories"><BarStories bars={mockBars} isPreview onSelectBar={onExplore} /></div>
       </section>
 
       <section className="lpb-sec">

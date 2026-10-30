@@ -487,6 +487,30 @@
 .story-text p:not(.story-kicker) { margin: 0 0 20px; color: #e6e0d8; }
 .story-text .primary-action { display: inline-flex; align-items: center; gap: 8px; }
 
+/* Story já visto: anel cinza (fica só neste celular). */
+.bar-story.is-seen .bar-story-ring { background: rgba(255, 255, 255, 0.22); }
+.bar-story.is-seen .bar-story-name { color: var(--muted); }
+
+/* Botões dentro do story: Ver o bar + Como chegar + WhatsApp. */
+.story-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.story-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.story-action:hover { background: rgba(0, 0, 0, 0.55); }
+
 @keyframes home-sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes home-fade { from { opacity: 0; } }
 @keyframes home-zoom { from { opacity: 0; transform: scale(0.92); } }

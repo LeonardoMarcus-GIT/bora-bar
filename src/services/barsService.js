@@ -10,6 +10,11 @@ function getSafeImageUrl(imageUrl) {
   return imageReplacements[imageUrl] ?? imageUrl;
 }
 
+// Foto de promoção/evento (fundo do story): só links https.
+function getStoryImageUrl(imageUrl) {
+  return typeof imageUrl === "string" && /^https:\/\//i.test(imageUrl) ? imageUrl : "";
+}
+
 function getCoordinate(value) {
   const numericValue = Number(value);
   return Number.isFinite(numericValue) ? numericValue : null;
@@ -58,6 +63,7 @@ function mapBarFromDatabase(bar) {
       id: promotion.id,
       title: promotion.title,
       description: promotion.description ?? "",
+      imageUrl: getStoryImageUrl(promotion.image_url),
       startsAt: promotion.starts_at,
       endsAt: promotion.ends_at
     }));
@@ -72,6 +78,7 @@ function mapBarFromDatabase(bar) {
       id: event.id,
       title: event.title,
       description: event.description ?? "",
+      imageUrl: getStoryImageUrl(event.image_url),
       startsAt: event.starts_at,
       endsAt: event.ends_at,
       price: event.price === null ? null : Number(event.price)
@@ -120,6 +127,7 @@ const BAR_SELECT = `
         id,
         title,
         description,
+        image_url,
         starts_at,
         ends_at,
         is_active
@@ -128,6 +136,7 @@ const BAR_SELECT = `
         id,
         title,
         description,
+        image_url,
         starts_at,
         ends_at,
         price,

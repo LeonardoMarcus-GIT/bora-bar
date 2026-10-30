@@ -28,13 +28,13 @@ real ainda.
 | `bars` | O estabelecimento (bar ou restaurante): nome, bairro, cidade, foto, coordenadas, `is_open`, `is_active`, **`is_listed`** (aparece no guia? `false` = só a página avulsa `/r/<id>`), **`takes_whatsapp_orders`** (aceita pedidos pelo WhatsApp? `true` = botão mostra "Peça por aqui", `false` = "Tire suas dúvidas"; o dono liga no painel; padrão `false`), **`vibes`** (clima do lugar: `barzinho`, `comer-bem`, `drinks`, `musica-ao-vivo`, `festa`, `date`, `assistir-jogo`, `rooftop` — o dono marca no painel; filtra os cards "Qual é o rolê de hoje?" da página inicial), `gallery` (**sem uso** — sobra dos "Pratos do dia", descartados em 15/10/2026; pode ser apagada), faixa de preço, endereço (texto + campos de CEP), horário (texto), telefone, descrição, `menu` jsonb antigo. Chave `id` é texto (slug, ex.: `esquina-77`). | Todos | Dono/gerente, só colunas liberadas (inclui `vibes` e `takes_whatsapp_orders`; não inclui `is_active`, `is_listed`, `promotion`, `menu`, `distance_km`). Criar bar: só você, via SQL. |
 | `menu_categories` | Categorias do cardápio por bar, com ordem e ativo. | Todos (ativas); dono vê todas | Dono/gerente |
 | `menu_items` | Itens com descrição, preço (≥ 0), disponível e ordem. | Todos (disponíveis); dono vê todos | Dono/gerente |
-| `promotions` | Promoções com início/fim opcionais e ativo. | Todos (só as vigentes); dono vê todas | Dono/gerente |
-| `bar_events` | Eventos (samba, show) com início, fim, preço da entrada e ativo. | Todos (só futuros/ativos); dono vê todos | Dono/gerente |
+| `promotions` | Promoções com início/fim opcionais, ativo e foto opcional do story (`image_url`). | Todos (só as vigentes); dono vê todas | Dono/gerente |
+| `bar_events` | Eventos (samba, show) com início, fim, preço da entrada, ativo e foto opcional do story (`image_url`). | Todos (só futuros/ativos); dono vê todos | Dono/gerente |
 | `reviews` | Avaliações 1–5 com comentário. O `author` e o `user_id` são preenchidos pelo trigger. | Todos | Usuário logado cria e apaga as próprias |
 | `profiles` | Perfil do usuário: nome, endereço, coordenadas, origem da localização. Criado automaticamente no cadastro (trigger). | O próprio usuário | O próprio usuário |
 | `bar_claims` | Pedido de um usuário para administrar um bar: contato, documento, mensagem, `status` (`pending`/`approved`/`rejected`), `review_notes`. | O próprio usuário | Usuário cria (só `pending`). Aprovar/recusar: você, no Table Editor. |
 | `bar_members` | Vínculo usuário ↔ bar com papel `owner`, `manager` ou `staff`. Criado sozinho quando um claim vira `approved`. | O próprio usuário | Trigger / você |
-| `bar_engagement_events` | Métrica anônima: bar, tipo (`view`, `whatsapp`, `phone`, `route_google`, `route_waze`, `favorite`), id de sessão, data. | Dono/gerente do bar | Qualquer visitante (insert) |
+| `bar_engagement_events` | Métrica anônima: bar, tipo (`view`, `whatsapp`, `phone`, `route_google`, `route_waze`, `favorite`, `story_view` = viu o story, `story_open` = tocou em "Ver o bar" no story), id de sessão, data. | Dono/gerente do bar | Qualquer visitante (insert) |
 
 Storage: bucket público **`bar-images`** (8 MB, JPG/PNG/WebP). Arquivos em
 `<bar_id>/<uuid>.<ext>`; só o dono daquele bar pode enviar.
@@ -47,7 +47,11 @@ Storage: bucket público **`bar-images`** (8 MB, JPG/PNG/WebP). Arquivos em
 | `get_bar_metrics(bar_id, since_at)` | Totais por tipo de evento desde a data. Só para quem administra o bar. |
 | `replace_bar_menu(bar_id, categories jsonb)` | Apaga e regrava todas as categorias e itens do bar. |
 | `replace_bar_promotions(bar_id, list jsonb)` | Apaga e regrava todas as promoções do bar. |
-| `replace_bar_events(bar_id, list jsonb)` | Apaga e regrava todos os eventos do bar. |
+| `replace_bar_events(bar_id, list jsonb)` | Apaga e regrava todos os eventos do bar. Promoções e eventos aceitam `imageUrl` (foto do story). |
+| `list_expired_story_images(max_age)` | Caminhos das fotos de story (`bar-images/<bar>/stories/`) com mais de 8 horas. Só `service_role`. |
+| `clear_story_image_urls(paths)` | Tira o link das fotos apagadas das promoções/eventos (o story volta a usar a capa). Só `service_role`. |
+
+**Fotos de story expiram em 8 horas** (`supabase/stories-cleanup-migration.sql` + Edge Function `supabase/functions/limpar-stories`): de hora em hora o pg_cron chama a função, que apaga as fotos vencidas pela API do Storage (apagar por SQL deixaria o arquivo perdido no bucket) e limpa os links. A promoção e o evento continuam. Aplicado e ativo desde 30/10/2026 (job `limpar-stories`, minuto 7 de cada hora).
 | `replace_bar_gallery(bar_id, dish_list jsonb)` | **Sem uso** (sobra dos "Pratos do dia", descartados). Pode ser apagada junto com `bars.gallery`: `drop function public.replace_bar_gallery(text, jsonb); alter table public.bars drop column gallery;` |
 
 ## Triggers

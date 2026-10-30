@@ -54,7 +54,9 @@ export const stories = {
   close: "Fechar",
   previous: "Anterior",
   next: "Próximo",
-  seeBar: "Ver o bar"
+  seeBar: "Ver o bar",
+  route: "Como chegar",
+  seen: "já visto"
 };
 
 // Faixa "Perto de você" (components/NearbyStrip.jsx).

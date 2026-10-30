@@ -112,6 +112,7 @@ create table if not exists public.promotions (
   bar_id text not null references public.bars(id) on delete cascade,
   title text not null,
   description text,
+  image_url text,
   starts_at timestamptz,
   ends_at timestamptz,
   is_active boolean not null default true,
@@ -124,6 +125,7 @@ create table if not exists public.bar_events (
   bar_id text not null references public.bars(id) on delete cascade,
   title text not null,
   description text,
+  image_url text,
   starts_at timestamptz not null,
   ends_at timestamptz,
   price numeric(10, 2) check (price is null or price >= 0),
@@ -142,7 +144,9 @@ create table if not exists public.bar_engagement_events (
       'phone',
       'route_google',
       'route_waze',
-      'favorite'
+      'favorite',
+      'story_view',
+      'story_open'
     )),
   session_id uuid not null,
   created_at timestamptz not null default now()
@@ -179,6 +183,13 @@ add column if not exists vibes text[] not null default '{}';
 
 alter table public.bars
 add column if not exists takes_whatsapp_orders boolean not null default false;
+
+-- Stories (30/10/2026): foto opcional em promoção e evento, e métricas de story.
+alter table public.promotions add column if not exists image_url text;
+alter table public.bar_events add column if not exists image_url text;
+alter table public.bar_engagement_events drop constraint if exists bar_engagement_events_event_type_check;
+alter table public.bar_engagement_events add constraint bar_engagement_events_event_type_check
+check (event_type in ('view', 'whatsapp', 'phone', 'route_google', 'route_waze', 'favorite', 'story_view', 'story_open'));
 
 alter table public.bars
 add column if not exists postal_code text;
@@ -443,7 +454,9 @@ with check (
     'phone',
     'route_google',
     'route_waze',
-    'favorite'
+    'favorite',
+    'story_view',
+    'story_open'
   )
 );
 
@@ -776,6 +789,7 @@ begin
       bar_id,
       title,
       description,
+      image_url,
       starts_at,
       ends_at,
       is_active
@@ -784,6 +798,7 @@ begin
       target_bar_id,
       trim(promotion_data ->> 'title'),
       nullif(trim(promotion_data ->> 'description'), ''),
+      nullif(trim(promotion_data ->> 'imageUrl'), ''),
       nullif(promotion_data ->> 'startsAt', '')::timestamptz,
       nullif(promotion_data ->> 'endsAt', '')::timestamptz,
       coalesce((promotion_data ->> 'isActive')::boolean, true)
@@ -827,6 +842,7 @@ begin
       bar_id,
       title,
       description,
+      image_url,
       starts_at,
       ends_at,
       price,
@@ -836,6 +852,7 @@ begin
       target_bar_id,
       trim(event_data ->> 'title'),
       nullif(trim(event_data ->> 'description'), ''),
+      nullif(trim(event_data ->> 'imageUrl'), ''),
       (event_data ->> 'startsAt')::timestamptz,
       nullif(event_data ->> 'endsAt', '')::timestamptz,
       nullif(event_data ->> 'price', '')::numeric,
@@ -899,3 +916,68 @@ on public.bar_engagement_events (bar_id, created_at desc);
 
 create index if not exists bar_engagement_type_created_idx
 on public.bar_engagement_events (event_type, created_at desc);
+
+-- Fotos de story expiram em 8 horas (30/10/2026). Detalhes em supabase/stories-cleanup-migration.sql.
+-- Lista as fotos de story vencidas (só a função de limpeza, com a chave de serviço, chama).
+create or replace function public.list_expired_story_images(max_age interval default interval '8 hours')
+returns table(path text)
+language sql
+stable
+security definer
+set search_path = public, storage
+as $$
+  select objects.name
+  from storage.objects objects
+  where objects.bucket_id = 'bar-images'
+    and split_part(objects.name, '/', 2) = 'stories'
+    and objects.created_at < now() - max_age
+  order by objects.created_at
+  limit 1000;
+$$;
+
+revoke all on function public.list_expired_story_images(interval) from public, anon, authenticated;
+grant execute on function public.list_expired_story_images(interval) to service_role;
+
+-- Tira das promoções/eventos o link das fotos que foram apagadas.
+create or replace function public.clear_story_image_urls(paths text[])
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  removed_path text;
+begin
+  foreach removed_path in array coalesce(paths, '{}') loop
+    update public.promotions
+    set image_url = null, updated_at = now()
+    where image_url like '%/bar-images/' || removed_path;
+
+    update public.bar_events
+    set image_url = null, updated_at = now()
+    where image_url like '%/bar-images/' || removed_path;
+  end loop;
+end;
+$$;
+
+revoke all on function public.clear_story_image_urls(text[]) from public, anon, authenticated;
+grant execute on function public.clear_story_image_urls(text[]) to service_role;
+
+-- Agendamento: a cada hora, no minuto 7.
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+select cron.unschedule('limpar-stories')
+where exists (select 1 from cron.job where jobname = 'limpar-stories');
+
+select cron.schedule(
+  'limpar-stories',
+  '7 * * * *',
+  $$
+  select net.http_post(
+    url := 'https://ovwhjngjismvlwhoqtmr.supabase.co/functions/v1/limpar-stories',
+    headers := '{"Content-Type": "application/json"}'::jsonb,
+    body := '{}'::jsonb
+  );
+  $$
+);
