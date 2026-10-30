@@ -127,7 +127,12 @@ export default function AuthPage({ onAuthenticated, onBackToLanding }) {
         </button>
         <div className="account-heading">
           <p className="section-kicker">{t.kicker}</p>
-          <h1>{t.heading[mode]}</h1>
+          <h1>
+            {/* O nome "Bora Bar" sai na serifa itálica coral, igual à marca. */}
+            {t.heading[mode].split(/(Bora Bar)/).map((part, index) =>
+              part === "Bora Bar" ? <em className="brand-word" key={index}>{part}</em> : part
+            )}
+          </h1>
           <p>{t.copy[mode]}</p>
         </div>
 

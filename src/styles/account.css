@@ -96,6 +96,17 @@
   letter-spacing: 0;
 }
 
+.account-heading h1 { font-weight: 800; letter-spacing: -0.035em; }
+
+.account-heading h1 .brand-word {
+  color: var(--coral);
+  font-family: var(--font-serif);
+  font-size: 1.15em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
 .account-heading p:not(.section-kicker),
 .profile-summary p {
   color: var(--muted);
