@@ -12,6 +12,7 @@ import LandingPage from "./pages/LandingPage.jsx";
 import NearbyStrip from "./components/NearbyStrip.jsx";
 import PasswordResetPage from "./pages/PasswordResetPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+import PromotionsPage from "./pages/PromotionsPage.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useGeolocation } from "./hooks/useGeolocation.js";
 import { recordBarEvent } from "./services/analyticsService.js";
@@ -69,16 +70,16 @@ function getRoute() {
     return { name: "home", vibe: hash.replace("clima/", "") };
   }
 
-  // "#promotions" (botão Promoções) é a mesma lista do app, já filtrada por promoção.
-  if (hash.startsWith("app") || hash.startsWith("promotions")) {
+  // "#promotions": promoções de hoje + agenda (PromotionsPage).
+  if (hash.startsWith("promotions")) {
+    return { name: "promotions" };
+  }
+
+  if (hash.startsWith("app")) {
     return { name: "home" };
   }
 
   return { name: "landing" };
-}
-
-function isPromotionsHash() {
-  return window.location.hash.replace("#", "").startsWith("promotions");
 }
 
 function readFavoriteIds() {
@@ -213,26 +214,7 @@ export default function App() {
     const onHashChange = () => {
       const nextRoute = getRoute();
       transitionRoute(() => setRoute(nextRoute), routeRef.current, nextRoute);
-
-      if (isPromotionsHash()) {
-        setShowFavoritesOnly(false);
-        setActiveFilters((currentFilters) =>
-          currentFilters.includes("promo")
-            ? currentFilters
-            : [...currentFilters, "promo"]
-        );
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
     };
-
-    if (isPromotionsHash()) {
-      setShowFavoritesOnly(false);
-      setActiveFilters((currentFilters) =>
-        currentFilters.includes("promo")
-          ? currentFilters
-          : [...currentFilters, "promo"]
-      );
-    }
 
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -554,11 +536,6 @@ export default function App() {
   function showPromotions() {
     window.location.hash = "promotions";
     setShowFavoritesOnly(false);
-    setActiveFilters((currentFilters) =>
-      currentFilters.includes("promo")
-        ? currentFilters
-        : [...currentFilters, "promo"]
-    );
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -778,6 +755,26 @@ export default function App() {
           onMenu={scrollToMenu}
           onProfile={openProfile}
           onPromotions={showPromotions}
+        />
+      </>
+    );
+  }
+
+  if (route.name === "promotions") {
+    return (
+      <>
+        <PromotionsPage
+          bars={barsWithDistance.filter(isWithinDiscoveryRange)}
+          isLoading={isLoadingBars}
+          onSelectBar={selectBar}
+        />
+        <BottomNav
+          mode="promotions"
+          onFavorites={showFavorites}
+          onHome={goBack}
+          onProfile={openProfile}
+          onPromotions={showPromotions}
+          onSearch={openSearch}
         />
       </>
     );

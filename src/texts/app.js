@@ -68,6 +68,22 @@ export const nearby = {
   allTitle: "Todos os lugares"
 };
 
+// Tela de Promoções com a agenda (pages/PromotionsPage.jsx).
+export const promotionsPage = {
+  kicker: "Hoje e nos próximos dias",
+  title: "Promoções e eventos",
+  loading: "Carregando promoções",
+  promotionsTitle: "Promoções",
+  agendaTitle: "Agenda",
+  noPromotions: "Nenhuma promoção no ar agora. Volte mais tarde.",
+  noEvents: "Nenhum evento marcado nos próximos dias.",
+  today: "Hoje",
+  tomorrow: "Amanhã",
+  weekdays: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
+  shortWeekdays: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+  at: (day, hour) => `${day} às ${hour}`
+};
+
 export const bottomNav = {
   ariaLabel: "Navegação principal",
   home: "Início",
