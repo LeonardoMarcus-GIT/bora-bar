@@ -48,6 +48,9 @@ const tabs = [
   { id: "events", label: t.tabs.events, icon: CalendarDays }
 ];
 
+const EVENT_DEFAULT_HOURS = 3;
+const HOUR_MS = 3600000;
+
 function createTemporaryId() {
   return crypto.randomUUID();
 }
@@ -72,26 +75,48 @@ function emptyMenuItem() {
   };
 }
 
+// Fim sugerido: evento dura 3 horas; promoção vale até 23h59 daquele dia.
+function getDefaultEnd(start, isEvent) {
+  if (isEvent) {
+    return new Date(start.getTime() + EVENT_DEFAULT_HOURS * HOUR_MS);
+  }
+
+  const end = new Date(start);
+  end.setHours(23, 59, 0, 0);
+  return end > start ? end : new Date(end.getTime() + 24 * HOUR_MS);
+}
+
+// Promoção nova já vem com a data e a hora do celular: começa agora
+// (arredondado para baixo, de 5 em 5 minutos) e vale até 23h59 de hoje.
 function emptyPromotion() {
+  const start = new Date();
+  start.setMinutes(Math.floor(start.getMinutes() / 5) * 5, 0, 0);
+  const end = getDefaultEnd(start, false);
+
   return {
     id: createTemporaryId(),
     title: "",
     description: "",
     imageUrl: "",
-    startsAt: "",
-    endsAt: "",
+    startsAt: toDateTimeInput(start.toISOString()),
+    endsAt: toDateTimeInput(end.toISOString()),
     isActive: true
   };
 }
 
+// Evento novo já vem na próxima meia hora do celular, com 3 horas de duração.
 function emptyEvent() {
+  const start = new Date();
+  start.setMinutes(start.getMinutes() < 30 ? 30 : 60, 0, 0);
+  const end = getDefaultEnd(start, true);
+
   return {
     id: createTemporaryId(),
     title: "",
     description: "",
     imageUrl: "",
-    startsAt: "",
-    endsAt: "",
+    startsAt: toDateTimeInput(start.toISOString()),
+    endsAt: toDateTimeInput(end.toISOString()),
     price: "",
     isActive: true
   };
@@ -130,6 +155,38 @@ function toDateTimeInput(value) {
 
 function toIsoDate(value) {
   return value ? new Date(value).toISOString() : "";
+}
+
+// Ao mudar o início, o fim acompanha: o evento mantém a duração e a promoção
+// muda de dia mantendo o horário. Ano menor que 2000 é só o ano pela metade
+// enquanto o dono digita.
+function getStartPatch(item, startsAt, isEvent) {
+  const previous = new Date(item.startsAt);
+  const next = new Date(startsAt);
+  const end = new Date(item.endsAt);
+
+  if (!(next.getFullYear() >= 2000) || Number.isNaN(end.getTime())) {
+    return { startsAt };
+  }
+
+  let nextEnd = end;
+
+  if (previous.getFullYear() >= 2000) {
+    if (isEvent) {
+      nextEnd = new Date(end.getTime() + (next - previous));
+    } else {
+      const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dayShift = Math.round((startOfDay(next) - startOfDay(previous)) / (24 * HOUR_MS));
+      nextEnd = new Date(end);
+      nextEnd.setDate(end.getDate() + dayShift);
+    }
+  }
+
+  if (nextEnd <= next) {
+    nextEnd = getDefaultEnd(next, isEvent);
+  }
+
+  return { startsAt, endsAt: toDateTimeInput(nextEnd.toISOString()) };
 }
 
 function normalizeTimedItems(items) {
@@ -1770,7 +1827,7 @@ function TimedItemsEditor({ items, kind, barId, onAdd, onFeedback, onRemove, onU
                 type="datetime-local"
                 value={item.startsAt}
                 onChange={(event) =>
-                  onUpdate(item.id, { startsAt: event.target.value })
+                  onUpdate(item.id, getStartPatch(item, event.target.value, isEvent))
                 }
                 required={isEvent}
               />
@@ -1780,6 +1837,7 @@ function TimedItemsEditor({ items, kind, barId, onAdd, onFeedback, onRemove, onU
               <input
                 type="datetime-local"
                 value={item.endsAt}
+                min={item.startsAt || undefined}
                 onChange={(event) =>
                   onUpdate(item.id, { endsAt: event.target.value })
                 }
