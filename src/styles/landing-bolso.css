@@ -229,7 +229,7 @@
 .lpb-step > span { grid-row: span 3; display: grid; place-items: center; width: 60px; height: 60px; border-radius: 18px; background: rgba(255, 113, 91, 0.14); color: var(--coral); }
 .lpb-step:nth-of-type(3) > span { background: rgba(26, 13, 10, 0.12); color: #1a0d0a; }
 .lpb-step small { color: var(--muted); font-weight: 800; }
-.lpb-step h3 { margin: 2px 0 4px; font-size: clamp(1.5rem, 3.4vw, 2.2rem); letter-spacing: -0.03em; }
+.lpb-step h3 { margin: 6px 0 6px; font-size: clamp(1.5rem, 3.4vw, 2.2rem); letter-spacing: -0.03em; }
 .lpb-step p { margin: 0; color: var(--muted); font-size: 1.02rem; }
 
 .lpb-owners {
@@ -256,7 +256,7 @@
 .lpb-rings i:nth-child(2) { animation-delay: 2s; }
 .lpb-rings i:nth-child(3) { animation-delay: 4s; }
 
-.lpb-footer { display: grid; justify-items: center; gap: 14px; padding: 34px 18px 46px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; text-align: center; }
+.lpb-footer { display: grid; justify-items: center; gap: 18px; padding: 34px 18px 46px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; text-align: center; }
 .lpb-footer p { margin: 0; }
 .lpb-footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
 .lpb-footer nav a,
